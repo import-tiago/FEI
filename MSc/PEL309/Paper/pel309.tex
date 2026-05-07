@@ -146,7 +146,7 @@ The useful ramp region was extracted from each acquisition before model identifi
 
 \subsection{Data Processing and Binning}
 
-The analysis pipeline first converted the shunt-voltage measurement into output current in milliamperes. The current signals were then grouped by load resistance, as illustrated in Fig.~\ref{fig:current_per_load_time}. In the next step, the DAC voltage axis was binned to reduce granularity and measurement noise. This binned representation was inspected both before and after removal of the resting intervals, allowing the effect of the ramp extraction step to be documented explicitly.
+The analysis pipeline first extracted the useful ramp interval and converted the shunt-voltage measurement into output current in milliamperes. The current signals were then grouped by load resistance, as illustrated in Fig.~\ref{fig:current_per_load_time}. In the next step, the DAC voltage axis was binned to reduce granularity and measurement noise before compliance-region selection and model identification.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_current_per_load_time.png}}
@@ -222,7 +222,7 @@ Linear regression was then performed independently for each load and globally us
 
 \subsection{Full-Range Experimental Behavior}
 
-Figure~\ref{fig:binned_with_rest} shows the output current versus DAC voltage after DAC-axis binning, while still preserving the resting regime. This representation is useful for documenting the complete acquisition path, because it shows that the processed signals originate from a ramp experiment that includes non-ramp intervals.
+Figure~\ref{fig:binned_with_rest} shows the output current versus DAC voltage after DAC-axis binning while still preserving the resting regime. This intermediate representation documents the complete acquisition path before ramp-only selection and shows the non-ramp samples around the nominal DAC reference.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_binned_current_with_rest.png}}
@@ -230,7 +230,7 @@ Figure~\ref{fig:binned_with_rest} shows the output current versus DAC voltage af
 \label{fig:binned_with_rest}
 \end{figure}
 
-Figure~\ref{fig:full_current_vs_dac} shows the complete output current versus DAC voltage for all three loads after removal of the resting intervals, including compliance-limited regions. The 1 k$\Omega$ load remains close to a linear behavior across most of the sweep. In contrast, the 2 k$\Omega$ and especially the 4.7 k$\Omega$ loads show stronger compliance-limited behavior because a larger load resistance requires a larger output voltage for the same current.
+After the resting regime is removed, Fig.~\ref{fig:full_current_vs_dac} shows the complete ramp-only output current versus DAC voltage for all three loads, including compliance-limited regions. The 1 k$\Omega$ load remains close to a linear behavior across most of the sweep. In contrast, the 2 k$\Omega$ and especially the 4.7 k$\Omega$ loads show stronger compliance-limited behavior because a larger load resistance requires a larger output voltage for the same current.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_full_current_vs_dac.png}}
@@ -242,13 +242,7 @@ This full-range behavior should not be interpreted as a failure of current-sourc
 
 \subsection{Linear Operating Region}
 
-Figure~\ref{fig:linear_current_vs_dac} presents the current curves after removing samples outside the common valid voltage interval. In this selected region, the curves for 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ overlap closely, indicating that the output current is primarily determined by the DAC voltage and not by the load resistance.
-
-\begin{figure}[htbp]
-\centerline{\placeholderfigure{images/fig_linear_current_vs_dac.png}}
-\caption{Output current versus DAC voltage after removal of compliance-limited samples using the common inferred load-voltage interval.}
-\label{fig:linear_current_vs_dac}
-\end{figure}
+After removing samples outside the common valid voltage interval, the curves for 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ overlap closely in the selected region. This indicates that the output current is primarily determined by the DAC voltage and not by the load resistance. The selected operating region is visualized together with the fitted global model in Fig.~\ref{fig:global_model}.
 
 \subsection{Correlation Analysis}
 
@@ -294,7 +288,7 @@ Linear regression in the selected operating region showed high linearity for all
 \end{center}
 \end{table}
 
-The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} illustrates the experimental curves together with the dashed global model. The close overlap indicates that the feedforward DAC estimation model can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
+The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} illustrates the selected experimental curves together with the dashed global model. The close overlap indicates that the feedforward DAC estimation model can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_global_linear_model.png}}
