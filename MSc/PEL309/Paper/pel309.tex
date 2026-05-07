@@ -31,7 +31,7 @@ tpsilva@fei.edu.br}
 \maketitle
 
 \begin{abstract}
-Functional Electrical Stimulation (FES) systems require predictable control of stimulation current to obtain repeatable output conditions and to support safe embedded operation. This paper presents an experimental characterization of the relationship between digital-to-analog converter (DAC) control voltage and output current in an FES output stage based on a Howland current source. The evaluated circuit is related to the STIMGRASP architecture, originally proposed as a portable neuromuscular electrical stimulator for restoration of grasp patterns. The original dissertation describes digitally controlled current stimulation using a modified Howland current source, but does not present detailed DAC-versus-current characterization curves, statistical validation, regression analysis, compliance-region analysis, or load-consistency analysis. In this work, an experimental firmware was created only to generate a DAC ramp from approximately 0 V to 3.3 V; it did not execute a conventional FES stimulation protocol with pulse-width, frequency, or waveform-parameter control. The output current was measured from oscilloscope CSV files using a 10 $\Omega$ shunt-based setup under 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ resistive loads. These loads were used to emulate changes in human-equivalent impedance and electrode contact quality under repeatable bench conditions. The complete dataset was used to characterize the experimental operating limits, whereas compliance-limited samples were removed before linearity, regression, residual, and feedforward-model analyses. In the selected valid load-voltage interval, Pearson and Spearman correlations were close to -1 for all loads, confirming highly linear and monotonic behavior. A single global linear model was then identified using all three loads, enabling an embedded feedforward DAC estimation equation.
+Functional Electrical Stimulation (FES) systems require predictable control of stimulation current to obtain repeatable output conditions and support predictable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland-current-source output stage related to the STIMGRASP architecture. A dedicated firmware was used only to generate a DAC ramp for characterization, and output current was measured under 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ resistive loads. The complete dataset was used to characterize the experimental operating limits, whereas compliance-limited samples were excluded before linearity and regression analyses. In the selected valid load-voltage interval, Pearson and Spearman correlations were close to -1 for all loads, confirming highly linear and monotonic behavior. A single global linear model was identified using all three loads for embedded feedforward DAC estimation.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -72,15 +72,7 @@ where $I_{\mathrm{out}}$ is expressed in amperes and $R_{\mathrm{load}}$ in ohms
 |V_{\mathrm{load}}| < V_{\mathrm{compliance}}.
 \label{eq:compliance_condition}
 \end{equation}
-The evaluated output stage has a physical compliance of approximately $\pm$48 V. Samples near or beyond this limit may exhibit compliance-limited behavior, particularly for higher load resistances.
-
-Figure~\ref{fig:output_stage_schematic} shows the evaluated DAC and output-stage circuit as extracted from the STIMGRASP documentation. The schematic is used here to identify the characterized circuit block and not to imply a hardware redesign.
-
-\begin{figure}[htbp]
-\centerline{\placeholderfigure{images/fig_output_stage_schematic.png}}
-\caption{Evaluated DAC and Howland-current-source output stage extracted from the STIMGRASP dissertation documentation.}
-\label{fig:output_stage_schematic}
-\end{figure}
+Samples near or beyond the available output-voltage capability may exhibit compliance-limited behavior, particularly for higher load resistances.
 
 \subsection{Open-Loop Feedforward Current Control}
 
@@ -104,6 +96,14 @@ Equation \eqref{eq:feedforward_model} is valid only within the experimentally se
 
 The evaluated output stage was an FES circuit based on a Howland current source. The MCU controlled the stimulation command through a DAC voltage input. A dedicated experimental firmware was developed for this characterization. Its only function was to generate a controlled DAC ramp with an initial and final resting interval; it was not the conventional stimulation firmware and did not generate a complete FES pulse train with therapeutic stimulation parameters. The nominal resting or reference point of the DAC command was approximately 1.65 V, and the DAC voltage was swept from approximately 0 V to 3.3 V.
 
+Figure~\ref{fig:output_stage_schematic} shows the evaluated DAC and Howland-current-source output stage as extracted from the STIMGRASP documentation.
+
+\begin{figure}[htbp]
+\centerline{\placeholderfigure{images/fig_output_stage_schematic.png}}
+\caption{Evaluated DAC and Howland-current-source output stage extracted from the STIMGRASP dissertation documentation. The schematic is used to identify the characterized circuit block and does not imply a hardware redesign.}
+\label{fig:output_stage_schematic}
+\end{figure}
+
 Output current was measured experimentally using a shunt/current measurement setup with a 10 $\Omega$ shunt resistor. Three resistive loads were evaluated: 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$. These loads were selected to emulate controlled variations in equivalent body impedance and electrode contact condition, from lower impedance or better contact to higher impedance or poorer contact, while maintaining repeatable bench-test conditions.
 
 \begin{table}[htbp]
@@ -119,11 +119,9 @@ Channels & CH1 and CH2, analog \\
 \hline
 Horizontal unit & s \\
 \hline
-Sample interval & $8.0 \times 10^{-5}$ s \\
+Sample interval & $80 \times 10^{-6}$ s \\
 \hline
 Record length & 148144 samples \\
-\hline
-Zero index & 23143 \\
 \hline
 Vertical unit & V \\
 \hline
@@ -134,7 +132,9 @@ Vertical unit & V \\
 
 \subsection{Data Acquisition}
 
-Raw data were acquired as CSV files exported by a Tektronix MSO46B oscilloscope using two analog channels. One channel measured the DAC voltage and the other measured the shunt voltage. The oscilloscope configuration is summarized in Table~\ref{tab:oscilloscope}. Figure~\ref{fig:raw_dac_shunt} shows a representative acquisition before any processing. The initial and final resting intervals are visible around the nominal 1.65 V DAC reference level, while the useful experimental interval corresponds to the DAC ramp.
+Raw data were acquired as CSV files exported by a Tektronix MSO46B oscilloscope using two analog channels. One channel measured the DAC voltage and the other measured the shunt voltage. The oscilloscope configuration is summarized in Table~\ref{tab:oscilloscope}. 
+
+Figure~\ref{fig:raw_dac_shunt} shows a representative acquisition before any processing. The initial and final resting intervals are visible around the nominal 1.65 V DAC reference level, while the useful experimental interval corresponds to the DAC ramp.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_raw_dac_shunt_rest.png}}
@@ -146,11 +146,11 @@ The useful ramp region was extracted from each acquisition before model identifi
 
 \subsection{Data Processing and Binning}
 
-The analysis pipeline first extracted the useful ramp interval and converted the shunt-voltage measurement into output current in milliamperes. The current signals were then grouped by load resistance, as illustrated in Fig.~\ref{fig:current_per_load_time}. In the next step, the DAC voltage axis was binned to reduce granularity and measurement noise before compliance-region selection and model identification.
+The analysis pipeline first extracted the useful ramp interval and converted the shunt-voltage measurement into output current in milliamperes. The current signals were then grouped by load resistance, as illustrated in Fig.~\ref{fig:current_per_load_time}. This figure shows current evolution over acquisition samples after ramp extraction; it is not a direct current-versus-DAC-voltage representation. In the next step, the DAC voltage axis was binned to reduce granularity and measurement noise before compliance-region selection and model identification.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_current_per_load_time.png}}
-\caption{Calculated output current signals for the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads obtained from the shunt voltage measurements.}
+\caption{Calculated output current signals over acquisition samples for the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads obtained from the shunt voltage measurements.}
 \label{fig:current_per_load_time}
 \end{figure}
 
@@ -222,7 +222,7 @@ Linear regression was then performed independently for each load and globally us
 
 \subsection{Full-Range Experimental Behavior}
 
-Figure~\ref{fig:binned_with_rest} shows the output current versus DAC voltage after DAC-axis binning while still preserving the resting regime. This intermediate representation documents the complete acquisition path before ramp-only selection and shows the non-ramp samples around the nominal DAC reference.
+Figure~\ref{fig:binned_with_rest} shows the output current versus DAC voltage after DAC-axis binning while still preserving the resting regime. Although this representation is not used for model identification, it documents the effect of DAC-axis binning before the resting-regime samples are removed and provides ETL documentation for the transition from raw acquisition to ramp-only analysis.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_binned_current_with_rest.png}}
@@ -372,7 +372,7 @@ Another limitation is the use of resistive loads. Although resistors provide rep
 
 \section{Conclusion}
 
-This paper presented a first experimental characterization draft of the output-stage linearity of an FES circuit based on a Howland current source and related to the STIMGRASP stimulation architecture. A DAC ramp was applied over approximately 0 V to 3.3 V, and output current was measured under 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ resistive loads. The complete dataset was used to characterize compliance-limited behavior, while a common valid load-voltage interval of approximately -43.80 V to 46.33 V was selected for linearity and regression analyses.
+This paper presented an experimental characterization of the output-stage linearity of an FES circuit based on a Howland current source and related to the STIMGRASP stimulation architecture. A DAC ramp was applied over approximately 0 V to 3.3 V, and output current was measured under 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ resistive loads. The complete dataset was used to characterize compliance-limited behavior, while a common valid load-voltage interval of approximately -43.80 V to 46.33 V was selected for linearity and regression analyses.
 
 Within this valid region, the DAC-to-current relationship was highly linear for all tested loads, with Pearson and Spearman correlations close to -1. A single global linear model using all three loads is therefore appropriate for embedded feedforward DAC estimation, provided that operation remains within the compliance region. The main practical limitation is that, without real-time current feedback, the MCU cannot detect when load changes or skin-electrode impedance cause compliance-limited operation. The study complements the original STIMGRASP investigation by adding quantitative transfer characterization, statistical validation, compliance-region analysis, and feedforward-model discussion.
 
