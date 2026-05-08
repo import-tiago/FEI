@@ -19,24 +19,24 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Experimental Characterization of the Output-Stage Linearity of a Functional Electrical Stimulator Based on a Howland Current Source}
+\title{Experimental Characterization of the Output-Stage of a Functional Electrical Stimulator Based on a Howland Current Source}
 
 \author{
 \IEEEauthorblockN{T. P. Silva}
 \IEEEauthorblockA{
 \textit{Laboratório de Engenharia Biomédica} \\
-\textit{Centro Universitário FEI}\\
+\textit{Centro Universitário FEI} \\
 São Bernardo do Campo, Brasil \\
 tpsilva@fei.edu.br}
 }
 \maketitle
 
 \begin{abstract}
-Functional Electrical Stimulation (FES) systems require predictable control of stimulation current to obtain repeatable output conditions and support predictable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland-current-source output stage related to the STIMGRASP FES architecture. A dedicated firmware was developed to generate a DAC ramp for characterization,  and output current was measured under 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ resistive loads. The complete collected dataset was used to characterize the experimental operating limits, whereas compliance-limited samples were excluded before linearity and regression analyses. In the selected valid interval, Pearson and Spearman correlations were close to -1 for all loads, confirming highly linear and monotonic behavior. A single global linear model was identified using all three loads for embedded feedforward DAC estimation.
+Functional Electrical Stimulation (FES) systems require predictable control of stimulation current to obtain repeatable output conditions and support predictable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland-current-source output stage related to the STIMGRASP FES architecture. Because this architecture does not provide real-time output-current feedback to the microcontroller unit (MCU), the evaluated output stage operates as an open-loop stimulation system. A dedicated firmware was developed to generate a DAC ramp for characterization, and output current was measured under multiple resistive loads (1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$) representing different output-loading conditions. The complete collected dataset was used to characterize the experimental operating limits, while compliance-limited samples were excluded before linearity and regression analyses. In the selected valid interval, Pearson and Spearman correlations were close to -1 for all loads, confirming highly linear and monotonic behavior. A single global linear model was identified using all three loads as an embedded DAC estimation model for open-loop operation.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Functional Electrical Stimulation, Howland current source, current-controlled stimulation, linearity analysis, compliance voltage, feedforward control, DAC calibration, biomedical instrumentation.
+Functional Electrical Stimulation, Howland current source, current-controlled stimulation, linearity analysis, compliance voltage, open-loop control, DAC, biomedical instrumentation.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -45,11 +45,11 @@ Functional Electrical Stimulation (FES) systems electrically activate peripheral
 
 This paper is directly related to the STIMGRASP FES master's dissertation developed at Centro Universitário FEI in by Renato G. Barelli, which proposed a portable neuromuscular electrical stimulator for restoration of grasp patterns \cite{TODO_STIMGRASP_DISSERTATION}. The original work describes a digitally controlled stimulation architecture based on a modified Howland current source and discusses linear stimulation ramps and current-controlled stimulation behavior. In that investigation, predictable current control behavior is assumed as part of the stimulation architecture. However, detailed DAC-versus-current characterization curves under different load conditions are not presented, and the behavior implied by the architecture is not quantitatively characterized through correlation, regression, compliance, or load-consistency analyses.
 
-The present work extends the original investigation by experimentally evaluating the output-stage transfer characteristic of the FES circuit. The purpose is not to redesign the STIMGRASP hardware or to provide a clinical validation of the stimulator. Instead, this study focuses on output-stage characterization: the relationship between DAC control voltage and delivered current, the effect of different resistive loads, the identification of a valid compliance region, and the derivation of an embedded feedforward DAC estimation model.
+The present work extends the original investigation by experimentally evaluating the output-stage transfer characteristic of the FES circuit. The purpose is not to redesign the STIMGRASP hardware or to provide a clinical validation of the stimulator. Instead, this study focuses on output-stage characterization: the relationship between DAC control voltage and delivered current, the effect of different resistive loads, the identification of a valid compliance region, and the derivation of an embedded DAC estimation model for open-loop operation.
 
-The STIMGRASP circuit does not include real-time current feedback to the microcontroller unit (MCU). Consequently, the embedded control strategy is feedforward: the user or application configures a desired stimulation current, and the firmware estimates the DAC voltage required to produce it. This approach is practical only if the DAC-to-current relation is sufficiently linear and load-independent within the valid operating region. If the skin-electrode impedance increases, electrode contact becomes poor, or the load changes substantially, the output stage may reach voltage compliance and the delivered current may be lower than the modeled current. Without current feedback, this condition cannot be detected by the MCU in real time.
+The STIMGRASP circuit does not include current feedback to the microcontroller unit (MCU). Consequently, the output stage operates as an open-loop stimulation system, where the delivered current is not directly monitored during operation. Under this condition, predictable stimulation behavior depends on a sufficiently linear and repeatable relationship between DAC control voltage and output current within the valid operating region. In this work, the experimentally identified DAC-to-current transfer model is used for embedded DAC estimation. The user or application configures a desired stimulation current, and the firmware estimates the DAC voltage required to produce it. If the skin-electrode impedance increases, electrode contact becomes poor, or the load changes substantially, the output stage may reach voltage compliance and the delivered current may be lower than the modeled current. Without current feedback, this condition cannot be detected by the MCU in real time.
 
-The main contributions of this paper are: (i) quantitative characterization of the DAC-voltage-to-output-current relationship; (ii) experimental compliance-region analysis based on reconstructed load voltage; (iii) statistical validation of linearity using Pearson and Spearman correlations; (iv) regression analysis by load and using a single global model; and (v) discussion of the practical limitations of feedforward stimulation current estimation in the absence of closed-loop current monitoring.
+The main contributions of this paper are: (i) quantitative characterization of the DAC-voltage-to-output-current relationship; (ii) experimental compliance-region analysis based on load voltage; (iii) statistical validation of linearity using Pearson and Spearman correlations; (iv) regression analysis by load and a single global model; and (v) discussion of the practical limitations of open-loop current estimation in the absence of closed-loop current monitoring.
 
 \section{Background}
 
@@ -75,21 +75,21 @@ where $I_{\mathrm{out}}$ is expressed in amperes and $R_{\mathrm{load}}$ in ohms
 \end{equation}
 Samples near or beyond the available output-voltage capability may exhibit compliance-limited behavior, particularly for higher load resistances.
 
-\subsection{Open-Loop Feedforward Current Control}
+\subsection{Open-Loop DAC Estimation}
 
-Because the evaluated FES circuit does not provide real-time current feedback to the MCU, the embedded controller cannot directly regulate the delivered current during stimulation. Instead, current control must be implemented as a feedforward estimation from the desired current to the DAC voltage. The experimentally identified direct model is
+Because the evaluated FES circuit does not provide real-time current feedback to the MCU, the embedded controller cannot directly regulate the delivered current during stimulation. Instead, current configuration must rely on an experimentally identified DAC-to-current relationship to estimate the DAC voltage required for a desired stimulation current. The experimentally identified direct model is
 \begin{equation}
 I_{\mathrm{out}} = a V_{\mathrm{DAC}} + b,
 \label{eq:direct_model}
 \end{equation}
 where $V_{\mathrm{DAC}}$ is the DAC control voltage and $a$ and $b$ are regression coefficients. In the evaluated circuit, $a$ is negative because increasing the DAC voltage decreases the output current.
 
-The embedded feedforward DAC estimation model is obtained by rearranging \eqref{eq:direct_model}:
+The embedded DAC estimation equation is obtained by rearranging \eqref{eq:direct_model}:
 \begin{equation}
 V_{\mathrm{DAC}} = \frac{I_{\mathrm{target}} - b}{a}.
-\label{eq:feedforward_model}
+\label{eq:dac_estimation_model}
 \end{equation}
-Equation \eqref{eq:feedforward_model} is valid only within the experimentally selected compliance region. Outside this region, the output current is constrained by available output voltage and load resistance, and the feedforward model may overestimate the current actually delivered to the load.
+Equation \eqref{eq:dac_estimation_model} is valid only within the experimentally selected compliance region. Outside this region, the output current is constrained by available output voltage and load resistance, and the DAC-to-current model may predict a current that cannot be physically delivered once the output stage reaches voltage compliance..
 
 \section{Materials and Methods}
 
@@ -160,7 +160,7 @@ granularity and measurement noise before compliance-region selection and model i
 \label{fig:current_per_load_time}
 \end{figure}
 
-After ramp extraction and binning, samples were aggregated by DAC-voltage interval and load resistance. The complete binned representation includes both the linear current-source region and the compliance-limited region. It is therefore appropriate for characterizing full-range behavior and operating limits, but it is not used directly for deriving the linear feedforward model.
+After ramp extraction and binning, samples were aggregated by DAC-voltage interval and load resistance. The complete binned representation includes both the linear current-source region and the compliance-limited region. It is therefore appropriate for characterizing full-range behavior and operating limits, but it is not used directly for deriving the linear DAC estimation model.
 
 \subsection{Compliance-Limited Region Selection}
 
@@ -176,7 +176,7 @@ V_{\max,\mathrm{limit}} = \min(V_{\max,1k}, V_{\max,2k}, V_{\max,4.7k}).
 \end{equation}
 This method avoids hardcoded voltage thresholds and selects a common interval in which all three loads remain experimentally inside the valid region.
 
-The inferred voltage limits are summarized in Table~\ref{tab:voltage_limits}. The resulting common selected voltage interval was approximately -43.803 V to 46.330 V. Samples whose inferred $V_{\mathrm{load}}$ remained inside this interval formed the valid linear operating dataset. This distinction is essential: the complete binned data describe the full behavior of the circuit, whereas only the selected valid operating data are used for linearity, regression, residual, load-consistency, and embedded feedforward analyses.
+The inferred voltage limits are summarized in Table~\ref{tab:voltage_limits}. The resulting common selected voltage interval was approximately -43.803 V to 46.330 V. Samples whose inferred $V_{\mathrm{load}}$ remained inside this interval formed the valid linear operating dataset. This distinction is essential: the complete binned data describe the full behavior of the circuit, whereas only the selected valid operating data are used for linearity, regression, residual, load-consistency, and embedded DAC estimation analyses.
 
 \begin{table}[htbp]
 \caption{Experimental Load-Voltage Limits Inferred From Measured Current}
@@ -222,7 +222,7 @@ All loads & \multicolumn{2}{c|}{\% TODO: insert values from final analysis} \\
 
 Pearson and Spearman correlations were computed for the selected linear operating region \cite{TODO_PEARSON}, \cite{TODO_SPEARMAN}. Pearson correlation was used to quantify linear association, while Spearman correlation was used to evaluate monotonic association. The full region was inspected to characterize compliance-limited behavior, but the statistical linearity results reported in this paper refer to the valid operating region only.
 
-Linear regression was then performed independently for each load and globally using all three loads in the valid linear region \cite{TODO_LINEAR_REGRESSION}. The 4.7 k$\Omega$ load was included in the global model after compliance-limited samples were removed, because the objective was to identify a single embedded feedforward model valid across the evaluated loads within the common compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency. Cross-validation was also performed to estimate model robustness \cite{TODO_CROSS_VALIDATION}.
+Linear regression was then performed independently for each load and globally using all three loads in the valid linear region \cite{TODO_LINEAR_REGRESSION}. The 4.7 k$\Omega$ load was included in the global model after compliance-limited samples were removed, because the objective was to identify a single embedded DAC estimation model valid across the evaluated loads within the common compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency. Cross-validation was also performed to estimate model robustness \cite{TODO_CROSS_VALIDATION}.
 
 \section{Results}
 
@@ -294,7 +294,7 @@ Linear regression in the selected operating region showed high linearity for all
 \end{center}
 \end{table}
 
-The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} illustrates the selected experimental curves together with the dashed global model. The close overlap indicates that the feedforward DAC estimation model can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
+The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} illustrates the selected experimental curves together with the dashed global model. The close overlap indicates that the DAC estimation model for open-loop operation can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_global_linear_model.png}}
@@ -326,7 +326,7 @@ RMSE & \% TODO: insert value from final analysis \\
 
 \subsection{Residuals and Load Consistency}
 
-Figure~\ref{fig:residuals} shows the residuals of the global linear model. The residual distribution should be inspected to identify possible systematic deviations as a function of DAC voltage or load. Such deviations are important for embedded implementation because they define the expected feedforward estimation error in the absence of real-time current feedback.
+Figure~\ref{fig:residuals} shows the residuals of the global linear model. The residual distribution should be inspected to identify possible systematic deviations as a function of DAC voltage or load. Such deviations are important for embedded implementation because they define the expected open-loop estimation error in the absence of real-time current feedback.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_residuals.png}}
@@ -368,11 +368,11 @@ Mean $R^2$ & \% TODO: insert value from final analysis \\
 
 The results indicate that the evaluated Howland-based FES output stage exhibits strong linearity between DAC control voltage and output current within the experimentally selected valid region. Pearson and Spearman correlations close to -1 demonstrate that the relationship is both highly linear and monotonic after compliance-limited samples are removed. The negative sign of the correlations and fitted slopes is consistent with the polarity of the evaluated circuit, in which increasing DAC voltage decreases output current.
 
-The nonlinear appearance of the complete DAC sweep is explained by compliance-limited behavior, not by a general loss of current-source linearity. The complete dataset is useful because it characterizes the experimental operating limits of the output stage. However, it mixes the linear current-source regime with a region where output current is constrained by the available voltage across the load. For this reason, compliance-limited samples were excluded from the regression analysis and from the derivation of the embedded feedforward model.
+The nonlinear appearance of the complete DAC sweep is explained by compliance-limited behavior, not by a general loss of current-source linearity. The complete dataset is useful because it characterizes the experimental operating limits of the output stage. However, it mixes the linear current-source regime with a region where output current is constrained by the available voltage across the load. For this reason, compliance-limited samples were excluded from the regression analysis and from the derivation of the embedded DAC estimation model.
 
-The global linear model is practically useful for firmware implementation. With coefficients $a$ and $b$ identified from the selected valid operating data, the MCU can estimate the required DAC voltage from the desired stimulation current using \eqref{eq:feedforward_model}. This supports the open-loop control strategy implied by the original STIMGRASP architecture while adding quantitative calibration and validation to the DAC-to-current transfer behavior described conceptually in the dissertation \cite{TODO_STIMGRASP_DISSERTATION}.
+The global linear model is practically useful for open-loop firmware current configuration. With coefficients $a$ and $b$ identified from the selected valid operating data, the MCU can estimate the required DAC voltage from the desired stimulation current using \eqref{eq:dac_estimation_model}. This supports the open-loop control strategy implied by the original STIMGRASP architecture while adding quantitative calibration and validation to the DAC-to-current transfer behavior described conceptually in the dissertation \cite{TODO_STIMGRASP_DISSERTATION}.
 
-At the same time, the feedforward model has an important limitation: it is valid only inside the compliance region. In real use, increased skin-electrode impedance, poor electrode contact, or significant load changes may require an output voltage beyond the available compliance. In that case, the real delivered current may be lower than the modeled current. Because the evaluated system does not include current feedback to the MCU, the firmware cannot detect this condition in real time. This limitation is directly related to the distinction between open-loop and closed-loop stimulation control discussed in the broader context of current-controlled FES systems.
+At the same time, the open-loop DAC estimation model has an important limitation: it is valid only inside the compliance region. In real use, increased skin-electrode impedance, poor electrode contact, or significant load changes may require an output voltage beyond the available compliance. In that case, the real delivered current may be lower than the modeled current. Because the evaluated system does not include current feedback to the MCU, the firmware cannot detect this condition in real time. This limitation is directly related to the distinction between open-loop and closed-loop stimulation control discussed in the broader context of current-controlled FES systems.
 
 Another limitation is the use of resistive loads. Although resistors provide repeatable and well-defined test conditions for output-stage characterization, they do not reproduce the nonlinear and time-varying impedance of the skin-electrode interface. Future work should therefore include tests with more realistic loads, electrode models, or in vitro/in vivo measurement conditions where ethically and technically appropriate. Hardware or firmware extensions for current feedback, compliance monitoring, or closed-loop current regulation should also be considered to improve robustness under changing load conditions.
 
@@ -380,7 +380,7 @@ Another limitation is the use of resistive loads. Although resistors provide rep
 
 This paper presented an experimental characterization of the output-stage linearity of an FES circuit based on a Howland current source and related to the STIMGRASP stimulation architecture. A DAC ramp was applied over approximately 0 V to 3.3 V, and output current was measured under 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ resistive loads. The complete dataset was used to characterize compliance-limited behavior, while a common valid load-voltage interval of approximately -43.80 V to 46.33 V was selected for linearity and regression analyses.
 
-Within this valid region, the DAC-to-current relationship was highly linear for all tested loads, with Pearson and Spearman correlations close to -1. A single global linear model using all three loads is therefore appropriate for embedded feedforward DAC estimation, provided that operation remains within the compliance region. The main practical limitation is that, without real-time current feedback, the MCU cannot detect when load changes or skin-electrode impedance cause compliance-limited operation. The study complements the original STIMGRASP investigation by adding quantitative transfer characterization, statistical validation, compliance-region analysis, and feedforward-model discussion.
+Within this valid region, the DAC-to-current relationship was highly linear for all tested loads, with Pearson and Spearman correlations close to -1. A single global linear model using all three loads is therefore appropriate for embedded open-loop DAC estimation, provided that operation remains within the compliance region. The main practical limitation is that, without real-time current feedback, the MCU cannot detect when load changes or skin-electrode impedance cause compliance-limited operation. The study complements the original STIMGRASP investigation by adding quantitative transfer characterization, statistical validation, compliance-region analysis, and open-loop DAC estimation discussion.
 
 \section*{Acknowledgment}
 
@@ -400,6 +400,7 @@ Within this valid region, the DAC-to-current relationship was highly linear for 
 % TODO_LINEAR_REGRESSION
 % TODO_CROSS_VALIDATION
 % TODO_STIMGRASP_DISSERTATION
+
 % If a references.bib file is added later, uncomment the following lines:
 % \bibliographystyle{IEEEtran}
 % \bibliography{references}
