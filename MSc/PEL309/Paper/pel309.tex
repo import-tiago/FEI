@@ -32,11 +32,11 @@ tpsilva@fei.edu.br}
 \maketitle
 
 \begin{abstract}
-Functional Electrical Stimulation (FES) systems require predictable control of stimulation current to obtain repeatable output conditions and support predictable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland-current-source output stage related to the STIMGRASP FES architecture. Because this architecture does not provide real-time output-current feedback to the microcontroller unit (MCU), the evaluated output stage operates as an open-loop stimulation system. A dedicated firmware was developed to generate a DAC ramp for characterization, and output current was measured under multiple resistive loads (1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$) representing different output-loading conditions. The complete collected dataset was used to characterize the experimental operating limits, while compliance-limited samples were excluded before linearity and regression analyses. In the selected valid interval, Pearson and Spearman correlations were close to -1 for all loads, confirming highly linear and monotonic behavior. A single global linear model was identified using all three loads as an embedded DAC estimation model for open-loop operation.
+Functional Electrical Stimulation (FES) systems require predictable current control to ensure repeatable clinical outcomes and stable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland Current Source output stage based on the STIMGRASP architecture. As this architecture lacks real-time current feedback, the output stage operates in an open-loop configuration. Dedicated firmware was developed to generate DAC ramps, and output current was measured using a shunt resistor across multiple resistive loads. After excluding compliance-limited samples, linearity and regression analyses were performed. Results show that Pearson and Spearman correlations were $<-0.99$ for all loads, confirming highly linear and monotonic behavior. A single global linear model was identified for use as an embedded DAC estimation model. Finally, this work quantifies how load-dependent compliance limits may compromise predictability in the absence of feedback, providing a characterization that complements the original STIMGRASP investigation.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Functional Electrical Stimulation, Howland current source, current-controlled stimulation, linearity analysis, compliance voltage, open-loop control, DAC, biomedical instrumentation.
+Functional Electrical Stimulation, Howland current source, linearity analysis, open-loop control.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -386,23 +386,7 @@ Within this valid region, the DAC-to-current relationship was highly linear for 
 
 % TODO: Insert acknowledgment text if applicable. Remove this section if no acknowledgment is required.
 
-\section*{References}
-
-% TODO: Search and insert real IEEE-formatted references for the following citation keys:
-% TODO_FES_REVIEW
-% TODO_FOOT_DROP_FES
-% TODO_HOWLAND_CURRENT_SOURCE
-% TODO_CURRENT_CONTROLLED_STIMULATION
-% TODO_ELECTRODE_SKIN_IMPEDANCE
-% TODO_COMPLIANCE_VOLTAGE
-% TODO_PEARSON
-% TODO_SPEARMAN
-% TODO_LINEAR_REGRESSION
-% TODO_CROSS_VALIDATION
-% TODO_STIMGRASP_DISSERTATION
-
-% If a references.bib file is added later, uncomment the following lines:
-% \bibliographystyle{IEEEtran}
-% \bibliography{references}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}

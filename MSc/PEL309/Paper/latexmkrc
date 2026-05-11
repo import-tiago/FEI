@@ -1,0 +1,1 @@
+$bibtex = q{BIBINPUTS='.;..;' bibtex %O %B};

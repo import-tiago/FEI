@@ -9,7 +9,7 @@
                 "-synctex=1",
                 "-outdir=build",
                 "-auxdir=build",
-                "%DOC%"
+                "%DOCFILE%.tex"
             ]
         }
     ],
