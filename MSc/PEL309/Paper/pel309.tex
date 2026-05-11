@@ -145,13 +145,12 @@ Figure~\ref{fig:raw_dac_shunt} shows a representative acquisition before any pro
 
 The useful ramp region was extracted from each acquisition before model identification. In this context, ramp extraction means removing the initial and final zero-current resting-regime samples around the 1.65 V DAC reference and preserving only the swept DAC interval. The measured shunt voltage was converted into output current using the 10 $\Omega$ shunt value. The output voltage was not directly measured; instead, it was inferred from \eqref{eq:vload} using the calculated current and nominal load resistance.
 
-\subsection{Data Processing and Binning}
+\subsection{Data Processing}
 
 The analysis pipeline first extracted the useful DAC-ramp interval corresponding to the experimental sweep from approximately 0 V to 3.3 V, removing the initial and final resting-regime samples around the nominal 1.65 V reference level. The shunt-voltage measurement was then converted into output current in milliamperes. The current signals were then grouped by load resistance, as illustrated 
 in Fig.~\ref{fig:current_per_load_time}.
-This figure shows current evolution over acquisition samples after ramp extraction; it is not a direct 
-current-versus-DAC-voltage representation. In the next step, the DAC voltage axis was binned to reduce 
-granularity and measurement noise before compliance-region selection and model identification.
+This figure shows current evolution over acquisition samples after ramp extraction; it is not a direct current-versus-DAC-voltage representation. 
+Converting the shunt-voltage measurements into output current made the compliance-limited behavior visible in the processed data. In this region, the load current no longer increases proportionally with the DAC-voltage command, because the output stage is constrained by the voltage required across the load.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_current_per_load_time.png}}
@@ -159,7 +158,14 @@ granularity and measurement noise before compliance-region selection and model i
 \label{fig:current_per_load_time}
 \end{figure}
 
-After ramp extraction and binning, samples were aggregated by DAC-voltage interval and load resistance. The complete binned representation includes both the linear current-source region and the compliance-limited region. It is therefore appropriate for characterizing full-range behavior and operating limits, but it is not used directly for deriving the linear DAC estimation model.
+In the next step, the DAC voltage axis was binned into 10 mV intervals to reduce granularity and measurement noise before compliance-region selection and model identification. For each load resistance and each DAC-voltage bin, the representative current value was obtained as the arithmetic mean of all current samples within that interval. The complete binned representation, shown in Fig.~\ref{fig:binned_with_rest}, includes both the linear current-source region and the compliance-limited region. It is therefore appropriate for characterizing full-range behavior and operating limits, but it is not used directly for deriving the linear DAC estimation model.
+
+
+\begin{figure}[H]
+\centerline{\placeholderfigure{images/fig_binned_current_with_rest.png}}
+\caption{Output current versus DAC voltage after reduction of signal granularity, still including the resting regime.}
+\label{fig:binned_with_rest}
+\end{figure}
 
 \subsection{Compliance-Limited Region Selection}
 
@@ -227,15 +233,7 @@ Linear regression was then performed independently for each load and globally us
 
 \subsection{Full-Range Experimental Behavior}
 
-Figure~\ref{fig:binned_with_rest} shows the output current versus DAC voltage after DAC-axis binning while still preserving the resting regime. Although this representation is not used for model identification, it documents the effect of DAC-axis binning before the resting-regime samples are removed and provides ETL documentation for the transition from raw acquisition to ramp-only analysis.
-
 After the resting regime is removed, Fig.~\ref{fig:full_current_vs_dac} shows the complete ramp-only output current versus DAC voltage for all three loads, including compliance-limited regions. The 1 k$\Omega$ load remains close to a linear behavior across most of the sweep. In contrast, the 2 k$\Omega$ and especially the 4.7 k$\Omega$ loads show stronger compliance-limited behavior because a larger load resistance requires a larger output voltage for the same current.
-
-\begin{figure}[htbp]
-\centerline{\placeholderfigure{images/fig_binned_current_with_rest.png}}
-\caption{Output current versus DAC voltage after reduction of signal granularity, still including the resting regime.}
-\label{fig:binned_with_rest}
-\end{figure}
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_full_current_vs_dac.png}}
