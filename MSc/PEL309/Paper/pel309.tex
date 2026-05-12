@@ -98,11 +98,11 @@ Equation \eqref{eq:dac_estimation_model} is valid only within the experimentally
 
 The evaluated output stage was an FES circuit based on a Howland current source. The MCU controlled the stimulation command through a DAC voltage input. A dedicated experimental firmware was developed for this characterization. Its only function was to generate a controlled DAC ramp with an initial and final resting interval; it was not the conventional stimulation firmware and did not generate a complete FES pulse train with therapeutic stimulation parameters. The nominal resting or reference point of the DAC command was approximately 1.65 V. This value is not arbitrary: in the STIMGRASP output-stage circuit, it corresponds to the zero-current operating point, for which the output current is approximately 0 mA and the load voltage is consequently approximately 0 V. In this work, the intervals around this 1.65 V reference are referred to as the zero-current resting regime. The DAC voltage was swept from approximately 0 V to 3.3 V.
 
-Figure~\ref{fig:output_stage_schematic} shows the evaluated DAC and Howland-current-source output stage as extracted from the STIMGRASP documentation.
+Figure~\ref{fig:output_stage_schematic} shows the evaluated DAC and Howland-current-source output stage as extracted from the STIMGRASP documentation. The schematic is used only to identify the characterized circuit block and does not imply a hardware redesign.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_output_stage_schematic.png}}
-\caption{Evaluated DAC and Howland-current-source output stage extracted from the STIMGRASP dissertation documentation. The schematic is used to identify the characterized circuit block and does not imply a hardware redesign.}
+\caption{Evaluated DAC and Howland-current-source output stage.}
 \label{fig:output_stage_schematic}
 \end{figure}
 
@@ -136,11 +136,11 @@ Horizontal unit & s \\
 \end{center}
 \end{table}
 
-Figure~\ref{fig:raw_dac_shunt} shows a representative raw acquisition for the 1 k$\Omega$ load before any processing. This example is included only to illustrate the format of the acquired oscilloscope data and the preliminary relationship between DAC voltage and shunt voltage. The initial and final resting intervals are visible around the nominal 1.65 V DAC reference level, corresponding to the zero-current operating point of the evaluated output stage, while the useful experimental interval corresponds to the DAC ramp.
+Figure~\ref{fig:raw_dac_shunt} shows a representative raw acquisition for the 1 k$\Omega$ load before any processing. This example is included only to illustrate the format of the acquired oscilloscope data and the preliminary relationship between DAC voltage and shunt voltage. The initial and final resting intervals are preserved in the raw CSV and are visible around the nominal 1.65 V DAC reference level, corresponding to the zero-current operating point of the evaluated output stage. The useful experimental interval corresponds to the DAC ramp.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_raw_dac_shunt_rest.png}}
-\caption{Representative raw oscilloscope acquisition for the 1 k$\Omega$ load, showing DAC voltage and shunt voltage before data treatment. This example illustrates the acquired data format and the preliminary DAC-voltage-to-shunt-voltage relationship; the resting intervals before and after the DAC ramp are preserved in the raw CSV.}
+\caption{Raw DAC and shunt voltages for the 1 k$\Omega$ load.}
 \label{fig:raw_dac_shunt}
 \end{figure}
 
@@ -152,7 +152,7 @@ The analysis pipeline first extracted the useful DAC-ramp interval corresponding
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_current_per_load_time.png}}
-\caption{Calculated output current signals over acquisition samples for the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads obtained from the shunt voltage measurements.}
+\caption{Calculated output current over acquisition samples.}
 \label{fig:current_per_load_time}
 \end{figure}
 
@@ -161,7 +161,7 @@ In the next step, the DAC voltage axis was binned into 10 mV intervals to reduce
 
 \begin{figure}[H]
 \centerline{\placeholderfigure{images/fig_binned_current_with_rest.png}}
-\caption{Output current versus DAC voltage after 10 mV binning, still including the resting regime.}
+\caption{Binned output current versus DAC voltage.}
 \label{fig:binned_with_rest}
 \end{figure}
 
@@ -205,7 +205,7 @@ After removing samples outside this common compliance interval, Fig.~\ref{fig:fu
 
 \begin{figure}[H]
 \centerline{\placeholderfigure{images/fig_full_current_vs_dac.png}}
-\caption{Output current versus DAC voltage for the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads after compliance-limited sample removal.}
+\caption{Output current versus DAC voltage after compliance-limited sample removal.}
 \label{fig:full_current_vs_dac}
 \end{figure}
 
@@ -215,7 +215,7 @@ Figure~\ref{fig:global_model} illustrates the selected experimental curves toget
 
 Pearson and Spearman correlations were computed for the selected linear operating region. Pearson correlation was used to quantify linear association, while Spearman correlation was used to evaluate monotonic association \cite{PEARSON_SPEARMAN_COMPARISON}, \cite{CORRELATION_COEFFICIENTS_INTERPRETATION}. Compliance-limited samples were excluded before statistical analysis, so the reported linearity metrics refer only to the hardware-supported operating region used for model identification.
 
-Linear regression was then performed independently for each load and globally using all three loads within the common valid linear region. The objective of the global fit was to identify a single embedded DAC estimation model valid across the evaluated loads inside the hardware-supported compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency.
+Linear regression was then performed independently for each load and globally using all three loads within the common valid linear region. For the global model, the three independent experimental current measurements, corresponding to the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads, were restricted to the linear operating region. The resulting samples were reorganized into a single dataset in which each point was represented by a pair $(V_{\mathrm{DAC}}, I_{\mathrm{out}})$, with the load label retained only as auxiliary information. All points from the three loads were then combined and used simultaneously in a single ordinary least-squares linear regression. The objective of the global fit was to identify a single embedded DAC estimation model valid across the evaluated loads inside the hardware-supported compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency.
 
 \section{Results}
 
@@ -227,17 +227,20 @@ After removing samples outside the common valid voltage interval, the curves for
 \caption{Pearson and Spearman Correlation Results in the Linear Operating Region}
 \begin{center}
 \scriptsize
-\begin{tabular}{|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|}
 \hline
-\textbf{Load} & \textbf{$r$} & \textbf{$p_r$} & \textbf{$\rho$} & \textbf{$n$} \\
+\textbf{Load} & \textbf{$r$} & \textbf{$p_r$} & \textbf{$\rho$} & \textbf{$p_\rho$} & \textbf{$n$} \\
 \hline
-1 k$\Omega$ & -0.999905252 & $<10^{-300}$ & -0.999999644 & 323 \\
+1 k$\Omega$ & -0.999909 & 0.000000 & -1.000000 & 0.000000 & 323 \\
 \hline
-2 k$\Omega$ & -0.999899428 & $2.3916\times10^{-301}$ & -1.000000000 & 164 \\
+2 k$\Omega$ & -0.999899 & 0.000000 & -1.000000 & 0.000000 & 164 \\
 \hline
-4.7 k$\Omega$ & -0.999823866 & $4.5492\times10^{-126}$ & -1.000000000 & 74 \\
+4.7 k$\Omega$ & -0.999824 & 0.000000 & -1.000000 & 0.000000 & 74 \\
 \hline
 \end{tabular}
+\vspace{1mm}
+
+\parbox{\columnwidth}{\scriptsize $r$: Pearson correlation coefficient; $p_r$: Pearson p-value; $\rho$: Spearman correlation coefficient; $p_\rho$: Spearman p-value; $n$: number of samples.}
 \label{tab:correlation}
 \end{center}
 \end{table}
@@ -260,6 +263,9 @@ Linear regression in the selected operating region showed high linearity for all
 4.7 k$\Omega$ & -26.2052 & 42.9934 & 0.999648 & 0.05797 \\
 \hline
 \end{tabular}
+\vspace{1mm}
+
+\parbox{\columnwidth}{\scriptsize $a$: fitted slope; $b$: fitted intercept; $R^2$: coefficient of determination; SE: standard error of the regression.}
 \label{tab:load_regression}
 \end{center}
 \end{table}
@@ -278,15 +284,18 @@ Linear regression in the selected operating region showed high linearity for all
 4.7 k$\Omega$ & 0.0918 & 0.1051 & 0.2611 \\
 \hline
 \end{tabular}
+\vspace{1mm}
+
+\parbox{\columnwidth}{\scriptsize MAE: mean absolute error; RMSE: root mean square error; Max.: maximum absolute error.}
 \label{tab:load_error_metrics}
 \end{center}
 \end{table}
 
-The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. First, the three independent experimental current measurements, corresponding to the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads, were restricted to the linear operating region. The resulting samples were then reorganized into a single dataset in which each point was represented by a pair $(V_{\mathrm{DAC}}, I_{\mathrm{out}})$, with the load label retained only as auxiliary information. All points from the three loads were then combined and used simultaneously in a single ordinary least-squares linear regression. Thus, instead of fitting three independent models, one for each load, a single global DAC-to-current relationship was estimated to represent the average circuit behavior in the supported linear region across all evaluated loads.
+The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} shows the experimental curves and the resulting global linear model.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_global_linear_model.png}}
-\caption{Experimental current curves for 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads with the dashed global linear model identified from all loads in the valid operating region.}
+\caption{Experimental current curves and global linear model.}
 \label{fig:global_model}
 \end{figure}
 
@@ -312,6 +321,9 @@ Max. absolute error & 0.930634 mA \\
 Samples & 561 \\
 \hline
 \end{tabular}
+\vspace{1mm}
+
+\parbox{\columnwidth}{\scriptsize $a$: fitted slope; $b$: fitted intercept; $R^2$: coefficient of determination; MAE: mean absolute error; RMSE: root mean square error.}
 \label{tab:global_model}
 \end{center}
 \end{table}
@@ -322,7 +334,7 @@ Figure~\ref{fig:residuals} shows the residuals of the global linear model. The r
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_residuals.png}}
-\caption{Residuals of the global linear model in the selected valid operating region.}
+\caption{Residuals of the global linear model.}
 \label{fig:residuals}
 \end{figure}
 
@@ -330,7 +342,7 @@ Figure~\ref{fig:current_spread} shows the absolute current spread between loads.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_current_spread.png}}
-\caption{Absolute current spread between loads as a function of DAC voltage in the selected valid operating region.}
+\caption{Absolute current spread between loads.}
 \label{fig:current_spread}
 \end{figure}
 
