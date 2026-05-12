@@ -32,8 +32,9 @@ tpsilva@fei.edu.br}
 \maketitle
 
 \begin{abstract}
-Functional Electrical Stimulation (FES) systems require predictable current control to ensure repeatable clinical outcomes and stable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland Current Source output stage based on the STIMGRASP FES architecture. As this architecture lacks real-time current feedback, the output stage operates in an open-loop configuration, requiring external current measurement through a shunt resistor. For experimental characterization, a dedicated firmware was developed to generate DAC ramps under multiple resistive load conditions. After excluding compliance-limited samples, linearity and regression analyses were performed. Results show that Pearson and Spearman correlation coefficients were $<-0.999$ for all loads, confirming highly linear and monotonic behavior in the selected operating region. A single global linear model was identified for use as an embedded DAC estimation model. Finally, this work quantifies how load-dependent compliance limits may compromise predictability in the absence of feedback, providing a characterization that complements the original STIMGRASP investigation.
+Functional Electrical Stimulation (FES) systems require predictable current control to ensure repeatable clinical outcomes and stable embedded control. This paper characterizes the relationship between digital-to-analog converter (DAC) control voltage and output current in a Howland Current Source output stage based on the STIMGRASP FES architecture. As this architecture lacks real-time current feedback, the output stage operates in an open-loop configuration. Therefore, for experimental characterization only, stimulation current was measured externally using a shunt resistor. A dedicated firmware was developed to generate DAC ramps under multiple resistive load conditions. After excluding compliance-limited samples, linearity and regression analyses were performed. Results show that Pearson and Spearman correlation coefficients were $<-0.999$ for all loads, confirming highly linear and monotonic behavior in the selected operating region. A single global linear model was identified for use as an embedded DAC estimation model. Finally, this work quantifies how load-dependent compliance limits may compromise predictability in the absence of feedback, providing a characterization that complements the original STIMGRASP investigation.
 \end{abstract}
+
 
 \begin{IEEEkeywords}
 Functional Electrical Stimulation, Howland current source, linearity analysis, open-loop control.
@@ -213,9 +214,11 @@ After removing samples outside this common compliance interval, Fig.~\ref{fig:fu
 
 \subsection{Statistical Analysis and Model Identification}
 
-Pearson and Spearman correlations were computed for the selected linear operating region \cite{TODO_PEARSON}, \cite{TODO_SPEARMAN}. Pearson correlation was used to quantify linear association, while Spearman correlation was used to evaluate monotonic association. Compliance-limited samples were excluded before statistical analysis, so the reported linearity metrics refer only to the hardware-supported operating region used for model identification.
+Figure~\ref{fig:global_model} illustrates the selected experimental curves together with the dashed global model used for model identification. The close overlap indicates that the DAC estimation model for open-loop operation can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
 
-Linear regression was then performed independently for each load and globally using all three loads within the common valid linear region \cite{TODO_LINEAR_REGRESSION}. The objective of the global fit was to identify a single embedded DAC estimation model valid across the evaluated loads inside the hardware-supported compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency. Cross-validation was also performed to estimate model robustness \cite{TODO_CROSS_VALIDATION}.
+Pearson and Spearman correlations were computed for the selected linear operating region. Pearson correlation was used to quantify linear association, while Spearman correlation was used to evaluate monotonic association \cite{TODO_PEARSON}, \cite{TODO_SPEARMAN}. Compliance-limited samples were excluded before statistical analysis, so the reported linearity metrics refer only to the hardware-supported operating region used for model identification.
+
+Linear regression was then performed independently for each load and globally using all three loads within the common valid linear region. The objective of the global fit was to identify a single embedded DAC estimation model valid across the evaluated loads inside the hardware-supported compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency. Cross-validation was also performed to estimate model robustness.
 
 \section{Results}
 
@@ -283,8 +286,6 @@ Linear regression in the selected operating region showed high linearity for all
 \end{table}
 
 The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. First, the three independent experimental current measurements, corresponding to the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads, were restricted to the linear operating region. The resulting samples were then reorganized into a single dataset in which each point was represented by a pair $(V_{\mathrm{DAC}}, I_{\mathrm{out}})$, with the load label retained only as auxiliary information. All points from the three loads were then combined and used simultaneously in a single ordinary least-squares linear regression. Thus, instead of fitting three independent models, one for each load, a single global DAC-to-current relationship was estimated to represent the average circuit behavior in the supported linear region across all evaluated loads.
-
-Figure~\ref{fig:global_model} illustrates the selected experimental curves together with the dashed global model. The close overlap indicates that the DAC estimation model for open-loop operation can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
 
 \begin{figure}[htbp]
 \centerline{\placeholderfigure{images/fig_global_linear_model.png}}
