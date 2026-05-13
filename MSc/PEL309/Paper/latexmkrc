@@ -1,1 +1,2 @@
+$pdflatex = q{pdflatex -synctex=1 %O %S};
 $bibtex = q{BIBINPUTS='.;..;' bibtex %O %B};

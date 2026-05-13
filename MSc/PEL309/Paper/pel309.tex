@@ -8,6 +8,12 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{float}
+\setlength{\textfloatsep}{7pt plus 1pt minus 2pt}
+\setlength{\floatsep}{7pt plus 1pt minus 2pt}
+\setlength{\intextsep}{7pt plus 1pt minus 2pt}
+\setlength{\abovecaptionskip}{3pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{1pt plus 1pt minus 1pt}
+\setlength{\tabcolsep}{4pt}
 \newcommand{\placeholderfigure}[1]{%
 \IfFileExists{#1}{%
 \includegraphics[width=\linewidth]{#1}%
@@ -18,6 +24,7 @@
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
+\raggedbottom
 
 \title{Experimental Characterization of the Output Stage of a Functional Electrical Stimulator Based on a Howland Current Source}
 
@@ -207,26 +214,31 @@ After removing samples outside this common compliance interval, Fig.~\ref{fig:fu
 \centerline{\placeholderfigure{images/fig_full_current_vs_dac.png}}
 \caption{Output current versus DAC voltage after compliance-limited sample removal.}
 \label{fig:full_current_vs_dac}
-\end{figure}
+\end{figure} 
+
 
 \subsection{Statistical Analysis and Model Identification}
 
-Figure~\ref{fig:global_model} illustrates the selected experimental curves together with the dashed global model used for model identification. The close overlap indicates that the DAC estimation model for open-loop operation can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
-
 Pearson and Spearman correlations were computed for the selected linear operating region. Pearson correlation was used to quantify linear association, while Spearman correlation was used to evaluate monotonic association \cite{PEARSON_SPEARMAN_COMPARISON}, \cite{CORRELATION_COEFFICIENTS_INTERPRETATION}. Compliance-limited samples were excluded before statistical analysis, so the reported linearity metrics refer only to the hardware-supported operating region used for model identification.
 
-Linear regression was then performed independently for each load and globally using all three loads within the common valid linear region. For the global model, the three independent experimental current measurements, corresponding to the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads, were restricted to the linear operating region. The resulting samples were reorganized into a single dataset in which each point was represented by a pair $(V_{\mathrm{DAC}}, I_{\mathrm{out}})$, with the load label retained only as auxiliary information. All points from the three loads were then combined and used simultaneously in a single ordinary least-squares linear regression. The objective of the global fit was to identify a single embedded DAC estimation model valid across the evaluated loads inside the hardware-supported compliance interval. Residuals were analyzed to assess systematic deviations from the global model, and current spread between loads was computed to evaluate load consistency.
+After correlation analysis, the DAC-to-current relationship was modeled as a linear regression problem in the form of \eqref{eq:direct_model}. Linear regression was first performed independently for each load to quantify load-specific slope, intercept, coefficient of determination, and estimation error in the valid region.
 
+A second regression was then performed globally using all selected samples from the 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ loads. For this global fit, each point was represented by a pair $(V_{\mathrm{DAC}}, I_{\mathrm{out}})$, with the load label retained only as auxiliary information. All points from the three loads were combined into a single dataset and used simultaneously in one linear regression. The objective was to identify a single embedded DAC estimation model valid across the evaluated loads inside the hardware-supported compliance interval.
+
+The global regression was used as the basis for the open-loop DAC estimation model. Residuals were analyzed afterward to assess systematic deviations from this global model.
+
+\newpage
 \section{Results}
 
 \subsection{Linear Operating Region}
 
 After removing samples outside the common valid voltage interval, the curves for 1 k$\Omega$, 2 k$\Omega$, and 4.7 k$\Omega$ overlap closely in the selected region. This indicates that the output current is primarily determined by the DAC voltage and not by the load resistance. The correlation results for this region are summarized in Table~\ref{tab:correlation}. Pearson and Spearman correlation coefficients were very close to -1 for all loads, confirming highly linear and monotonic behavior after compliance-limited samples were removed. The negative sign is expected because, in the evaluated circuit, increasing DAC voltage decreases the output current.
 
-\begin{table}[htbp]
+\begin{table}[!htbp]
 \caption{Pearson and Spearman Correlation Results in the Linear Operating Region}
 \begin{center}
 \scriptsize
+\renewcommand{\arraystretch}{0.92}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 \textbf{Load} & \textbf{$r$} & \textbf{$p_r$} & \textbf{$\rho$} & \textbf{$p_\rho$} & \textbf{$n$} \\
@@ -238,6 +250,7 @@ After removing samples outside the common valid voltage interval, the curves for
 4.7 k$\Omega$ & -0.999824 & 0.000000 & -1.000000 & 0.000000 & 74 \\
 \hline
 \end{tabular}
+\renewcommand{\arraystretch}{1}
 \vspace{1mm}
 
 \parbox{\columnwidth}{\scriptsize $r$: Pearson correlation coefficient; $p_r$: Pearson p-value; $\rho$: Spearman correlation coefficient; $p_\rho$: Spearman p-value; $n$: number of samples.}
@@ -249,9 +262,11 @@ After removing samples outside the common valid voltage interval, the curves for
 
 Linear regression in the selected operating region showed high linearity for all loads. Table~\ref{tab:load_regression} summarizes the per-load regression coefficients, while Table~\ref{tab:load_error_metrics} reports the corresponding estimation errors.
 
-\begin{table}[htbp]
+\begin{table}[!htbp]
 \caption{Linear Regression Coefficients by Load in the Valid Region}
 \begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{0.92}
 \begin{tabular}{|c|c|c|c|c|}
 \hline
 \textbf{Load} & \textbf{$a$ (mA/V)} & \textbf{$b$ (mA)} & \textbf{$R^2$} & \textbf{SE (mA)} \\
@@ -263,6 +278,7 @@ Linear regression in the selected operating region showed high linearity for all
 4.7 k$\Omega$ & -26.2052 & 42.9934 & 0.999648 & 0.05797 \\
 \hline
 \end{tabular}
+\renewcommand{\arraystretch}{1}
 \vspace{1mm}
 
 \parbox{\columnwidth}{\scriptsize $a$: fitted slope; $b$: fitted intercept; $R^2$: coefficient of determination; SE: standard error of the regression.}
@@ -270,9 +286,11 @@ Linear regression in the selected operating region showed high linearity for all
 \end{center}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!htbp]
 \caption{Per-Load Error Metrics in the Valid Region}
 \begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{0.92}
 \begin{tabular}{|c|c|c|c|}
 \hline
 \textbf{Load} & \textbf{MAE (mA)} & \textbf{RMSE (mA)} & \textbf{Max. (mA)} \\
@@ -284,6 +302,7 @@ Linear regression in the selected operating region showed high linearity for all
 4.7 k$\Omega$ & 0.0918 & 0.1051 & 0.2611 \\
 \hline
 \end{tabular}
+\renewcommand{\arraystretch}{1}
 \vspace{1mm}
 
 \parbox{\columnwidth}{\scriptsize MAE: mean absolute error; RMSE: root mean square error; Max.: maximum absolute error.}
@@ -291,36 +310,39 @@ Linear regression in the selected operating region showed high linearity for all
 \end{center}
 \end{table}
 
-The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} shows the experimental curves and the resulting global linear model.
+The preferred embedded model is a single global linear model identified using all three loads within the valid linear region. Figure~\ref{fig:global_model} shows the experimental curves and the resulting global linear model. The close overlap indicates that the open-loop DAC estimation model can represent the evaluated output stage across the tested loads, provided that the load voltage remains inside the compliance interval.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centerline{\placeholderfigure{images/fig_global_linear_model.png}}
 \caption{Experimental current curves and global linear model.}
 \label{fig:global_model}
 \end{figure}
 
-\begin{table}[htbp]
+\begin{table}[!htbp]
 \caption{Global Linear Model Performance Metrics}
 \begin{center}
-\begin{tabular}{|c|c|}
+\scriptsize
+\renewcommand{\arraystretch}{0.92}
+\begin{tabular}{|l|c|}
 \hline
 \textbf{Metric} & \textbf{Value} \\
 \hline
-Slope $a$ & -28.040197 mA/V \\
+Slope $a$ (mA/V) & -28.040197 \\
 \hline
-Intercept $b$ & 46.353724 mA \\
+Intercept $b$ (mA) & 46.353724 \\
 \hline
 $R^2$ & 0.999695 \\
 \hline
-MAE & 0.328845 mA \\
+MAE (mA) & 0.328845 \\
 \hline
-RMSE & 0.385635 mA \\
+RMSE (mA) & 0.385635 \\
 \hline
-Max. absolute error & 0.930634 mA \\
+Max. error (mA) & 0.930634 \\
 \hline
 Samples & 561 \\
 \hline
 \end{tabular}
+\renewcommand{\arraystretch}{1}
 \vspace{1mm}
 
 \parbox{\columnwidth}{\scriptsize $a$: fitted slope; $b$: fitted intercept; $R^2$: coefficient of determination; MAE: mean absolute error; RMSE: root mean square error.}
@@ -330,20 +352,12 @@ Samples & 561 \\
 
 \subsection{Residuals and Load Consistency}
 
-Figure~\ref{fig:residuals} shows the residuals of the global linear model. The residual distribution was used to identify possible systematic deviations as a function of DAC voltage or load. Such deviations are important for embedded implementation because they define the expected open-loop estimation error in the absence of real-time current feedback.
+Figure~\ref{fig:residuals} shows the residuals of the global linear model. The residual distribution was used to identify possible systematic deviations as a function of DAC voltage. Such deviations are important for embedded implementation because they define the expected open-loop estimation error in the absence of real-time current feedback.
 
-\begin{figure}[htbp]
+\begin{figure}[!htbp]
 \centerline{\placeholderfigure{images/fig_residuals.png}}
 \caption{Residuals of the global linear model.}
 \label{fig:residuals}
-\end{figure}
-
-Figure~\ref{fig:current_spread} shows the absolute current spread between loads. Within the selected region, the spread quantifies the practical load consistency of the output stage. A small spread supports the use of a single global embedded model, whereas increased spread would indicate load-dependent behavior that should be considered in firmware calibration or hardware redesign.
-
-\begin{figure}[htbp]
-\centerline{\placeholderfigure{images/fig_current_spread.png}}
-\caption{Absolute current spread between loads.}
-\label{fig:current_spread}
 \end{figure}
 
 \section{Discussion}
@@ -356,7 +370,7 @@ The global linear model is practically useful for open-loop firmware current con
 
 At the same time, the open-loop DAC estimation model has an important limitation: it is valid only inside the compliance region. In real use, increased skin-electrode impedance, poor electrode contact, or significant load changes may require an output voltage beyond the available compliance. In that case, the real delivered current may be lower than the modeled current. Because the evaluated system does not include current feedback to the MCU, the firmware cannot detect this condition in real time. This limitation is directly related to the distinction between open-loop and closed-loop stimulation control discussed in the broader context of current-controlled FES systems.
 
-Another limitation is the use of resistive loads. Although resistors provide repeatable and well-defined test conditions for output-stage characterization, they do not reproduce the nonlinear and time-varying impedance of the skin-electrode interface. Future work should therefore include tests with more realistic loads, electrode models, or in vitro/in vivo measurement conditions where ethically and technically appropriate. Hardware or firmware extensions for current feedback, compliance monitoring, or closed-loop current regulation should also be considered to improve robustness under changing load conditions.
+Another limitation is the use of resistive loads. Although resistors provide repeatable and well-defined test conditions for output-stage characterization, they do not reproduce the nonlinear and time-varying impedance of the skin-electrode interface. Future work should therefore include tests with more realistic loads or electrode models. Hardware or firmware extensions for current feedback, compliance monitoring, or closed-loop current regulation should also be considered to improve robustness under changing load conditions.
 
 \section{Conclusion}
 
