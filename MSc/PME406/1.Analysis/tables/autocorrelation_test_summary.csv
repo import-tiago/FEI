@@ -1,0 +1,2 @@
+test,statistic,p_value,method,alpha,interpretation
+manual_durbin_watson_approximation,0.03858791831699471,6.306454596486674e-137,fallback_normal_approximation,0.05,Ha evidencia de autocorrelacao temporal; p-valores classicos da regressao podem estar otimistas.

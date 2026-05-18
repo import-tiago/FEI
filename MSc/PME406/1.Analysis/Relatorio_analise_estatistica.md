@@ -1,568 +1,235 @@
 ---
-title: "Relatório de Caracterização Experimental do Estágio de Saída de um Estimulador Elétrico Funcional"
+title: "Relatório de Caracterização Estatística do Estágio de Saída FES/STIMGRASP"
 author: "Tiago P. Silva"
 date: "18 de maio de 2026"
 lang: pt-BR
 toc: true
 numbersections: true
 geometry: margin=2.5cm
-mainfont: "Times New Roman"
 ---
 
-# Relatório de Caracterização Experimental do Estágio de Saída de um Estimulador Elétrico Funcional Baseado em Fonte de Corrente do tipo Howland
+# 1. Desenho experimental e limitações
 
-## 1. Problema
+Foram analisadas rampas de tensão de DAC e tensão no resistor shunt para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A análise estima corrente a partir do shunt e reconstrói a tensão na carga por resistência nominal. Como o sistema opera em malha aberta, a regressão caracteriza o comportamento observado no ensaio, mas não garante corrente entregue em operação real quando a carga, contato eletrodo-pele ou condições térmicas mudam.
 
-O item de estudo  é o estágio de saída de um estimulador elétrico funcional (FES) baseado em uma fonte de corrente Howland. Mais especificamente, o eletroestimulador denominado STIMGRASP, desenvolvido por Renato Barelli no ano de 2017 como parte de uma dissertação de mestrado. 
+# 2. Importação e pré-processamento
 
-Nesta arquitetura, o microcontrolador define uma tensão de controle no DAC, e essa tensão deve produzir uma corrente de saída previsível no paciente ou em uma carga equivalente.
+Os CSVs foram importados diretamente dos arquivos do osciloscópio, removendo os segmentos estacionários antes e depois da rampa útil. As três cargas foram equalizadas para a mesma quantidade de amostras.
 
-O problema central é que o circuito opera em malha aberta: o microcontrolador não mede a corrente real entregue durante a operação. Assim, se a carga mudar, se o contato eletrodo-pele piorar ou se o circuito atingir seu limite de tensão de operação (voltage-compliance), a corrente entregue pode deixar de seguir o valor esperado. Como não há realimentação de corrente, essa perda de previsibilidade não é detectada diretamente pelo firmware do STIMGRASP.
+| load | samples |
+| --- | --- |
+| 1k | 58386 |
+| 2k | 58386 |
+| 4k7 | 58386 |
 
-Por isso, é necessário caracterizar experimentalmente a relação entre tensão de DAC e corrente de saída, identificando:
+Figura: figures/01_raw_signals_before_stationary_removal.png
 
-- a região em que o circuito se comporta aproximadamente como fonte de corrente;
-- a influência da carga resistiva sobre a corrente entregue;
-- um modelo matemático que permita estimar a tensão de DAC necessária para uma corrente desejada;
-- evidências estatísticas de linearidade, consistência e limitação por compliance.
+Figura: figures/02_ramp_signals_after_stationary_removal.png
 
-## 2. Motivação
+# 3. Conversão shunt-corrente
 
-Em estimulação elétrica funcional, a amplitude de corrente está associada à resposta neuromuscular, ao conforto do usuário e à repetibilidade do protocolo de estimulação. Se a corrente real não for previsível, o mesmo comando digital pode gerar respostas diferentes em diferentes condições de carga.
+A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = 10 Ohm. A tolerância configurada do shunt é 1%.
 
-Um estudo similar foi realizado primariamente pelo autor deste relatório no artigo **Experimental Characterization of the Output Stage of a Functional Electrical Stimulator Based on a Howland Current Source**. Esse artigo foi desenvolvido como entregável da disciplina de Data Science, PEL309, utilizando Python. Nele, o estágio de saída do STIMGRASP foi caracterizado experimentalmente por meio da relação entre tensão de DAC e corrente de saída, seleção da região de compliance, correlação, regressão linear e identificação de um modelo global para operação em malha aberta.
+Figura: figures/03_current_after_conversion.png
 
-O presente relatório aprofunda essa caracterização com uma análise estatística mais ampla em R, incorporando os tópicos estudados na disciplina PME406: curva normal, normal reduzida Z, distribuição amostral, intervalos de confiança, nível de significância, testes de hipótese, correlação, regressão linear simples e múltipla, ANOVA, DOE, regressão logística, PCA, análise fatorial e cluster.
+# 4. Identificação da região de compliance
 
-## 3. Objetivo
+A região comum de compliance foi definida antes da regressão usando critério físico baseado na tensão reconstruída na carga. O limite comum foi tomado como a menor magnitude máxima de tensão reconstruída entre as cargas, definindo uma faixa simétrica comum em torno de zero. O modelo linear deve ser interpretado apenas dentro dessa região comum.
 
-O objetivo do script é executar uma análise estatística completa da relação entre tensão de DAC e corrente de saída para três cargas resistivas: 1 kOhm, 2 kOhm e 4,7 kOhm.
+| load | Vmin | Vmax | common_Vmin | common_Vmax | total_points | retained_points | removed_points | removed_percent |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1k | -43.803125 | 46.330384 | -46.330384 | 46.330384 | 325 | 325 | 0 | 0.000000 |
+| 2k | -46.224740 | 49.559811 | -46.330384 | 46.330384 | 325 | 244 | 81 | 24.923077 |
+| 4k7 | -47.619405 | 47.775973 | -46.330384 | 46.330384 | 325 | 76 | 249 | 76.615385 |
 
-Os objetivos específicos são:
+Figura: figures/05_compliance_retained_removed.png
 
-- importar os dados experimentais do osciloscópio;
-- extrair a região útil da rampa de DAC;
-- converter tensão no resistor shunt em corrente de saída;
-- agregar os dados por bins de tensão de DAC;
-- identificar a região comum de compliance;
-- avaliar linearidade por correlação e regressão;
-- ajustar um modelo global para uso em firmware;
-- avaliar os resíduos e sua aderência à curva normal;
-- explicitar grau de confiança, nível de significância, p-valores e decisões de hipótese;
-- comparar o comportamento entre cargas;
-- aplicar métodos multivariados ensinados na disciplina.
+# 5. Estatística descritiva relevante
 
-## 4. Estrutura do código
+Resumo da região linear retida:
 
-O arquivo principal é `analise_rstudio.R`.
+| load | count | mean_mA | sd_mA | min_mA | q25_mA | median_mA | q75_mA | max_mA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1k | 325 | 0.788753 | 26.416914 | -43.803125 | -21.962662 | 0.131058 | 23.519614 | 46.330384 |
+| 2k | 244 | -7.249327 | 15.361609 | -23.112370 | -22.924225 | -10.743657 | 6.197721 | 23.062448 |
+| 4k7 | 76 | -0.107802 | 5.777173 | -9.731551 | -5.021909 | -0.269278 | 4.849080 | 9.812040 |
 
-### 4.1 Carregamento de pacotes
+# 6. Correlação exploratória
 
-O script começa verificando se o pacote `tidyverse` está instalado. Caso não esteja, ele instala automaticamente:
+Correlação foi mantida apenas como evidência exploratória de associação monotônica/linear entre DAC e corrente. A validade do circuito é discutida a partir de erro, resíduos, intervalos e incerteza.
 
-```r
-if (!requireNamespace("tidyverse", quietly = TRUE)) {
-  install.packages("tidyverse")
-}
+| load | pearson_r | pearson_p | spearman_r | spearman_p | samples | interpretation |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1k | -0.999909 | 0 | -0.999999 | 0 | 325 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
+| 2k | -0.966918 | 0 | -0.991413 | 0 | 244 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
+| 4k7 | -0.999815 | 0 | -1.000000 | 0 | 76 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
 
-library(tidyverse)
-```
+# 7. Modelos lineares por carga
 
-O `tidyverse` é usado para leitura dos arquivos CSV, transformação de dados, sumarização estatística e gráficos.
+Modelos independentes por carga foram ajustados como current_mA ~ dac_bin.
 
-### 4.2 Importação dos dados
+| model | load | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| load_1k | 1k | 0.999817 | 0.999817 | 0.357519 | 325 | 0.289716 | 0.356418 | 0.948600 |
+| load_2k | 2k | 0.934931 | 0.934662 | 3.926612 | 244 | 3.303021 | 3.910486 | 9.706062 |
+| load_4k7 | 4k7 | 0.999630 | 0.999625 | 0.111824 | 76 | 0.095924 | 0.110343 | 0.252044 |
 
-Os dados são lidos diretamente de arquivos CSV exportados do osciloscópio:
+# 8. Modelo global
 
-```r
-read_scope_csv <- function(url) {
-  read_csv(
-    url,
-    skip = 17,
-    col_select = 2:3,
-    show_col_types = FALSE
-  ) |>
-    set_names(c("dac_volts", "shunt_volts")) |>
-    mutate(sample = row_number() - 1)
-}
-```
+O modelo global foi ajustado como current_mA ~ dac_bin dentro da região comum de compliance.
 
-Cada arquivo contém duas grandezas principais:
+| model | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| global_current_mA_by_dac | 0.969533 | 0.969486 | 3.741179 | 645 | 2.495843 | 3.735374 | 16.821922 |
 
-- `dac_volts`: tensão de controle aplicada ao estágio de saída;
-- `shunt_volts`: tensão medida no resistor shunt, usada para calcular corrente.
+# 9. Modelo com interação carga x DAC
 
-Os dados brutos podem ser acessados diretamente nos links:
+O modelo com interação foi ajustado como current_mA ~ dac_bin * load.
 
-| Carga | Link para o CSV bruto |
-|---|---|
-| 1 kOhm | <https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PEL309/0.Data/1k.csv> |
-| 2 kOhm | <https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PEL309/0.Data/2k.csv> |
-| 4,7 kOhm | <https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PEL309/0.Data/4k7.csv> |
+| model | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| interaction_current_mA_by_dac_load | 0.987226 | 0.987126 | 2.430066 | 645 | 1.406798 | 2.418737 | 9.706062 |
 
-Antes de qualquer tratamento, a carga de 1 kOhm possui dados crus no seguinte formato:
+| model | alpha | decision | term | estimate | std_error | statistic | p_value | ci_low | ci_high |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| global_current_mA_by_dac | 0.05 | reject_H0 | (Intercept) | 43.425537 | 0.352335 | 123.250831 | 0.000000 | 42.733672 | 44.117403 |
+| global_current_mA_by_dac | 0.05 | reject_H0 | dac_bin | -25.649178 | 0.179309 | -143.044648 | 0.000000 | -26.001280 | -25.297076 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | (Intercept) | 46.610346 | 0.270215 | 172.493608 | 0.000000 | 46.079729 | 47.140963 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin | -28.111406 | 0.143676 | -195.657691 | 0.000000 | -28.393542 | -27.829271 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | load2k | -11.034052 | 0.547022 | -20.171135 | 0.000000 | -12.108230 | -9.959875 |
+| interaction_current_mA_by_dac_load | 0.05 | do_not_reject_H0 | load4k7 | -3.691311 | 2.125966 | -1.736298 | 0.082993 | -7.866035 | 0.483413 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin:load2k | 7.066876 | 0.263485 | 26.820774 | 0.000000 | 6.549474 | 7.584277 |
+| interaction_current_mA_by_dac_load | 0.05 | do_not_reject_H0 | dac_bin:load4k7 | 1.955274 | 1.278747 | 1.529055 | 0.126746 | -0.555780 | 4.466329 |
+| load_1k | 0.05 | reject_H0 | (Intercept) | 46.610346 | 0.039755 | 1172.442340 | 0.000000 | 46.532135 | 46.688557 |
+| load_1k | 0.05 | reject_H0 | dac_bin | -28.111406 | 0.021138 | -1329.889051 | 0.000000 | -28.152992 | -28.069821 |
+| load_2k | 0.05 | reject_H0 | (Intercept) | 35.576294 | 0.768533 | 46.291181 | 0.000000 | 34.062426 | 37.090161 |
+| load_2k | 0.05 | reject_H0 | dac_bin | -21.044531 | 0.356884 | -58.967369 | 0.000000 | -21.747527 | -20.341535 |
+| load_4k7 | 0.05 | reject_H0 | (Intercept) | 42.919035 | 0.097037 | 442.296331 | 0.000000 | 42.725685 | 43.112385 |
+| load_4k7 | 0.05 | reject_H0 | dac_bin | -26.156132 | 0.058471 | -447.332761 | 0.000000 | -26.272639 | -26.039625 |
 
-| Amostra | DAC voltage (V) | Shunt voltage (V) |
-|---:|---:|---:|
-| 0 | 1,62515625 | 0,002984375 |
-| 1 | 1,62578125 | 0,002796875 |
-| 2 | 1,62515625 | 0,001015625 |
-| 3 | 1,62578125 | 0,003046875 |
-| 4 | 1,62515625 | 0,005046875 |
-| 5 | 1,62546875 | 0,002875000 |
-| 6 | 1,62546875 | 0,003156250 |
-| 7 | 1,62515625 | 0,002609375 |
-| 8 | 1,62546875 | 0,002125000 |
-| 9 | 1,62546875 | 0,003265625 |
-| 10 | 1,62546875 | 0,003500000 |
-| 11 | 1,62546875 | 0,002468750 |
+# 10. Comparação entre modelos
 
-Essa tabela corresponde diretamente ao objeto:
+A comparação formal entre o modelo global e o modelo com interação foi feita por ANOVA/teste F para modelos aninhados.
 
-```r
-summary_tables$raw_1k_preview
-```
+| compared_models | alpha | interpretation | model_index | Res.Df | RSS | Df | Sum of Sq | F | Pr(>F) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| current_mA ~ dac_bin | 0.05 | NA | 1 | 643 | 8999.699127 |  |  |  |  |
+| current_mA ~ dac_bin * load | 0.05 | O modelo com interacao melhora significativamente o ajuste em relacao ao modelo global. | 2 | 639 | 3773.435106 | 4 | 5226.264021 | 221.256138 | 0 |
 
-Ela é apresentada antes da extração da rampa, antes da conversão da tensão do shunt em corrente e antes da agregação por bins de DAC.
+# 11. Erro de predição
 
-![Sinais brutos antes da remoção dos trechos estacionários](figures/01_raw_signals_before_stationary_removal.png)
+As métricas de erro foram calculadas dentro da região linear: MAE, RMSE e maior erro absoluto.
 
-**Figura 1.** Sinais brutos das três cargas antes da remoção dos trechos estacionários. Observam-se os períodos inicial e final próximos ao ponto de repouso, além do trecho central correspondente à rampa útil de DAC.
+| model | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| global_current_mA_by_dac | 0.969533 | 0.969486 | 3.741179 | 645 | 2.495843 | 3.735374 | 16.821922 |
+| interaction_current_mA_by_dac_load | 0.987226 | 0.987126 | 2.430066 | 645 | 1.406798 | 2.418737 | 9.706062 |
+| load_1k | 0.999817 | 0.999817 | 0.357519 | 325 | 0.289716 | 0.356418 | 0.948600 |
+| load_2k | 0.934931 | 0.934662 | 3.926612 | 244 | 3.303021 | 3.910486 | 9.706062 |
+| load_4k7 | 0.999630 | 0.999625 | 0.111824 | 76 | 0.095924 | 0.110343 | 0.252044 |
 
-### 4.3 Extração da rampa útil
+Figura: figures/06_measured_vs_predicted.png
 
-O osciloscópio registra também trechos estacionários antes e depois da rampa. A função `extract_ramp_region()` detecta transições bruscas na tensão de DAC e remove as regiões de repouso:
+Figura: figures/07_current_vs_dac_confidence_band.png
 
-```r
-delta <- abs(data[[column]] - dplyr::lag(data[[column]]))
-transition_points <- which(delta > trigger_threshold)
-```
+Figura: figures/08_current_vs_dac_prediction_band.png
 
-Com isso, a análise passa a considerar apenas o trecho experimental em que o DAC varre a faixa de tensão de interesse.
+# 12. Diagnóstico dos resíduos
 
-![Sinais após extração da rampa útil](figures/02_ramp_signals_after_stationary_removal.png)
+| model | mean_residual_mA | sd_residual_mA | median_residual_mA | min_residual_mA | max_residual_mA | MAE_mA | RMSE_mA | shapiro_sample_n | shapiro_p_value | normality_interpretation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| global_current_mA_by_dac | 0 | 3.738273 | -1.190753 | -4.112371 | 16.821922 | 2.495843 | 3.735374 | 645 | 0 | A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk. |
 
-**Figura 2.** Sinais das três cargas após a remoção dos trechos estacionários e equalização do número de amostras. Esta é a região experimental efetivamente usada nas etapas seguintes de cálculo de corrente, binning e modelagem.
+Figura: figures/09_residuals_vs_dac.png
 
-### 4.4 Conversão para corrente
+Figura: figures/10_residuals_vs_predicted.png
 
-A corrente é calculada pela lei de Ohm usando o resistor shunt de 10 Ohm:
+# 13. Homocedasticidade
 
-```r
-current_mA = shunt_volts / shunt_resistance_ohm * 1000
-```
+| test | statistic | parameter | p_value | method | alpha | interpretation |
+| --- | --- | --- | --- | --- | --- | --- |
+| manual_breusch_pagan_residual_squared_on_fitted | 116.93181 | 1 | 0 | fallback | 0.05 | Ha evidencia de heterocedasticidade; a hipotese de variancia constante e questionavel. |
 
-Assim, a tensão medida no shunt é convertida para corrente em miliampères.
+# 14. Autocorrelação temporal
 
-![Corrente calculada após conversão da tensão no shunt](figures/03_current_after_conversion.png)
+Como os dados vêm de uma rampa temporal, a independência dos resíduos não foi assumida automaticamente.
 
-**Figura 3.** Corrente calculada para as três cargas após a extração da rampa útil e conversão da tensão no resistor shunt. Este gráfico ainda está no domínio das amostras, antes da agregação por bins de tensão de DAC.
+| test | statistic | p_value | method | alpha | interpretation |
+| --- | --- | --- | --- | --- | --- |
+| manual_durbin_watson_approximation | 0.038588 | 0 | fallback_normal_approximation | 0.05 | Ha evidencia de autocorrelacao temporal; p-valores classicos da regressao podem estar otimistas. |
 
-### 4.5 Binning da tensão de DAC
+Figura: figures/11_residual_acf.png
 
-Para reduzir ruído e granulosidade, os dados são agrupados em intervalos de 10 mV:
+# 15. Outliers e influência
 
-```r
-dac_step <- 0.01
+Foram calculados resíduos studentizados, leverage e distância de Cook. Pontos foram apenas marcados e reportados; a remoção automática permanece desativada por padrão.
 
-processed_current_data <- all_currents |>
-  mutate(dac_bin = round(round(dac_volts / dac_step) * dac_step, 2)) |>
-  group_by(dac_bin, load) |>
-  summarise(current_mA = mean(current_mA, na.rm = TRUE), .groups = "drop")
-```
+| samples | influential_points | influential_percent | cook_threshold | max_cook_distance | max_abs_studentized_residual |
+| --- | --- | --- | --- | --- | --- |
+| 645 | 41 | 6.356589 | 0.006202 | 0.06637 | 4.580621 |
 
-Esse conjunto agregado contém tanto a região linear quanto regiões limitadas por compliance.
+Figura: figures/12_cook_distance_by_index.png
 
-![Corrente de saída agregada por tensão de DAC](figures/04_full_current_vs_dac.png)
+Figura: figures/13_studentized_residuals_by_index.png
 
-**Figura 4.** Corrente de saída em função da tensão de DAC para as três cargas, antes da remoção da região limitada por compliance. A saturação mais evidente nas cargas maiores mostra que nem toda a faixa de DAC pode ser usada para modelagem linear.
+Figura: figures/14_leverage_vs_studentized_residuals.png
 
-## 5. Identificação da região de compliance
+# 16. Validação cruzada por blocos
 
-A tensão na carga é reconstruída por:
+A validação por blocos usa cinco blocos contíguos ordenados, treinando em quatro blocos e testando no bloco remanescente. Isso evita usar apenas uma validação aleatória que mistura pontos vizinhos da rampa.
 
-```r
-vload <- processed_current_data[[load]] / 1000 * resistance
-```
+| fold | train_samples | test_samples | MAE_mA | RMSE_mA | max_abs_error_mA |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 516 | 129 | 4.680013 | 4.999185 | 7.504176 |
+| 2 | 516 | 129 | 2.437179 | 2.567308 | 3.784670 |
+| 3 | 516 | 129 | 2.994049 | 3.860282 | 6.030168 |
+| 4 | 516 | 129 | 2.019707 | 2.116129 | 2.942737 |
+| 5 | 516 | 129 | 6.090217 | 9.372174 | 21.062169 |
 
-Para cada carga, o script estima os limites mínimo e máximo de tensão na carga. A região comum válida é definida pelo intervalo em que todas as cargas ainda permanecem dentro de uma região experimentalmente suportada.
+| folds | RMSE_mean_mA | RMSE_sd_mA | MAE_mean_mA | MAE_sd_mA | max_abs_error_mean_mA | max_abs_error_sd_mA |
+| --- | --- | --- | --- | --- | --- | --- |
+| 5 | 4.583016 | 2.906036 | 3.644233 | 1.701065 | 8.264784 | 7.37802 |
 
-Resultado principal:
+Figura: figures/15_block_cross_validation_errors.png
 
-| Carga | Vmin estimado | Vmax estimado |
-|---|---:|---:|
-| 1 kOhm | -43,8 V | 46,3 V |
-| 2 kOhm | -46,2 V | 49,6 V |
-| 4,7 kOhm | -47,6 V | 47,8 V |
+# 17. Incerteza metrológica
 
-A região comum selecionada ficou aproximadamente entre -43,8 V e 46,3 V.
+A incerteza foi tratada como orçamento configurável. Parâmetros de instrumento que não estavam disponíveis foram deixados como placeholders explícitos para substituição por especificações calibradas.
 
-Após essa seleção, a quantidade de pontos válidos foi:
+| uncertainty_source | assumed_value | effect_on_metric | observation |
+| --- | --- | --- | --- |
+| Shunt resistance tolerance | 1% | Approx. current standard uncertainty contribution: 0.17843 mA | Assumes tolerance is representative; replace with calibrated resistor data when available. |
+| Oscilloscope voltage uncertainty | 0.002 V | Current uncertainty contribution: 0.2 mA | Placeholder; replace with calibrated instrument specification. |
+| Load resistance tolerance | 1% | Reconstructed load-voltage contribution: 0.257513 V | Assumes nominal load tolerance; replace with measured load resistance when available. |
+| DAC voltage uncertainty | 0.002 V | Affects predicted current through model slope and DAC input; assumed 0.002 V. | Placeholder; replace with calibrated DAC/output measurement specification. |
+| Linear-model coefficient covariance | vcov(lm) | Used through predict.lm confidence interval for mean predicted current. | Coefficient uncertainty is represented in mean confidence intervals; prediction intervals include residual scatter. |
 
-| Carga | Pontos processados | Pontos lineares | Pontos removidos | Removido (%) |
-|---|---:|---:|---:|---:|
-| 1 kOhm | 325 | 323 | 2 | 0,615% |
-| 2 kOhm | 325 | 164 | 161 | 49,5% |
-| 4,7 kOhm | 325 | 74 | 251 | 77,2% |
+| metric | load | value | unit | observation |
+| --- | --- | --- | --- | --- |
+| estimated_sampling_rate | NA |  | Hz | CSV files do not provide a calibrated time column; sample index alone is insufficient. |
+| current_drift_over_ramp | 1k | -0.001554 | mA/sample | Slope estimated over retained compliance region. |
+| current_drift_over_ramp | 2k | -0.001164 | mA/sample | Slope estimated over retained compliance region. |
+| current_drift_over_ramp | 4k7 | -0.001435 | mA/sample | Slope estimated over retained compliance region. |
 
-Interpretação: cargas maiores exigem maior tensão para a mesma corrente. Por isso, a carga de 4,7 kOhm entra em limitação de compliance mais cedo, restando menos pontos válidos para modelagem linear. Nesta etapa, o objetivo é apenas definir quais pontos permanecem fisicamente válidos para a análise. A regressão linear propriamente dita é apresentada mais adiante, depois da correlação e da definição formal do modelo.
+# 18. Métricas de FES não avaliadas
 
-![Corrente após remoção da região limitada por compliance](figures/05_current_after_compliance_filter.png)
+| metric | reason |
+| --- | --- |
+| Cycle-by-cycle amplitude | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Pulse width | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Stimulation frequency | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Charge per phase | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Charge balancing | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Overshoot | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Ringing | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Rise time | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Fall time | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Waveform distortion | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
+| Long-term thermal/temporal stability | Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt; nao ha aquisicao de forma de onda pulsada. |
 
-**Figura 5.** Corrente de saída em função da tensão de DAC após a remoção dos pontos fora da região comum de compliance. Esta figura mostra apenas a região fisicamente válida para as análises estatísticas posteriores, ainda sem sobreposição de modelo de regressão.
+# 19. Conclusões revisadas
 
-## 6. Distribuição normal, distribuição amostral e normal reduzida Z
+A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida fisicamente pela tensão reconstruída na carga. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual, autocorrelação temporal e orçamento de incerteza. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.
 
-A distribuição normal é uma referência central para a análise inferencial, especialmente na construção de intervalos de confiança e na interpretação de estatísticas padronizadas. Ela é simétrica em torno da média, possui área total igual a 1 e pode ser padronizada pela variável normal reduzida:
+Análises como PCA, cluster e testes de média global foram preservadas somente como material secundário/didático e não são usadas como evidência central de validade metrológica do estágio de saída.
 
-```text
-Z = (X - media) / desvio_padrao
-```
-
-Para a análise da média amostral, utiliza-se a ideia de distribuição amostral: a média calculada em uma amostra é uma estatística sujeita à variabilidade amostral. O erro padrão da média é dado por:
-
-```text
-erro padrao = s / sqrt(n)
-```
-
-em que `s` é o desvio padrão amostral e `n` é o número de amostras. Essa relação é usada para quantificar a incerteza associada às médias de corrente medidas em cada carga.
-
-Também foi criada a tabela `z_reference_table`, relacionando grau de confiança, nível de significância e valor crítico Z:
-
-| Confiança | Significância alpha | Z crítico bilateral |
-|---:|---:|---:|
-| 90% | 0,10 | 1,64 |
-| 95% | 0,05 | 1,96 |
-| 99% | 0,01 | 2,58 |
-
-Esses valores são usados como referência para interpretar intervalos bilaterais associados a diferentes graus de confiança.
-
-## 7. Estatística descritiva, confiança e distribuição t
-
-O script calcula estatísticas descritivas para a região completa e para a região linear. Na região linear, as médias de corrente ficaram próximas de zero, como esperado para uma rampa simétrica em torno do ponto de corrente nula.
-
-Foi adotado:
-
-```text
-alpha = 0,05
-grau de confiança = 1 - alpha = 0,95
-```
-
-Como o desvio padrão populacional não é conhecido, a análise usa a distribuição t de Student para os intervalos de confiança.
-
-Intervalos de confiança de 95% para a média da corrente:
-
-| Carga | Média (mA) | IC 95% inferior | IC 95% superior | Amostras |
-|---|---:|---:|---:|---:|
-| 1 kOhm | 0,786 | -2,09 | 3,66 | 323 |
-| 2 kOhm | 0,401 | -1,62 | 2,42 | 164 |
-| 4,7 kOhm | 0,148 | -1,16 | 1,45 | 74 |
-
-Interpretação: os intervalos incluem zero, o que é coerente com a varredura de corrente positiva e negativa em torno do ponto central do DAC. Como zero pertence aos intervalos, não há evidência suficiente, ao nível de 5% de significância, para afirmar que a média da corrente em cada carga seja diferente de zero.
-
-![Intervalos de confiança para a média da corrente](figures/10_confidence_intervals.png)
-
-**Figura 6.** Médias de corrente e intervalos de confiança de 95% para cada carga. Como a linha de 0 mA atravessa os intervalos, os testes de uma média não rejeitam H0.
-
-## 8. Testes de hipótese, significância e p-valor
-
-A análise explicita as hipóteses nula e alternativa, o nível de significância, o p-valor e a decisão estatística. Nesta etapa, os testes são aplicados somente às médias de corrente, pois ainda não foram definidos os modelos de regressão e seus resíduos.
-
-A regra de decisão usada foi:
-
-```text
-se p-valor < alpha, rejeita H0
-se p-valor >= alpha, nao rejeita H0
-```
-
-Com `alpha = 0,05`, os principais resultados foram:
-
-| Análise | H0 | p-valor | Decisão |
-|---|---|---:|---|
-| Média da corrente 1k | média = 0 | 0,591 | não rejeita H0 |
-| Média da corrente 2k | média = 0 | 0,696 | não rejeita H0 |
-| Média da corrente 4k7 | média = 0 | 0,822 | não rejeita H0 |
-
-Interpretação: para as três cargas, não há evidência estatística suficiente para rejeitar a hipótese de que a média da corrente seja igual a zero. Esse resultado é coerente com a rampa ser aproximadamente simétrica em torno do ponto de corrente nula.
-
-## 9. Testes de duas médias
-
-Também foram aplicados testes t pareados entre cargas, permitindo avaliar se as diferenças médias entre pares de cargas são estatisticamente significativas.
-
-Resultados principais:
-
-| Comparação | Diferença média (mA) | p-valor | Decisão com alpha = 0,05 |
-|---|---:|---:|---|
-| 1k vs 2k | -0,109 | 3,88e-10 | rejeita H0 |
-| 1k vs 4k7 | -0,00263 | 0,962 | não rejeita H0 |
-| 2k vs 4k7 | 0,107 | 0,0299 | rejeita H0 |
-
-Interpretação: há diferenças estatisticamente significativas entre 1k e 2k e entre 2k e 4k7, mas as diferenças médias são pequenas em magnitude prática. Este é um ponto didático importante: significância estatística não é necessariamente relevância prática.
-
-## 10. Correlação
-
-Foram calculadas correlações de Pearson e Spearman entre `dac_bin` e `current_mA` para cada carga, usando apenas a região linear.
-
-Resultados:
-
-| Carga | Pearson r | Spearman rho |
-|---|---:|---:|
-| 1 kOhm | aproximadamente -1,000 | aproximadamente -1,000 |
-| 2 kOhm | aproximadamente -1,000 | aproximadamente -1,000 |
-| 4,7 kOhm | aproximadamente -1,000 | aproximadamente -1,000 |
-
-Interpretação: existe associação linear e monotônica praticamente perfeita entre tensão de DAC e corrente dentro da região válida. O sinal negativo indica que, neste circuito, aumentar a tensão de DAC reduz a corrente medida.
-
-## 11. Regressão linear simples
-
-O modelo direto usado é:
-
-```text
-Iout = a * VDAC + b
-```
-
-O script ajusta regressões por carga:
-
-| Carga | Inclinação a (mA/V) | Intercepto b (mA) | R² |
-|---|---:|---:|---:|
-| 1 kOhm | -28,1 | 46,6 | aproximadamente 1,000 |
-| 2 kOhm | -27,6 | 45,6 | aproximadamente 1,000 |
-| 4,7 kOhm | -26,2 | 43,0 | aproximadamente 1,000 |
-
-Interpretação: as inclinações são muito próximas, mas não idênticas. Isso mostra que o comportamento é altamente linear em cada carga, embora ainda exista alguma dependência residual da carga.
-
-## 12. Modelo global para firmware
-
-Também foi ajustado um modelo global com todas as cargas na região linear:
-
-| Métrica | Valor |
-|---|---:|
-| Inclinação | -28,04 mA/V |
-| Intercepto | 46,35 mA |
-| MAE | 0,329 mA |
-| RMSE | 0,386 mA |
-| Erro máximo absoluto | 0,931 mA |
-| R² | aproximadamente 1,000 |
-
-![Região linear e modelo global](figures/06_linear_region_global_model.png)
-
-**Figura 7.** Região linear após remoção dos pontos limitados por compliance, com sobreposição do modelo linear global. Esta figura aparece nesta seção porque a linha tracejada só faz sentido depois de definida a regressão linear e seus coeficientes.
-
-O modelo global é:
-
-```text
-Iout = -28,04 * VDAC + 46,35
-```
-
-Para uso no firmware, a equação inversa é:
-
-```text
-VDAC = (Itarget - b) / a
-```
-
-Logo:
-
-```text
-VDAC = (Itarget - 46,35) / -28,04
-```
-
-Interpretação: o modelo global é adequado para estimar o DAC a partir da corrente desejada, desde que a operação permaneça dentro da região comum de compliance. Fora dessa região, o modelo pode pedir uma corrente que o circuito não consegue entregar fisicamente.
-
-## 13. Resíduos e validação
-
-![Resíduos do modelo global em função da tensão de DAC](figures/07_residuals_vs_dac.png)
-
-**Figura 8.** Resíduos do modelo global em função da tensão de DAC. A concentração dos resíduos ao redor de zero indica bom ajuste, enquanto pequenos padrões sistemáticos ajudam a explicar a rejeição de normalidade perfeita.
-
-O teste t da média dos resíduos resultou em p-valor aproximadamente 1, indicando que a média residual não é estatisticamente diferente de zero.
-
-Resumo dos resíduos:
-
-| Métrica | Valor |
-|---|---:|
-| Média | aproximadamente 0 mA |
-| Desvio padrão | 0,386 mA |
-| Mínimo | -0,931 mA |
-| Máximo | 0,757 mA |
-| MAE | 0,329 mA |
-| RMSE | 0,386 mA |
-
-A validação cruzada com 5 folds apresentou RMSE médio de aproximadamente 0,386 mA, praticamente igual ao erro do ajuste global.
-
-Interpretação: o modelo não parece estar apenas memorizando os dados. O erro de validação é consistente com o erro de ajuste.
-
-Além da análise de magnitude dos resíduos, foi avaliada sua compatibilidade com uma distribuição normal. Primeiro, calcula-se a média e o desvio padrão dos resíduos:
-
-```r
-residual_mean <- mean(global_model_data$residual_mA)
-residual_sd <- sd(global_model_data$residual_mA)
-```
-
-Em seguida, é criada uma curva normal teórica com a mesma média e o mesmo desvio padrão:
-
-```r
-normal_curve_data <- tibble(
-  residual_mA = seq(
-    residual_mean - 4 * residual_sd,
-    residual_mean + 4 * residual_sd,
-    length.out = 400
-  ),
-  normal_density = dnorm(residual_mA, mean = residual_mean, sd = residual_sd),
-  standard_z = (residual_mA - residual_mean) / residual_sd
-)
-```
-
-![Histograma dos resíduos com curva normal teórica](figures/08_residual_normal_curve.png)
-
-**Figura 9.** Histograma dos resíduos do modelo global com a curva normal teórica ajustada pela média e pelo desvio padrão dos resíduos. A figura permite avaliar visualmente se a distribuição residual se aproxima de uma normal.
-
-O resumo `residual_standard_normal_summary` compara a proporção real dos resíduos dentro de 1, 2 e 3 desvios padrão com a proporção esperada pela normal. O resultado mostrou cerca de 61,1% dos resíduos dentro de 1 desvio padrão, contra 68,3% esperado na normal, com proporções mais próximas do esperado para faixas mais amplas.
-
-![QQ-plot dos resíduos](figures/09_residual_qq_plot.png)
-
-**Figura 10.** QQ-plot dos resíduos. Se os resíduos fossem perfeitamente normais, os pontos ficariam próximos da linha vermelha. Os desvios observados explicam a rejeição da normalidade pelo teste de Shapiro-Wilk.
-
-O teste de Shapiro-Wilk apresentou p-valor de aproximadamente `1,15e-7`, rejeitando a hipótese de normalidade perfeita dos resíduos ao nível de significância de 5%. Esse resultado não invalida o modelo linear, mas indica pequenas assimetrias, caudas ou estrutura residual detectável.
-
-## 14. ANOVA e DOE
-
-Foram feitas duas análises:
-
-- ANOVA simples: `current_mA ~ load`;
-- ANOVA fatorial: `current_mA ~ load * dac_level`, onde `dac_level` divide a faixa de DAC em quatro níveis.
-
-Na ANOVA simples, o efeito de carga isolado teve p-valor de aproximadamente 0,965. Isso indica que, quando se ignora a posição do DAC, a média global da corrente não muda significativamente entre cargas.
-
-![Boxplot da corrente por carga](figures/11_anova_boxplot.png)
-
-**Figura 11.** Distribuição da corrente na região linear por carga. O gráfico ajuda a visualizar por que a ANOVA simples não encontra diferença significativa entre médias globais de corrente por carga.
-
-Na ANOVA fatorial, os efeitos de `dac_level` e da interação `load:dac_level` foram significativos.
-
-Interpretação: a tensão de DAC é o fator dominante. A interação significativa indica que a forma como a corrente varia com o DAC muda levemente conforme a carga, o que é coerente com os resultados das regressões por carga.
-
-## 15. Regressão linear múltipla
-
-O modelo múltiplo ajustado foi:
-
-```r
-current_mA ~ dac_bin * load
-```
-
-Esse modelo permite inclinações e interceptos diferentes por carga.
-
-Resultados principais:
-
-| Métrica | Valor |
-|---|---:|
-| R² | aproximadamente 1,000 |
-| R² ajustado | aproximadamente 1,000 |
-| Sigma | 0,290 mA |
-
-Comparado ao modelo global simples, o modelo com interação reduz a soma de quadrados residual, com p-valor muito pequeno na comparação entre modelos.
-
-Interpretação: estatisticamente, permitir parâmetros diferentes por carga melhora o ajuste. Porém, para firmware embarcado, o modelo global continua mais simples e ainda apresenta erro pequeno. A escolha entre modelo global e modelos por carga depende de o sistema conhecer ou estimar a carga durante a operação.
-
-## 16. Regressão logística para compliance
-
-A regressão logística modelou a probabilidade de uma amostra estar dentro da região comum de compliance usando:
-
-```r
-in_common_compliance_region ~ dac_distance_from_zero_current + load_resistance_ohm
-```
-
-Resultados:
-
-| Termo | Interpretação |
-|---|---|
-| `dac_distance_from_zero_current` negativo | quanto mais longe do ponto central do DAC, menor a chance de permanecer na região comum de compliance |
-| `load_resistance_ohm` negativo | quanto maior a carga, menor a chance de permanecer dentro da região comum |
-
-A acurácia de classificação foi aproximadamente 0,881.
-
-Interpretação: o resultado confirma quantitativamente que a limitação de compliance depende tanto da amplitude comandada quanto da carga.
-
-![Regressão logística para região de compliance](figures/12_compliance_logistic.png)
-
-**Figura 12.** Probabilidade estimada de permanência na região comum de compliance em função da distância ao ponto central do DAC. A probabilidade cai quando o comando se afasta do centro e quando a carga exige maior tensão.
-
-## 17. PCA e análise fatorial
-
-A PCA foi aplicada às correntes das três cargas na região comum.
-
-Resultado principal:
-
-| Componente | Proporção de variância |
-|---|---:|
-| PC1 | aproximadamente 1,000 |
-| PC2 | aproximadamente 0,000060 |
-| PC3 | aproximadamente 0,000011 |
-
-Interpretação: quase toda a variabilidade das três correntes é explicada por uma única componente principal. Isso indica que as três cargas compartilham praticamente o mesmo padrão de variação, dominado pela rampa de DAC.
-
-![Escores da PCA](figures/13_pca_scores.png)
-
-**Figura 13.** Escores da PCA. A coloração pela tensão de DAC mostra que a primeira componente organiza os dados conforme a posição ao longo da rampa.
-
-A análise fatorial com um fator produziu cargas fatoriais próximas de 0,999 para as três cargas.
-
-Interpretação: há um fator comum muito forte, compatível com a ideia de que o DAC é o principal fator latente controlando as correntes medidas.
-
-## 18. Cluster analysis
-
-O k-means com três clusters separou os pontos da região linear em três grupos:
-
-| Cluster | Interpretação aproximada |
-|---|---|
-| 1 | região próxima ao ponto central, corrente média próxima de zero |
-| 2 | região de corrente negativa |
-| 3 | região de corrente positiva |
-
-Interpretação: o agrupamento recupera naturalmente a estrutura da rampa: um grupo para correntes positivas, um para correntes negativas e outro para a região central. Isso reforça que a principal estrutura multivariada dos dados é a posição ao longo da rampa de DAC.
-
-![Análise de cluster](figures/14_cluster_analysis.png)
-
-**Figura 14.** Agrupamento k-means com três clusters. Os grupos separam regiões de corrente positiva, corrente negativa e região próxima ao ponto central de corrente nula.
-
-## 19. Conclusões
-
-A análise confirma que o estágio de saída apresenta comportamento altamente linear entre tensão de DAC e corrente de saída dentro da região de compliance. As correlações próximas de -1, os valores de R² próximos de 1 e os baixos erros de regressão sustentam o uso de um modelo linear para estimativa em malha aberta.
-
-O modelo global:
-
-```text
-Iout = -28,04 * VDAC + 46,35
-```
-
-é simples e adequado para implementação em firmware, desde que limitado à região comum de compliance. A equação inversa permite estimar a tensão de DAC necessária para uma corrente alvo.
-
-Entretanto, a análise também mostra que cargas maiores reduzem a região operacional válida. A carga de 4,7 kOhm perdeu cerca de 77,2% dos pontos após a seleção da região linear, indicando forte limitação de compliance em parte da faixa de DAC. Portanto, o modelo linear não deve ser usado indiscriminadamente fora da região caracterizada.
-
-Do ponto de vista da disciplina, o estudo cobre uma sequência ampla de métodos estatísticos: curva normal, normal reduzida Z, distribuição amostral, descrição de dados, intervalos de confiança, grau de confiança, significância, testes de hipótese, correlação, regressão linear simples e múltipla, ANOVA, DOE, regressão logística, PCA, análise fatorial e cluster. Esses métodos convergem para a mesma interpretação técnica: o DAC domina a corrente entregue na região válida, mas a carga limita a faixa em que o circuito consegue manter comportamento de fonte de corrente.
-
-## 20. Como reproduzir
-
-No RStudio, execute:
-
-```r
-source("analise_rstudio.R")
-```
-
-Para consultar os resultados:
-
-```r
-names(summary_tables)
-summary_tables$figure_paths
-summary_tables$raw_1k_preview
-summary_tables$course_topic_coverage
-summary_tables$z_reference_table
-summary_tables$residual_standard_normal_summary
-summary_tables$sampling_distribution_summary
-summary_tables$statistical_decision_summary
-summary_tables$mean_current_ci
-summary_tables$residual_normality_table
-summary_tables$global_model_summary
-summary_tables$factorial_doe_anova_summary
-summary_tables$pca_variance_summary
-summary_tables$cluster_summary
-```

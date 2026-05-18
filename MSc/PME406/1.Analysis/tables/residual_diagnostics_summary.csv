@@ -1,0 +1,2 @@
+model,mean_residual_mA,sd_residual_mA,median_residual_mA,min_residual_mA,max_residual_mA,MAE_mA,RMSE_mA,shapiro_sample_n,shapiro_p_value,normality_interpretation
+global_current_mA_by_dac,1.4882801198368501e-15,3.738273409694959,-1.190752510283943,-4.112370505001209,16.821922197101976,2.495843305486304,3.735374399247534,645,4.174587255326136e-30,A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk.
