@@ -1,7 +1,7 @@
 ---
 title: "Relatório de Caracterização Estatística do Estágio de Saída FES/STIMGRASP"
 author: "Tiago P. Silva"
-date: "18 de maio de 2026"
+date: "19 de maio de 2026"
 lang: pt-BR
 toc: true
 numbersections: true
@@ -22,27 +22,27 @@ Os CSVs foram importados diretamente dos arquivos do osciloscópio, removendo os
 | 2k | 58386 |
 | 4k7 | 58386 |
 
-Figura: figures/01_raw_signals_before_stationary_removal.png
+![Sinais brutos antes da remoção dos segmentos estacionários](figures/01_raw_signals_before_stationary_removal.png)
 
-Figura: figures/02_ramp_signals_after_stationary_removal.png
+![Sinais da rampa após a remoção dos segmentos estacionários](figures/02_ramp_signals_after_stationary_removal.png)
 
 # 3. Conversão shunt-corrente
 
 A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = 10 Ohm. A tolerância configurada do shunt é 1%.
 
-Figura: figures/03_current_after_conversion.png
+![Corrente calculada após conversão da tensão no shunt](figures/03_current_after_conversion.png)
 
 # 4. Identificação da região de compliance
 
-A região comum de compliance foi definida antes da regressão usando critério físico baseado na tensão reconstruída na carga. O limite comum foi tomado como a menor magnitude máxima de tensão reconstruída entre as cargas, definindo uma faixa simétrica comum em torno de zero. O modelo linear deve ser interpretado apenas dentro dessa região comum.
+A região comum de compliance foi definida antes da regressão usando dois critérios: limite físico pela tensão reconstruída na carga e inclinação local mínima compatível com o trecho linear de cada carga. O limite comum de tensão foi tomado como a menor magnitude máxima de tensão reconstruída entre as cargas, definindo uma faixa simétrica comum em torno de zero; em seguida, foram mantidos apenas os pontos do maior trecho contínuo com inclinação local suficiente. O modelo linear deve ser interpretado apenas dentro dessa região comum.
 
-| load | Vmin | Vmax | common_Vmin | common_Vmax | total_points | retained_points | removed_points | removed_percent |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1k | -43.803125 | 46.330384 | -46.330384 | 46.330384 | 325 | 325 | 0 | 0.000000 |
-| 2k | -46.224740 | 49.559811 | -46.330384 | 46.330384 | 325 | 244 | 81 | 24.923077 |
-| 4k7 | -47.619405 | 47.775973 | -46.330384 | 46.330384 | 325 | 76 | 249 | 76.615385 |
+| load | Vmin | Vmax | common_Vmin | common_Vmax | reference_slope_mA_per_V | slope_threshold_mA_per_V | total_points | retained_points | removed_points | removed_percent |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1k | -43.803125 | 46.330384 | -46.330384 | 46.330384 | 28.153212 | 14.076606 | 325 | 322 | 3 | 0.923077 |
+| 2k | -46.224740 | 49.559811 | -46.330384 | 46.330384 | 27.808377 | 13.904188 | 325 | 168 | 157 | 48.307692 |
+| 4k7 | -47.619405 | 47.775973 | -46.330384 | 46.330384 | 26.605116 | 13.302558 | 325 | 76 | 249 | 76.615385 |
 
-Figura: figures/05_compliance_retained_removed.png
+![Pontos retidos e removidos pelo critério de compliance](figures/05_compliance_retained_removed.png)
 
 # 5. Estatística descritiva relevante
 
@@ -50,8 +50,8 @@ Resumo da região linear retida:
 
 | load | count | mean_mA | sd_mA | min_mA | q25_mA | median_mA | q75_mA | max_mA |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1k | 325 | 0.788753 | 26.416914 | -43.803125 | -21.962662 | 0.131058 | 23.519614 | 46.330384 |
-| 2k | 244 | -7.249327 | 15.361609 | -23.112370 | -22.924225 | -10.743657 | 6.197721 | 23.062448 |
+| 1k | 322 | 0.645672 | 26.179311 | -43.739572 | -21.889446 | -0.004240 | 23.329117 | 46.122148 |
+| 2k | 168 | -0.142096 | 13.424850 | -22.740101 | -11.670383 | -0.463385 | 11.370625 | 23.062448 |
 | 4k7 | 76 | -0.107802 | 5.777173 | -9.731551 | -5.021909 | -0.269278 | 4.849080 | 9.812040 |
 
 # 6. Correlação exploratória
@@ -60,9 +60,9 @@ Correlação foi mantida apenas como evidência exploratória de associação mo
 
 | load | pearson_r | pearson_p | spearman_r | spearman_p | samples | interpretation |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1k | -0.999909 | 0 | -0.999999 | 0 | 325 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
-| 2k | -0.966918 | 0 | -0.991413 | 0 | 244 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
-| 4k7 | -0.999815 | 0 | -1.000000 | 0 | 76 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
+| 1k | -0.999909 | 0 | -1 | 0 | 322 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
+| 2k | -0.999897 | 0 | -1 | 0 | 168 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
+| 4k7 | -0.999815 | 0 | -1 | 0 | 76 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
 
 # 7. Modelos lineares por carga
 
@@ -70,8 +70,8 @@ Modelos independentes por carga foram ajustados como current_mA ~ dac_bin.
 
 | model | load | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| load_1k | 1k | 0.999817 | 0.999817 | 0.357519 | 325 | 0.289716 | 0.356418 | 0.948600 |
-| load_2k | 2k | 0.934931 | 0.934662 | 3.926612 | 244 | 3.303021 | 3.910486 | 9.706062 |
+| load_1k | 1k | 0.999818 | 0.999817 | 0.354077 | 322 | 0.287084 | 0.352975 | 0.743690 |
+| load_2k | 2k | 0.999794 | 0.999792 | 0.193410 | 168 | 0.159041 | 0.192255 | 0.445245 |
 | load_4k7 | 4k7 | 0.999630 | 0.999625 | 0.111824 | 76 | 0.095924 | 0.110343 | 0.252044 |
 
 # 8. Modelo global
@@ -80,7 +80,7 @@ O modelo global foi ajustado como current_mA ~ dac_bin dentro da região comum d
 
 | model | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| global_current_mA_by_dac | 0.969533 | 0.969486 | 3.741179 | 645 | 2.495843 | 3.735374 | 16.821922 |
+| global_current_mA_by_dac | 0.999661 | 0.999661 | 0.389648 | 566 | 0.331486 | 0.388959 | 0.934792 |
 
 # 9. Modelo com interação carga x DAC
 
@@ -88,24 +88,24 @@ O modelo com interação foi ajustado como current_mA ~ dac_bin * load.
 
 | model | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| interaction_current_mA_by_dac_load | 0.987226 | 0.987126 | 2.430066 | 645 | 1.406798 | 2.418737 | 9.706062 |
+| interaction_current_mA_by_dac_load | 0.999813 | 0.999811 | 0.290484 | 566 | 0.223411 | 0.288941 | 0.74369 |
 
 | model | alpha | decision | term | estimate | std_error | statistic | p_value | ci_low | ci_high |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| global_current_mA_by_dac | 0.05 | reject_H0 | (Intercept) | 43.425537 | 0.352335 | 123.250831 | 0.000000 | 42.733672 | 44.117403 |
-| global_current_mA_by_dac | 0.05 | reject_H0 | dac_bin | -25.649178 | 0.179309 | -143.044648 | 0.000000 | -26.001280 | -25.297076 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | (Intercept) | 46.610346 | 0.270215 | 172.493608 | 0.000000 | 46.079729 | 47.140963 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin | -28.111406 | 0.143676 | -195.657691 | 0.000000 | -28.393542 | -27.829271 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | load2k | -11.034052 | 0.547022 | -20.171135 | 0.000000 | -12.108230 | -9.959875 |
-| interaction_current_mA_by_dac_load | 0.05 | do_not_reject_H0 | load4k7 | -3.691311 | 2.125966 | -1.736298 | 0.082993 | -7.866035 | 0.483413 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin:load2k | 7.066876 | 0.263485 | 26.820774 | 0.000000 | 6.549474 | 7.584277 |
-| interaction_current_mA_by_dac_load | 0.05 | do_not_reject_H0 | dac_bin:load4k7 | 1.955274 | 1.278747 | 1.529055 | 0.126746 | -0.555780 | 4.466329 |
-| load_1k | 0.05 | reject_H0 | (Intercept) | 46.610346 | 0.039755 | 1172.442340 | 0.000000 | 46.532135 | 46.688557 |
-| load_1k | 0.05 | reject_H0 | dac_bin | -28.111406 | 0.021138 | -1329.889051 | 0.000000 | -28.152992 | -28.069821 |
-| load_2k | 0.05 | reject_H0 | (Intercept) | 35.576294 | 0.768533 | 46.291181 | 0.000000 | 34.062426 | 37.090161 |
-| load_2k | 0.05 | reject_H0 | dac_bin | -21.044531 | 0.356884 | -58.967369 | 0.000000 | -21.747527 | -20.341535 |
-| load_4k7 | 0.05 | reject_H0 | (Intercept) | 42.919035 | 0.097037 | 442.296331 | 0.000000 | 42.725685 | 43.112385 |
-| load_4k7 | 0.05 | reject_H0 | dac_bin | -26.156132 | 0.058471 | -447.332761 | 0.000000 | -26.272639 | -26.039625 |
+| global_current_mA_by_dac | 0.05 | reject_H0 | (Intercept) | 46.348935 | 0.039271 | 1180.239742 | 0 | 46.271801 | 46.426070 |
+| global_current_mA_by_dac | 0.05 | reject_H0 | dac_bin | -28.033152 | 0.021733 | -1289.860154 | 0 | -28.075841 | -27.990464 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | (Intercept) | 46.618138 | 0.032754 | 1423.279796 | 0 | 46.553802 | 46.682473 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin | -28.117716 | 0.017415 | -1614.538039 | 0 | -28.151923 | -28.083509 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | load2k | -1.087684 | 0.086165 | -12.623199 | 0 | -1.256931 | -0.918437 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | load4k7 | -3.699103 | 0.254191 | -14.552452 | 0 | -4.198387 | -3.199818 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin:load2k | 0.521009 | 0.049385 | 10.549968 | 0 | 0.424007 | 0.618011 |
+| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin:load4k7 | 1.961584 | 0.152886 | 12.830399 | 0 | 1.661285 | 2.261883 |
+| load_1k | 0.05 | reject_H0 | (Intercept) | 46.618138 | 0.039924 | 1167.658226 | 0 | 46.539590 | 46.696685 |
+| load_1k | 0.05 | reject_H0 | dac_bin | -28.117716 | 0.021228 | -1324.566419 | 0 | -28.159480 | -28.075952 |
+| load_2k | 0.05 | reject_H0 | (Intercept) | 45.530454 | 0.053064 | 858.030359 | 0 | 45.425687 | 45.635221 |
+| load_2k | 0.05 | reject_H0 | dac_bin | -27.596707 | 0.030769 | -896.900438 | 0 | -27.657456 | -27.535958 |
+| load_4k7 | 0.05 | reject_H0 | (Intercept) | 42.919035 | 0.097037 | 442.296331 | 0 | 42.725685 | 43.112385 |
+| load_4k7 | 0.05 | reject_H0 | dac_bin | -26.156132 | 0.058471 | -447.332761 | 0 | -26.272639 | -26.039625 |
 
 # 10. Comparação entre modelos
 
@@ -113,8 +113,8 @@ A comparação formal entre o modelo global e o modelo com interação foi feita
 
 | compared_models | alpha | interpretation | model_index | Res.Df | RSS | Df | Sum of Sq | F | Pr(>F) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| current_mA ~ dac_bin | 0.05 | NA | 1 | 643 | 8999.699127 |  |  |  |  |
-| current_mA ~ dac_bin * load | 0.05 | O modelo com interacao melhora significativamente o ajuste em relacao ao modelo global. | 2 | 639 | 3773.435106 | 4 | 5226.264021 | 221.256138 | 0 |
+| current_mA ~ dac_bin | 0.05 | NA | 1 | 564 | 85.629792 |  |  |  |  |
+| current_mA ~ dac_bin * load | 0.05 | O modelo com interacao melhora significativamente o ajuste em relacao ao modelo global. | 2 | 560 | 47.253472 | 4 | 38.37632 | 113.699262 | 0 |
 
 # 11. Erro de predição
 
@@ -122,33 +122,33 @@ As métricas de erro foram calculadas dentro da região linear: MAE, RMSE e maio
 
 | model | R2 | adjusted_R2 | sigma_mA | samples | MAE_mA | RMSE_mA | max_abs_error_mA |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| global_current_mA_by_dac | 0.969533 | 0.969486 | 3.741179 | 645 | 2.495843 | 3.735374 | 16.821922 |
-| interaction_current_mA_by_dac_load | 0.987226 | 0.987126 | 2.430066 | 645 | 1.406798 | 2.418737 | 9.706062 |
-| load_1k | 0.999817 | 0.999817 | 0.357519 | 325 | 0.289716 | 0.356418 | 0.948600 |
-| load_2k | 0.934931 | 0.934662 | 3.926612 | 244 | 3.303021 | 3.910486 | 9.706062 |
+| global_current_mA_by_dac | 0.999661 | 0.999661 | 0.389648 | 566 | 0.331486 | 0.388959 | 0.934792 |
+| interaction_current_mA_by_dac_load | 0.999813 | 0.999811 | 0.290484 | 566 | 0.223411 | 0.288941 | 0.743690 |
+| load_1k | 0.999818 | 0.999817 | 0.354077 | 322 | 0.287084 | 0.352975 | 0.743690 |
+| load_2k | 0.999794 | 0.999792 | 0.193410 | 168 | 0.159041 | 0.192255 | 0.445245 |
 | load_4k7 | 0.999630 | 0.999625 | 0.111824 | 76 | 0.095924 | 0.110343 | 0.252044 |
 
-Figura: figures/06_measured_vs_predicted.png
+![Corrente medida versus corrente predita](figures/06_measured_vs_predicted.png)
 
-Figura: figures/07_current_vs_dac_confidence_band.png
+![Banda de confiança da corrente em função do DAC](figures/07_current_vs_dac_confidence_band.png)
 
-Figura: figures/08_current_vs_dac_prediction_band.png
+![Banda de predição da corrente em função do DAC](figures/08_current_vs_dac_prediction_band.png)
 
 # 12. Diagnóstico dos resíduos
 
 | model | mean_residual_mA | sd_residual_mA | median_residual_mA | min_residual_mA | max_residual_mA | MAE_mA | RMSE_mA | shapiro_sample_n | shapiro_p_value | normality_interpretation |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| global_current_mA_by_dac | 0 | 3.738273 | -1.190753 | -4.112371 | 16.821922 | 2.495843 | 3.735374 | 645 | 0 | A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk. |
+| global_current_mA_by_dac | 0 | 0.389303 | 0.015381 | -0.934792 | 0.738906 | 0.331486 | 0.388959 | 566 | 0 | A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk. |
 
-Figura: figures/09_residuals_vs_dac.png
+![Resíduos em função do DAC](figures/09_residuals_vs_dac.png)
 
-Figura: figures/10_residuals_vs_predicted.png
+![Resíduos em função dos valores preditos](figures/10_residuals_vs_predicted.png)
 
 # 13. Homocedasticidade
 
 | test | statistic | parameter | p_value | method | alpha | interpretation |
 | --- | --- | --- | --- | --- | --- | --- |
-| manual_breusch_pagan_residual_squared_on_fitted | 116.93181 | 1 | 0 | fallback | 0.05 | Ha evidencia de heterocedasticidade; a hipotese de variancia constante e questionavel. |
+| manual_breusch_pagan_residual_squared_on_fitted | 27.838682 | 1 | 0 | fallback | 0.05 | Ha evidencia de heterocedasticidade; a hipotese de variancia constante e questionavel. |
 
 # 14. Autocorrelação temporal
 
@@ -156,9 +156,9 @@ Como os dados vêm de uma rampa temporal, a independência dos resíduos não fo
 
 | test | statistic | p_value | method | alpha | interpretation |
 | --- | --- | --- | --- | --- | --- |
-| manual_durbin_watson_approximation | 0.038588 | 0 | fallback_normal_approximation | 0.05 | Ha evidencia de autocorrelacao temporal; p-valores classicos da regressao podem estar otimistas. |
+| manual_durbin_watson_approximation | 0.068879 | 0 | fallback_normal_approximation | 0.05 | Ha evidencia de autocorrelacao temporal; p-valores classicos da regressao podem estar otimistas. |
 
-Figura: figures/11_residual_acf.png
+![Autocorrelação dos resíduos](figures/11_residual_acf.png)
 
 # 15. Outliers e influência
 
@@ -166,13 +166,13 @@ Foram calculados resíduos studentizados, leverage e distância de Cook. Pontos 
 
 | samples | influential_points | influential_percent | cook_threshold | max_cook_distance | max_abs_studentized_residual |
 | --- | --- | --- | --- | --- | --- |
-| 645 | 41 | 6.356589 | 0.006202 | 0.06637 | 4.580621 |
+| 566 | 51 | 9.010601 | 0.007067 | 0.0178 | 2.411942 |
 
-Figura: figures/12_cook_distance_by_index.png
+![Distância de Cook por índice](figures/12_cook_distance_by_index.png)
 
-Figura: figures/13_studentized_residuals_by_index.png
+![Resíduos studentizados por índice](figures/13_studentized_residuals_by_index.png)
 
-Figura: figures/14_leverage_vs_studentized_residuals.png
+![Leverage versus resíduos studentizados](figures/14_leverage_vs_studentized_residuals.png)
 
 # 16. Validação cruzada por blocos
 
@@ -180,17 +180,17 @@ A validação por blocos usa cinco blocos contíguos ordenados, treinando em qua
 
 | fold | train_samples | test_samples | MAE_mA | RMSE_mA | max_abs_error_mA |
 | --- | --- | --- | --- | --- | --- |
-| 1 | 516 | 129 | 4.680013 | 4.999185 | 7.504176 |
-| 2 | 516 | 129 | 2.437179 | 2.567308 | 3.784670 |
-| 3 | 516 | 129 | 2.994049 | 3.860282 | 6.030168 |
-| 4 | 516 | 129 | 2.019707 | 2.116129 | 2.942737 |
-| 5 | 516 | 129 | 6.090217 | 9.372174 | 21.062169 |
+| 1 | 452 | 114 | 1.094951 | 1.149833 | 1.640076 |
+| 2 | 453 | 113 | 0.336214 | 0.391106 | 0.604763 |
+| 3 | 453 | 113 | 0.614323 | 0.672667 | 1.249332 |
+| 4 | 453 | 113 | 0.287021 | 0.314989 | 0.575789 |
+| 5 | 453 | 113 | 0.469936 | 0.525130 | 0.978239 |
 
 | folds | RMSE_mean_mA | RMSE_sd_mA | MAE_mean_mA | MAE_sd_mA | max_abs_error_mean_mA | max_abs_error_sd_mA |
 | --- | --- | --- | --- | --- | --- | --- |
-| 5 | 4.583016 | 2.906036 | 3.644233 | 1.701065 | 8.264784 | 7.37802 |
+| 5 | 0.610745 | 0.330716 | 0.560489 | 0.324743 | 1.00964 | 0.449455 |
 
-Figura: figures/15_block_cross_validation_errors.png
+![Erros da validação cruzada por blocos](figures/15_block_cross_validation_errors.png)
 
 # 17. Incerteza metrológica
 
@@ -198,9 +198,9 @@ A incerteza foi tratada como orçamento configurável. Parâmetros de instrument
 
 | uncertainty_source | assumed_value | effect_on_metric | observation |
 | --- | --- | --- | --- |
-| Shunt resistance tolerance | 1% | Approx. current standard uncertainty contribution: 0.17843 mA | Assumes tolerance is representative; replace with calibrated resistor data when available. |
+| Shunt resistance tolerance | 1% | Approx. current standard uncertainty contribution: 0.170101 mA | Assumes tolerance is representative; replace with calibrated resistor data when available. |
 | Oscilloscope voltage uncertainty | 0.002 V | Current uncertainty contribution: 0.2 mA | Placeholder; replace with calibrated instrument specification. |
-| Load resistance tolerance | 1% | Reconstructed load-voltage contribution: 0.257513 V | Assumes nominal load tolerance; replace with measured load resistance when available. |
+| Load resistance tolerance | 1% | Reconstructed load-voltage contribution: 0.229392 V | Assumes nominal load tolerance; replace with measured load resistance when available. |
 | DAC voltage uncertainty | 0.002 V | Affects predicted current through model slope and DAC input; assumed 0.002 V. | Placeholder; replace with calibrated DAC/output measurement specification. |
 | Linear-model coefficient covariance | vcov(lm) | Used through predict.lm confidence interval for mean predicted current. | Coefficient uncertainty is represented in mean confidence intervals; prediction intervals include residual scatter. |
 
@@ -208,7 +208,7 @@ A incerteza foi tratada como orçamento configurável. Parâmetros de instrument
 | --- | --- | --- | --- | --- |
 | estimated_sampling_rate | NA |  | Hz | CSV files do not provide a calibrated time column; sample index alone is insufficient. |
 | current_drift_over_ramp | 1k | -0.001554 | mA/sample | Slope estimated over retained compliance region. |
-| current_drift_over_ramp | 2k | -0.001164 | mA/sample | Slope estimated over retained compliance region. |
+| current_drift_over_ramp | 2k | -0.001524 | mA/sample | Slope estimated over retained compliance region. |
 | current_drift_over_ramp | 4k7 | -0.001435 | mA/sample | Slope estimated over retained compliance region. |
 
 # 18. Métricas de FES não avaliadas
@@ -229,7 +229,7 @@ A incerteza foi tratada como orçamento configurável. Parâmetros de instrument
 
 # 19. Conclusões revisadas
 
-A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida fisicamente pela tensão reconstruída na carga. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual, autocorrelação temporal e orçamento de incerteza. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.
+A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida pela tensão reconstruída na carga e pela manutenção de inclinação local compatível com o trecho linear. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual, autocorrelação temporal e orçamento de incerteza. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.
 
 Análises como PCA, cluster e testes de média global foram preservadas somente como material secundário/didático e não são usadas como evidência central de validade metrológica do estágio de saída.
 

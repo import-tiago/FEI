@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Tiago P. Silva" />
+  <title>Relatório de Caracterização Estatística do Estágio de Saída FES/STIMGRASP</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Relatório de Caracterização Estatística do Estágio de
+Saída FES/STIMGRASP</h1>
+<p class="author">Tiago P. Silva</p>
+<p class="date">19 de maio de 2026</p>
+</header>
+<nav id="TOC" role="doc-toc">
+
+</nav>
+<h1 id="desenho-experimental-e-limitações">1. Desenho experimental e
+limitações</h1>
+<p>Foram analisadas rampas de tensão de DAC e tensão no resistor shunt
+para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A
+análise estima corrente a partir do shunt e reconstrói a tensão na carga
+por resistência nominal. Como o sistema opera em malha aberta, a
+regressão caracteriza o comportamento observado no ensaio, mas não
+garante corrente entregue em operação real quando a carga, contato
+eletrodo-pele ou condições térmicas mudam.</p>
+<h1 id="importação-e-pré-processamento">2. Importação e
+pré-processamento</h1>
+<p>Os CSVs foram importados diretamente dos arquivos do osciloscópio,
+removendo os segmentos estacionários antes e depois da rampa útil. As
+três cargas foram equalizadas para a mesma quantidade de amostras.</p>
+<table>
+<thead>
+<tr>
+<th>load</th>
+<th>samples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1k</td>
+<td>58386</td>
+</tr>
+<tr>
+<td>2k</td>
+<td>58386</td>
+</tr>
+<tr>
+<td>4k7</td>
+<td>58386</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/01_raw_signals_before_stationary_removal.png"
+alt="Sinais brutos antes da remoção dos segmentos estacionários" />
+<figcaption aria-hidden="true">Sinais brutos antes da remoção dos
+segmentos estacionários</figcaption>
+</figure>
+<figure>
+<img src="figures/02_ramp_signals_after_stationary_removal.png"
+alt="Sinais da rampa após a remoção dos segmentos estacionários" />
+<figcaption aria-hidden="true">Sinais da rampa após a remoção dos
+segmentos estacionários</figcaption>
+</figure>
+<h1 id="conversão-shunt-corrente">3. Conversão shunt-corrente</h1>
+<p>A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = 10
+Ohm. A tolerância configurada do shunt é 1%.</p>
+<figure>
+<img src="figures/03_current_after_conversion.png"
+alt="Corrente calculada após conversão da tensão no shunt" />
+<figcaption aria-hidden="true">Corrente calculada após conversão da
+tensão no shunt</figcaption>
+</figure>
+<h1 id="identificação-da-região-de-compliance">4. Identificação da
+região de compliance</h1>
+<p>A região comum de compliance foi definida antes da regressão usando
+dois critérios: limite físico pela tensão reconstruída na carga e
+inclinação local mínima compatível com o trecho linear de cada carga. O
+limite comum de tensão foi tomado como a menor magnitude máxima de
+tensão reconstruída entre as cargas, definindo uma faixa simétrica comum
+em torno de zero; em seguida, foram mantidos apenas os pontos do maior
+trecho contínuo com inclinação local suficiente. O modelo linear deve
+ser interpretado apenas dentro dessa região comum.</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>load</th>
+<th>Vmin</th>
+<th>Vmax</th>
+<th>common_Vmin</th>
+<th>common_Vmax</th>
+<th>reference_slope_mA_per_V</th>
+<th>slope_threshold_mA_per_V</th>
+<th>total_points</th>
+<th>retained_points</th>
+<th>removed_points</th>
+<th>removed_percent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1k</td>
+<td>-43.803125</td>
+<td>46.330384</td>
+<td>-46.330384</td>
+<td>46.330384</td>
+<td>28.153212</td>
+<td>14.076606</td>
+<td>325</td>
+<td>322</td>
+<td>3</td>
+<td>0.923077</td>
+</tr>
+<tr>
+<td>2k</td>
+<td>-46.224740</td>
+<td>49.559811</td>
+<td>-46.330384</td>
+<td>46.330384</td>
+<td>27.808377</td>
+<td>13.904188</td>
+<td>325</td>
+<td>168</td>
+<td>157</td>
+<td>48.307692</td>
+</tr>
+<tr>
+<td>4k7</td>
+<td>-47.619405</td>
+<td>47.775973</td>
+<td>-46.330384</td>
+<td>46.330384</td>
+<td>26.605116</td>
+<td>13.302558</td>
+<td>325</td>
+<td>76</td>
+<td>249</td>
+<td>76.615385</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/05_compliance_retained_removed.png"
+alt="Pontos retidos e removidos pelo critério de compliance" />
+<figcaption aria-hidden="true">Pontos retidos e removidos pelo critério
+de compliance</figcaption>
+</figure>
+<h1 id="estatística-descritiva-relevante">5. Estatística descritiva
+relevante</h1>
+<p>Resumo da região linear retida:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>load</th>
+<th>count</th>
+<th>mean_mA</th>
+<th>sd_mA</th>
+<th>min_mA</th>
+<th>q25_mA</th>
+<th>median_mA</th>
+<th>q75_mA</th>
+<th>max_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1k</td>
+<td>322</td>
+<td>0.645672</td>
+<td>26.179311</td>
+<td>-43.739572</td>
+<td>-21.889446</td>
+<td>-0.004240</td>
+<td>23.329117</td>
+<td>46.122148</td>
+</tr>
+<tr>
+<td>2k</td>
+<td>168</td>
+<td>-0.142096</td>
+<td>13.424850</td>
+<td>-22.740101</td>
+<td>-11.670383</td>
+<td>-0.463385</td>
+<td>11.370625</td>
+<td>23.062448</td>
+</tr>
+<tr>
+<td>4k7</td>
+<td>76</td>
+<td>-0.107802</td>
+<td>5.777173</td>
+<td>-9.731551</td>
+<td>-5.021909</td>
+<td>-0.269278</td>
+<td>4.849080</td>
+<td>9.812040</td>
+</tr>
+</tbody>
+</table>
+<h1 id="correlação-exploratória">6. Correlação exploratória</h1>
+<p>Correlação foi mantida apenas como evidência exploratória de
+associação monotônica/linear entre DAC e corrente. A validade do
+circuito é discutida a partir de erro, resíduos, intervalos e
+incerteza.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>load</th>
+<th>pearson_r</th>
+<th>pearson_p</th>
+<th>spearman_r</th>
+<th>spearman_p</th>
+<th>samples</th>
+<th>interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1k</td>
+<td>-0.999909</td>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>322</td>
+<td>Associacao linear exploratoria; validade do modelo avaliada por
+residuos, erro e incerteza.</td>
+</tr>
+<tr>
+<td>2k</td>
+<td>-0.999897</td>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>168</td>
+<td>Associacao linear exploratoria; validade do modelo avaliada por
+residuos, erro e incerteza.</td>
+</tr>
+<tr>
+<td>4k7</td>
+<td>-0.999815</td>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>76</td>
+<td>Associacao linear exploratoria; validade do modelo avaliada por
+residuos, erro e incerteza.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="modelos-lineares-por-carga">7. Modelos lineares por carga</h1>
+<p>Modelos independentes por carga foram ajustados como current_mA ~
+dac_bin.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>model</th>
+<th>load</th>
+<th>R2</th>
+<th>adjusted_R2</th>
+<th>sigma_mA</th>
+<th>samples</th>
+<th>MAE_mA</th>
+<th>RMSE_mA</th>
+<th>max_abs_error_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>load_1k</td>
+<td>1k</td>
+<td>0.999818</td>
+<td>0.999817</td>
+<td>0.354077</td>
+<td>322</td>
+<td>0.287084</td>
+<td>0.352975</td>
+<td>0.743690</td>
+</tr>
+<tr>
+<td>load_2k</td>
+<td>2k</td>
+<td>0.999794</td>
+<td>0.999792</td>
+<td>0.193410</td>
+<td>168</td>
+<td>0.159041</td>
+<td>0.192255</td>
+<td>0.445245</td>
+</tr>
+<tr>
+<td>load_4k7</td>
+<td>4k7</td>
+<td>0.999630</td>
+<td>0.999625</td>
+<td>0.111824</td>
+<td>76</td>
+<td>0.095924</td>
+<td>0.110343</td>
+<td>0.252044</td>
+</tr>
+</tbody>
+</table>
+<h1 id="modelo-global">8. Modelo global</h1>
+<p>O modelo global foi ajustado como current_mA ~ dac_bin dentro da
+região comum de compliance.</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>model</th>
+<th>R2</th>
+<th>adjusted_R2</th>
+<th>sigma_mA</th>
+<th>samples</th>
+<th>MAE_mA</th>
+<th>RMSE_mA</th>
+<th>max_abs_error_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global_current_mA_by_dac</td>
+<td>0.999661</td>
+<td>0.999661</td>
+<td>0.389648</td>
+<td>566</td>
+<td>0.331486</td>
+<td>0.388959</td>
+<td>0.934792</td>
+</tr>
+</tbody>
+</table>
+<h1 id="modelo-com-interação-carga-x-dac">9. Modelo com interação carga
+x DAC</h1>
+<p>O modelo com interação foi ajustado como current_mA ~ dac_bin *
+load.</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>model</th>
+<th>R2</th>
+<th>adjusted_R2</th>
+<th>sigma_mA</th>
+<th>samples</th>
+<th>MAE_mA</th>
+<th>RMSE_mA</th>
+<th>max_abs_error_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.999813</td>
+<td>0.999811</td>
+<td>0.290484</td>
+<td>566</td>
+<td>0.223411</td>
+<td>0.288941</td>
+<td>0.74369</td>
+</tr>
+</tbody>
+</table>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>model</th>
+<th>alpha</th>
+<th>decision</th>
+<th>term</th>
+<th>estimate</th>
+<th>std_error</th>
+<th>statistic</th>
+<th>p_value</th>
+<th>ci_low</th>
+<th>ci_high</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global_current_mA_by_dac</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>(Intercept)</td>
+<td>46.348935</td>
+<td>0.039271</td>
+<td>1180.239742</td>
+<td>0</td>
+<td>46.271801</td>
+<td>46.426070</td>
+</tr>
+<tr>
+<td>global_current_mA_by_dac</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin</td>
+<td>-28.033152</td>
+<td>0.021733</td>
+<td>-1289.860154</td>
+<td>0</td>
+<td>-28.075841</td>
+<td>-27.990464</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>(Intercept)</td>
+<td>46.618138</td>
+<td>0.032754</td>
+<td>1423.279796</td>
+<td>0</td>
+<td>46.553802</td>
+<td>46.682473</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin</td>
+<td>-28.117716</td>
+<td>0.017415</td>
+<td>-1614.538039</td>
+<td>0</td>
+<td>-28.151923</td>
+<td>-28.083509</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>load2k</td>
+<td>-1.087684</td>
+<td>0.086165</td>
+<td>-12.623199</td>
+<td>0</td>
+<td>-1.256931</td>
+<td>-0.918437</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>load4k7</td>
+<td>-3.699103</td>
+<td>0.254191</td>
+<td>-14.552452</td>
+<td>0</td>
+<td>-4.198387</td>
+<td>-3.199818</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin:load2k</td>
+<td>0.521009</td>
+<td>0.049385</td>
+<td>10.549968</td>
+<td>0</td>
+<td>0.424007</td>
+<td>0.618011</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin:load4k7</td>
+<td>1.961584</td>
+<td>0.152886</td>
+<td>12.830399</td>
+<td>0</td>
+<td>1.661285</td>
+<td>2.261883</td>
+</tr>
+<tr>
+<td>load_1k</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>(Intercept)</td>
+<td>46.618138</td>
+<td>0.039924</td>
+<td>1167.658226</td>
+<td>0</td>
+<td>46.539590</td>
+<td>46.696685</td>
+</tr>
+<tr>
+<td>load_1k</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin</td>
+<td>-28.117716</td>
+<td>0.021228</td>
+<td>-1324.566419</td>
+<td>0</td>
+<td>-28.159480</td>
+<td>-28.075952</td>
+</tr>
+<tr>
+<td>load_2k</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>(Intercept)</td>
+<td>45.530454</td>
+<td>0.053064</td>
+<td>858.030359</td>
+<td>0</td>
+<td>45.425687</td>
+<td>45.635221</td>
+</tr>
+<tr>
+<td>load_2k</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin</td>
+<td>-27.596707</td>
+<td>0.030769</td>
+<td>-896.900438</td>
+<td>0</td>
+<td>-27.657456</td>
+<td>-27.535958</td>
+</tr>
+<tr>
+<td>load_4k7</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>(Intercept)</td>
+<td>42.919035</td>
+<td>0.097037</td>
+<td>442.296331</td>
+<td>0</td>
+<td>42.725685</td>
+<td>43.112385</td>
+</tr>
+<tr>
+<td>load_4k7</td>
+<td>0.05</td>
+<td>reject_H0</td>
+<td>dac_bin</td>
+<td>-26.156132</td>
+<td>0.058471</td>
+<td>-447.332761</td>
+<td>0</td>
+<td>-26.272639</td>
+<td>-26.039625</td>
+</tr>
+</tbody>
+</table>
+<h1 id="comparação-entre-modelos">10. Comparação entre modelos</h1>
+<p>A comparação formal entre o modelo global e o modelo com interação
+foi feita por ANOVA/teste F para modelos aninhados.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>compared_models</th>
+<th>alpha</th>
+<th>interpretation</th>
+<th>model_index</th>
+<th>Res.Df</th>
+<th>RSS</th>
+<th>Df</th>
+<th>Sum of Sq</th>
+<th>F</th>
+<th>Pr(&gt;F)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>current_mA ~ dac_bin</td>
+<td>0.05</td>
+<td>NA</td>
+<td>1</td>
+<td>564</td>
+<td>85.629792</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>current_mA ~ dac_bin * load</td>
+<td>0.05</td>
+<td>O modelo com interacao melhora significativamente o ajuste em
+relacao ao modelo global.</td>
+<td>2</td>
+<td>560</td>
+<td>47.253472</td>
+<td>4</td>
+<td>38.37632</td>
+<td>113.699262</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h1 id="erro-de-predição">11. Erro de predição</h1>
+<p>As métricas de erro foram calculadas dentro da região linear: MAE,
+RMSE e maior erro absoluto.</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>model</th>
+<th>R2</th>
+<th>adjusted_R2</th>
+<th>sigma_mA</th>
+<th>samples</th>
+<th>MAE_mA</th>
+<th>RMSE_mA</th>
+<th>max_abs_error_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global_current_mA_by_dac</td>
+<td>0.999661</td>
+<td>0.999661</td>
+<td>0.389648</td>
+<td>566</td>
+<td>0.331486</td>
+<td>0.388959</td>
+<td>0.934792</td>
+</tr>
+<tr>
+<td>interaction_current_mA_by_dac_load</td>
+<td>0.999813</td>
+<td>0.999811</td>
+<td>0.290484</td>
+<td>566</td>
+<td>0.223411</td>
+<td>0.288941</td>
+<td>0.743690</td>
+</tr>
+<tr>
+<td>load_1k</td>
+<td>0.999818</td>
+<td>0.999817</td>
+<td>0.354077</td>
+<td>322</td>
+<td>0.287084</td>
+<td>0.352975</td>
+<td>0.743690</td>
+</tr>
+<tr>
+<td>load_2k</td>
+<td>0.999794</td>
+<td>0.999792</td>
+<td>0.193410</td>
+<td>168</td>
+<td>0.159041</td>
+<td>0.192255</td>
+<td>0.445245</td>
+</tr>
+<tr>
+<td>load_4k7</td>
+<td>0.999630</td>
+<td>0.999625</td>
+<td>0.111824</td>
+<td>76</td>
+<td>0.095924</td>
+<td>0.110343</td>
+<td>0.252044</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/06_measured_vs_predicted.png"
+alt="Corrente medida versus corrente predita" />
+<figcaption aria-hidden="true">Corrente medida versus corrente
+predita</figcaption>
+</figure>
+<figure>
+<img src="figures/07_current_vs_dac_confidence_band.png"
+alt="Banda de confiança da corrente em função do DAC" />
+<figcaption aria-hidden="true">Banda de confiança da corrente em função
+do DAC</figcaption>
+</figure>
+<figure>
+<img src="figures/08_current_vs_dac_prediction_band.png"
+alt="Banda de predição da corrente em função do DAC" />
+<figcaption aria-hidden="true">Banda de predição da corrente em função
+do DAC</figcaption>
+</figure>
+<h1 id="diagnóstico-dos-resíduos">12. Diagnóstico dos resíduos</h1>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>model</th>
+<th>mean_residual_mA</th>
+<th>sd_residual_mA</th>
+<th>median_residual_mA</th>
+<th>min_residual_mA</th>
+<th>max_residual_mA</th>
+<th>MAE_mA</th>
+<th>RMSE_mA</th>
+<th>shapiro_sample_n</th>
+<th>shapiro_p_value</th>
+<th>normality_interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>global_current_mA_by_dac</td>
+<td>0</td>
+<td>0.389303</td>
+<td>0.015381</td>
+<td>-0.934792</td>
+<td>0.738906</td>
+<td>0.331486</td>
+<td>0.388959</td>
+<td>566</td>
+<td>0</td>
+<td>A normalidade dos residuos e questionavel pelo teste de
+Shapiro-Wilk.</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/09_residuals_vs_dac.png"
+alt="Resíduos em função do DAC" />
+<figcaption aria-hidden="true">Resíduos em função do DAC</figcaption>
+</figure>
+<figure>
+<img src="figures/10_residuals_vs_predicted.png"
+alt="Resíduos em função dos valores preditos" />
+<figcaption aria-hidden="true">Resíduos em função dos valores
+preditos</figcaption>
+</figure>
+<h1 id="homocedasticidade">13. Homocedasticidade</h1>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>test</th>
+<th>statistic</th>
+<th>parameter</th>
+<th>p_value</th>
+<th>method</th>
+<th>alpha</th>
+<th>interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>manual_breusch_pagan_residual_squared_on_fitted</td>
+<td>27.838682</td>
+<td>1</td>
+<td>0</td>
+<td>fallback</td>
+<td>0.05</td>
+<td>Ha evidencia de heterocedasticidade; a hipotese de variancia
+constante e questionavel.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="autocorrelação-temporal">14. Autocorrelação temporal</h1>
+<p>Como os dados vêm de uma rampa temporal, a independência dos resíduos
+não foi assumida automaticamente.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>test</th>
+<th>statistic</th>
+<th>p_value</th>
+<th>method</th>
+<th>alpha</th>
+<th>interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>manual_durbin_watson_approximation</td>
+<td>0.068879</td>
+<td>0</td>
+<td>fallback_normal_approximation</td>
+<td>0.05</td>
+<td>Ha evidencia de autocorrelacao temporal; p-valores classicos da
+regressao podem estar otimistas.</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/11_residual_acf.png"
+alt="Autocorrelação dos resíduos" />
+<figcaption aria-hidden="true">Autocorrelação dos resíduos</figcaption>
+</figure>
+<h1 id="outliers-e-influência">15. Outliers e influência</h1>
+<p>Foram calculados resíduos studentizados, leverage e distância de
+Cook. Pontos foram apenas marcados e reportados; a remoção automática
+permanece desativada por padrão.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>samples</th>
+<th>influential_points</th>
+<th>influential_percent</th>
+<th>cook_threshold</th>
+<th>max_cook_distance</th>
+<th>max_abs_studentized_residual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>566</td>
+<td>51</td>
+<td>9.010601</td>
+<td>0.007067</td>
+<td>0.0178</td>
+<td>2.411942</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/12_cook_distance_by_index.png"
+alt="Distância de Cook por índice" />
+<figcaption aria-hidden="true">Distância de Cook por índice</figcaption>
+</figure>
+<figure>
+<img src="figures/13_studentized_residuals_by_index.png"
+alt="Resíduos studentizados por índice" />
+<figcaption aria-hidden="true">Resíduos studentizados por
+índice</figcaption>
+</figure>
+<figure>
+<img src="figures/14_leverage_vs_studentized_residuals.png"
+alt="Leverage versus resíduos studentizados" />
+<figcaption aria-hidden="true">Leverage versus resíduos
+studentizados</figcaption>
+</figure>
+<h1 id="validação-cruzada-por-blocos">16. Validação cruzada por
+blocos</h1>
+<p>A validação por blocos usa cinco blocos contíguos ordenados,
+treinando em quatro blocos e testando no bloco remanescente. Isso evita
+usar apenas uma validação aleatória que mistura pontos vizinhos da
+rampa.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>fold</th>
+<th>train_samples</th>
+<th>test_samples</th>
+<th>MAE_mA</th>
+<th>RMSE_mA</th>
+<th>max_abs_error_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>452</td>
+<td>114</td>
+<td>1.094951</td>
+<td>1.149833</td>
+<td>1.640076</td>
+</tr>
+<tr>
+<td>2</td>
+<td>453</td>
+<td>113</td>
+<td>0.336214</td>
+<td>0.391106</td>
+<td>0.604763</td>
+</tr>
+<tr>
+<td>3</td>
+<td>453</td>
+<td>113</td>
+<td>0.614323</td>
+<td>0.672667</td>
+<td>1.249332</td>
+</tr>
+<tr>
+<td>4</td>
+<td>453</td>
+<td>113</td>
+<td>0.287021</td>
+<td>0.314989</td>
+<td>0.575789</td>
+</tr>
+<tr>
+<td>5</td>
+<td>453</td>
+<td>113</td>
+<td>0.469936</td>
+<td>0.525130</td>
+<td>0.978239</td>
+</tr>
+</tbody>
+</table>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>folds</th>
+<th>RMSE_mean_mA</th>
+<th>RMSE_sd_mA</th>
+<th>MAE_mean_mA</th>
+<th>MAE_sd_mA</th>
+<th>max_abs_error_mean_mA</th>
+<th>max_abs_error_sd_mA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td>0.610745</td>
+<td>0.330716</td>
+<td>0.560489</td>
+<td>0.324743</td>
+<td>1.00964</td>
+<td>0.449455</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="figures/15_block_cross_validation_errors.png"
+alt="Erros da validação cruzada por blocos" />
+<figcaption aria-hidden="true">Erros da validação cruzada por
+blocos</figcaption>
+</figure>
+<h1 id="incerteza-metrológica">17. Incerteza metrológica</h1>
+<p>A incerteza foi tratada como orçamento configurável. Parâmetros de
+instrumento que não estavam disponíveis foram deixados como placeholders
+explícitos para substituição por especificações calibradas.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>uncertainty_source</th>
+<th>assumed_value</th>
+<th>effect_on_metric</th>
+<th>observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shunt resistance tolerance</td>
+<td>1%</td>
+<td>Approx. current standard uncertainty contribution: 0.170101 mA</td>
+<td>Assumes tolerance is representative; replace with calibrated
+resistor data when available.</td>
+</tr>
+<tr>
+<td>Oscilloscope voltage uncertainty</td>
+<td>0.002 V</td>
+<td>Current uncertainty contribution: 0.2 mA</td>
+<td>Placeholder; replace with calibrated instrument specification.</td>
+</tr>
+<tr>
+<td>Load resistance tolerance</td>
+<td>1%</td>
+<td>Reconstructed load-voltage contribution: 0.229392 V</td>
+<td>Assumes nominal load tolerance; replace with measured load
+resistance when available.</td>
+</tr>
+<tr>
+<td>DAC voltage uncertainty</td>
+<td>0.002 V</td>
+<td>Affects predicted current through model slope and DAC input; assumed
+0.002 V.</td>
+<td>Placeholder; replace with calibrated DAC/output measurement
+specification.</td>
+</tr>
+<tr>
+<td>Linear-model coefficient covariance</td>
+<td>vcov(lm)</td>
+<td>Used through predict.lm confidence interval for mean predicted
+current.</td>
+<td>Coefficient uncertainty is represented in mean confidence intervals;
+prediction intervals include residual scatter.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>metric</th>
+<th>load</th>
+<th>value</th>
+<th>unit</th>
+<th>observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>estimated_sampling_rate</td>
+<td>NA</td>
+<td></td>
+<td>Hz</td>
+<td>CSV files do not provide a calibrated time column; sample index
+alone is insufficient.</td>
+</tr>
+<tr>
+<td>current_drift_over_ramp</td>
+<td>1k</td>
+<td>-0.001554</td>
+<td>mA/sample</td>
+<td>Slope estimated over retained compliance region.</td>
+</tr>
+<tr>
+<td>current_drift_over_ramp</td>
+<td>2k</td>
+<td>-0.001524</td>
+<td>mA/sample</td>
+<td>Slope estimated over retained compliance region.</td>
+</tr>
+<tr>
+<td>current_drift_over_ramp</td>
+<td>4k7</td>
+<td>-0.001435</td>
+<td>mA/sample</td>
+<td>Slope estimated over retained compliance region.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="métricas-de-fes-não-avaliadas">18. Métricas de FES não
+avaliadas</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>metric</th>
+<th>reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cycle-by-cycle amplitude</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Pulse width</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Stimulation frequency</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Charge per phase</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Charge balancing</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Overshoot</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Ringing</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Rise time</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Fall time</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Waveform distortion</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+<tr>
+<td>Long-term thermal/temporal stability</td>
+<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
+nao ha aquisicao de forma de onda pulsada.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="conclusões-revisadas">19. Conclusões revisadas</h1>
+<p>A caracterização sustenta um modelo linear de corrente em função do
+DAC apenas dentro da região comum de compliance definida pela tensão
+reconstruída na carga e pela manutenção de inclinação local compatível
+com o trecho linear. O modelo global é útil como aproximação
+operacional, mas sua adequação deve ser julgada junto com os erros de
+predição, intervalos de confiança/predição, diagnóstico residual,
+autocorrelação temporal e orçamento de incerteza. A ausência de
+realimentação de corrente no STIMGRASP limita a garantia de corrente
+entregue em operação real, especialmente fora das condições de carga
+ensaiadas ou quando o circuito se aproxima dos limites de
+compliance.</p>
+<p>Análises como PCA, cluster e testes de média global foram preservadas
+somente como material secundário/didático e não são usadas como
+evidência central de validade metrológica do estágio de saída.</p>
+</body>
+</html>

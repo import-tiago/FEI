@@ -1,2 +1,2 @@
 test,statistic,parameter,p_value,method,alpha,interpretation
-manual_breusch_pagan_residual_squared_on_fitted,116.93180955200789,1,2.97109176945969e-27,fallback,0.05,Ha evidencia de heterocedasticidade; a hipotese de variancia constante e questionavel.
+manual_breusch_pagan_residual_squared_on_fitted,27.83868163127537,1,1.3186320714989048e-7,fallback,0.05,Ha evidencia de heterocedasticidade; a hipotese de variancia constante e questionavel.

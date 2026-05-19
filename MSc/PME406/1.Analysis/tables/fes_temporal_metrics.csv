@@ -1,5 +1,5 @@
 metric,load,value,unit,observation
 estimated_sampling_rate,NA,NA,Hz,CSV files do not provide a calibrated time column; sample index alone is insufficient.
-current_drift_over_ramp,1k,-0.0015540951679123896,mA/sample,Slope estimated over retained compliance region.
-current_drift_over_ramp,2k,-0.0011637394232026541,mA/sample,Slope estimated over retained compliance region.
+current_drift_over_ramp,1k,-0.0015542927918274448,mA/sample,Slope estimated over retained compliance region.
+current_drift_over_ramp,2k,-0.001523884846542544,mA/sample,Slope estimated over retained compliance region.
 current_drift_over_ramp,4k7,-0.0014351490401939952,mA/sample,Slope estimated over retained compliance region.

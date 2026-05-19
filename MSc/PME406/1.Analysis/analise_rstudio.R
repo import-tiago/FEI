@@ -17,6 +17,8 @@ alpha <- 0.05
 confidence_level <- 1 - alpha
 n_block_folds <- 5
 dac_step <- 0.01
+compliance_slope_fraction <- 0.5
+compliance_reference_fraction <- 0.5
 
 shunt_resistance_ohm <- 10
 shunt_resistance_tolerance <- 0.01
@@ -24,9 +26,9 @@ load_resistance_tolerance <- 0.01
 scope_voltage_uncertainty_V <- 0.002 # replace with calibrated instrument specification
 dac_voltage_uncertainty_V <- 0.002 # replace with calibrated instrument specification
 
-url_1k <- "https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PEL309/0.Data/1k.csv"
-url_2k <- "https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PEL309/0.Data/2k.csv"
-url_4k7 <- "https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PEL309/0.Data/4k7.csv"
+url_1k <- "https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/1k.csv"
+url_2k <- "https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/2k.csv"
+url_4k7 <- "https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/4k7.csv"
 
 load_resistance_ohm <- c("1k" = 1000, "2k" = 2000, "4k7" = 4700)
 load_levels <- names(load_resistance_ohm)
@@ -80,6 +82,10 @@ markdown_table <- function(df, digits = 6, max_rows = Inf) {
   rows <- apply(display, 1, \(row) paste(row, collapse = " | "))
   paste(c(paste0("| ", header, " |"), paste0("| ", separator, " |"),
           paste0("| ", rows, " |")), collapse = "\n")
+}
+
+markdown_figure <- function(path, caption) {
+  paste0("![", caption, "](", path, ")")
 }
 
 hypothesis_decision <- function(p_value, alpha = 0.05) {
@@ -537,9 +543,42 @@ common_v_min <- -common_abs_v_max
 common_v_max <- common_abs_v_max
 
 compliance_class_data <- processed_current_data |>
+  group_by(load) |>
+  arrange(dac_bin, .by_group = TRUE) |>
   mutate(
-    in_common_compliance_region = abs(load_voltage_V) <= common_abs_v_max
-  )
+    previous_slope_mA_per_V = (current_mA - lag(current_mA)) / (dac_bin - lag(dac_bin)),
+    next_slope_mA_per_V = (lead(current_mA) - current_mA) / (lead(dac_bin) - dac_bin),
+    local_slope_mA_per_V = coalesce(
+      (previous_slope_mA_per_V + next_slope_mA_per_V) / 2,
+      previous_slope_mA_per_V,
+      next_slope_mA_per_V
+    ),
+    reference_slope_mA_per_V = median(
+      abs(local_slope_mA_per_V[abs(load_voltage_V) <= common_abs_v_max * compliance_reference_fraction]),
+      na.rm = TRUE
+    ),
+    slope_threshold_mA_per_V = reference_slope_mA_per_V * compliance_slope_fraction
+  ) |>
+  ungroup() |>
+  mutate(
+    inside_common_voltage_limit = abs(load_voltage_V) <= common_abs_v_max,
+    inside_linear_slope_region = abs(local_slope_mA_per_V) >= slope_threshold_mA_per_V,
+    compliance_candidate = inside_common_voltage_limit & inside_linear_slope_region
+  ) |>
+  group_by(load) |>
+  arrange(dac_bin, .by_group = TRUE) |>
+  mutate(
+    compliance_run_id = cumsum(compliance_candidate != lag(compliance_candidate, default = first(compliance_candidate)))
+  ) |>
+  group_by(load, compliance_run_id) |>
+  mutate(compliance_run_points = if_else(first(compliance_candidate), n(), 0L)) |>
+  ungroup() |>
+  group_by(load) |>
+  mutate(
+    max_compliance_run_points = max(compliance_run_points, na.rm = TRUE),
+    in_common_compliance_region = compliance_candidate & compliance_run_points == max_compliance_run_points
+  ) |>
+  ungroup()
 
 compliance_summary <- compliance_class_data |>
   group_by(load) |>
@@ -548,6 +587,8 @@ compliance_summary <- compliance_class_data |>
     Vmax = max(load_voltage_V, na.rm = TRUE),
     common_Vmin = common_v_min,
     common_Vmax = common_v_max,
+    reference_slope_mA_per_V = first(reference_slope_mA_per_V),
+    slope_threshold_mA_per_V = first(slope_threshold_mA_per_V),
     total_points = n(),
     retained_points = sum(in_common_compliance_region, na.rm = TRUE),
     removed_points = total_points - retained_points,
@@ -977,9 +1018,9 @@ report_sections <- c(
   "",
   markdown_table(ramp_sample_summary),
   "",
-  paste0("Figura: ", figure_paths$raw_stationary_segments_plot),
+  markdown_figure(figure_paths$raw_stationary_segments_plot, "Sinais brutos antes da remoção dos segmentos estacionários"),
   "",
-  paste0("Figura: ", figure_paths$ramp_signals_plot),
+  markdown_figure(figure_paths$ramp_signals_plot, "Sinais da rampa após a remoção dos segmentos estacionários"),
   "",
   "# 3. Conversão shunt-corrente",
   "",
@@ -987,15 +1028,15 @@ report_sections <- c(
          shunt_resistance_ohm, " Ohm. A tolerância configurada do shunt é ",
          shunt_resistance_tolerance * 100, "%."),
   "",
-  paste0("Figura: ", figure_paths$current_after_conversion_plot),
+  markdown_figure(figure_paths$current_after_conversion_plot, "Corrente calculada após conversão da tensão no shunt"),
   "",
   "# 4. Identificação da região de compliance",
   "",
-  "A região comum de compliance foi definida antes da regressão usando critério físico baseado na tensão reconstruída na carga. O limite comum foi tomado como a menor magnitude máxima de tensão reconstruída entre as cargas, definindo uma faixa simétrica comum em torno de zero. O modelo linear deve ser interpretado apenas dentro dessa região comum.",
+  "A região comum de compliance foi definida antes da regressão usando dois critérios: limite físico pela tensão reconstruída na carga e inclinação local mínima compatível com o trecho linear de cada carga. O limite comum de tensão foi tomado como a menor magnitude máxima de tensão reconstruída entre as cargas, definindo uma faixa simétrica comum em torno de zero; em seguida, foram mantidos apenas os pontos do maior trecho contínuo com inclinação local suficiente. O modelo linear deve ser interpretado apenas dentro dessa região comum.",
   "",
   markdown_table(compliance_summary),
   "",
-  paste0("Figura: ", figure_paths$compliance_highlight_plot),
+  markdown_figure(figure_paths$compliance_highlight_plot, "Pontos retidos e removidos pelo critério de compliance"),
   "",
   "# 5. Estatística descritiva relevante",
   "",
@@ -1041,19 +1082,19 @@ report_sections <- c(
   "",
   markdown_table(prediction_error_summary),
   "",
-  paste0("Figura: ", figure_paths$measured_vs_predicted_plot),
+  markdown_figure(figure_paths$measured_vs_predicted_plot, "Corrente medida versus corrente predita"),
   "",
-  paste0("Figura: ", figure_paths$confidence_band_plot),
+  markdown_figure(figure_paths$confidence_band_plot, "Banda de confiança da corrente em função do DAC"),
   "",
-  paste0("Figura: ", figure_paths$prediction_band_plot),
+  markdown_figure(figure_paths$prediction_band_plot, "Banda de predição da corrente em função do DAC"),
   "",
   "# 12. Diagnóstico dos resíduos",
   "",
   markdown_table(residual_diagnostics_summary),
   "",
-  paste0("Figura: ", figure_paths$residuals_vs_dac_plot),
+  markdown_figure(figure_paths$residuals_vs_dac_plot, "Resíduos em função do DAC"),
   "",
-  paste0("Figura: ", figure_paths$residuals_vs_predicted_plot),
+  markdown_figure(figure_paths$residuals_vs_predicted_plot, "Resíduos em função dos valores preditos"),
   "",
   "# 13. Homocedasticidade",
   "",
@@ -1065,7 +1106,7 @@ report_sections <- c(
   "",
   markdown_table(autocorrelation_test_summary),
   "",
-  paste0("Figura: ", figure_paths$acf_residual_plot),
+  markdown_figure(figure_paths$acf_residual_plot, "Autocorrelação dos resíduos"),
   "",
   "# 15. Outliers e influência",
   "",
@@ -1073,11 +1114,11 @@ report_sections <- c(
   "",
   markdown_table(influence_diagnostics_summary),
   "",
-  paste0("Figura: ", figure_paths$cook_distance_plot),
+  markdown_figure(figure_paths$cook_distance_plot, "Distância de Cook por índice"),
   "",
-  paste0("Figura: ", figure_paths$studentized_residual_plot),
+  markdown_figure(figure_paths$studentized_residual_plot, "Resíduos studentizados por índice"),
   "",
-  paste0("Figura: ", figure_paths$leverage_studentized_plot),
+  markdown_figure(figure_paths$leverage_studentized_plot, "Leverage versus resíduos studentizados"),
   "",
   "# 16. Validação cruzada por blocos",
   "",
@@ -1087,7 +1128,7 @@ report_sections <- c(
   "",
   markdown_table(block_cv_summary),
   "",
-  paste0("Figura: ", figure_paths$block_cv_plot),
+  markdown_figure(figure_paths$block_cv_plot, "Erros da validação cruzada por blocos"),
   "",
   "# 17. Incerteza metrológica",
   "",
@@ -1103,7 +1144,7 @@ report_sections <- c(
   "",
   "# 19. Conclusões revisadas",
   "",
-  "A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida fisicamente pela tensão reconstruída na carga. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual, autocorrelação temporal e orçamento de incerteza. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.",
+  "A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida pela tensão reconstruída na carga e pela manutenção de inclinação local compatível com o trecho linear. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual, autocorrelação temporal e orçamento de incerteza. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.",
   "",
   "Análises como PCA, cluster e testes de média global foram preservadas somente como material secundário/didático e não são usadas como evidência central de validade metrológica do estágio de saída.",
   ""

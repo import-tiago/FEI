@@ -1,6 +1,6 @@
 uncertainty_source,assumed_value,effect_on_metric,observation
-Shunt resistance tolerance,1%,Approx. current standard uncertainty contribution: 0.17843 mA,Assumes tolerance is representative; replace with calibrated resistor data when available.
+Shunt resistance tolerance,1%,Approx. current standard uncertainty contribution: 0.170101 mA,Assumes tolerance is representative; replace with calibrated resistor data when available.
 Oscilloscope voltage uncertainty,0.002 V,Current uncertainty contribution: 0.2 mA,Placeholder; replace with calibrated instrument specification.
-Load resistance tolerance,1%,Reconstructed load-voltage contribution: 0.257513 V,Assumes nominal load tolerance; replace with measured load resistance when available.
+Load resistance tolerance,1%,Reconstructed load-voltage contribution: 0.229392 V,Assumes nominal load tolerance; replace with measured load resistance when available.
 DAC voltage uncertainty,0.002 V,Affects predicted current through model slope and DAC input; assumed 0.002 V.,Placeholder; replace with calibrated DAC/output measurement specification.
 Linear-model coefficient covariance,vcov(lm),Used through predict.lm confidence interval for mean predicted current.,Coefficient uncertainty is represented in mean confidence intervals; prediction intervals include residual scatter.
