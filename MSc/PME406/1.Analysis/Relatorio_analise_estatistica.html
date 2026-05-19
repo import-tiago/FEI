@@ -5,12 +5,13 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Tiago P. Silva" />
-  <title>Relatório de Caracterização Estatística do Estágio de Saída FES/STIMGRASP</title>
+  <title>Relatório de Caracterização Experimental e Estatística do Estágio de Saída de um Estimulador Elétrico Funcional</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
     html {
+      font-family: Times New Roman;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -174,15 +175,96 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Relatório de Caracterização Estatística do Estágio de
-Saída FES/STIMGRASP</h1>
+<h1 class="title">Relatório de Caracterização Experimental e Estatística
+do Estágio de Saída de um Estimulador Elétrico Funcional</h1>
 <p class="author">Tiago P. Silva</p>
 <p class="date">19 de maio de 2026</p>
 </header>
 <nav id="TOC" role="doc-toc">
 
 </nav>
-<h1 id="desenho-experimental-e-limitações">1. Desenho experimental e
+<h1 id="problema">1. Problema</h1>
+<p>O item de estudo é o estágio de saída de um estimulador elétrico
+funcional (FES) baseado em uma fonte de corrente Howland. Mais
+especificamente, trata-se do eletroestimulador STIMGRASP, desenvolvido
+por Renato Barelli em 2017 como parte de uma dissertação de
+mestrado.</p>
+<p>Na dissertação de Renato Barelli, a arquitetura é apresentada e a
+linearidade do estágio de saída é afirmada como característica esperada
+do circuito, mas não é feita uma caracterização experimental
+quantitativa dessa linearidade. Também não são avaliadas, de forma
+sistemática, a dependência da corrente em relação à carga conectada nem
+os limites de operação em tensão impostos pela arquitetura.</p>
+<p>Nesta arquitetura, o microcontrolador define uma tensão de controle
+no DAC, e essa tensão deve produzir uma corrente de saída previsível no
+paciente ou em uma carga equivalente.</p>
+<p>O problema central é que o circuito opera em malha aberta: o
+microcontrolador não mede a corrente real entregue durante a operação.
+Assim, se a carga mudar, se o contato eletrodo-pele piorar ou se o
+circuito atingir seu limite de tensão de operação (voltage compliance),
+a corrente entregue pode deixar de seguir o valor esperado. Como não há
+realimentação de corrente, essa perda de previsibilidade não é detectada
+diretamente pelo firmware do STIMGRASP.</p>
+<p>Por isso, é necessário caracterizar experimentalmente a relação entre
+tensão de DAC e corrente de saída, identificando a região em que o
+circuito se comporta aproximadamente como fonte de corrente, a
+influência da carga resistiva sobre a corrente entregue, um modelo
+matemático útil para estimar a corrente a partir do DAC e evidências
+estatísticas sobre linearidade, erro, incerteza e limitação por
+compliance.</p>
+<h1 id="motivação">2. Motivação</h1>
+<p>Em estimulação elétrica funcional, a amplitude de corrente está
+associada à resposta neuromuscular, ao conforto do usuário e à
+repetibilidade do protocolo de estimulação. Se a corrente real não for
+previsível, o mesmo comando digital pode gerar respostas diferentes em
+diferentes condições de carga.</p>
+<p>Este relatório é inspirado no artigo <em>Experimental
+Characterization of the Output Stage of a Functional Electrical
+Stimulator Based on a Howland Current Source</em>, produzido no contexto
+da disciplina PEL309 [1]. Naquele trabalho, com análise em Python, o
+STIMGRASP foi caracterizado experimentalmente por meio da relação entre
+tensão de DAC e corrente de saída, seleção da região de compliance,
+correlação e regressão linear.</p>
+<p>O presente relatório revisa e aprofunda essa caracterização em R, com
+uma análise estatística mais cuidadosa para a disciplina PME406. A
+versão atual prioriza a validade metrológica da caracterização: a região
+útil é definida antes da regressão, os modelos são avaliados por erro,
+resíduos, intervalos, validação cruzada e incerteza, e análises
+multivariadas ou didáticas são tratadas como material secundário quando
+não sustentam diretamente a conclusão técnica.</p>
+<h1 id="objetivo">3. Objetivo</h1>
+<p>O objetivo do script é executar uma análise estatística da relação
+entre tensão de DAC e corrente de saída para três cargas resistivas
+nominais: 1 kOhm, 2 kOhm e 4,7 kOhm.</p>
+<p>Os objetivos específicos são:</p>
+<ul>
+<li>importar os dados experimentais do osciloscópio;</li>
+<li>extrair a região útil da rampa de DAC;</li>
+<li>converter tensão no resistor shunt em corrente de saída;</li>
+<li>agregar os dados por bins de tensão de DAC;</li>
+<li>identificar a região comum de compliance;</li>
+<li>avaliar linearidade por correlação e regressão;</li>
+<li>comparar modelo global e modelo com interação carga x DAC;</li>
+<li>quantificar erro de predição, resíduos, autocorrelação temporal e
+pontos influentes;</li>
+<li>explicitar limitações de normalidade e independência dos
+resíduos.</li>
+</ul>
+<h1 id="estrutura-da-análise">4. Estrutura da análise</h1>
+<p>O arquivo principal é <a
+href="https://github.com/import-tiago/FEI/blob/main/MSc/PME406/1.Analysis/analise_rstudio.R">analise_rstudio.R</a>.
+O script lê os CSVs exportados do osciloscópio, remove trechos
+estacionários antes e depois da rampa útil, calcula corrente a partir da
+tensão no resistor shunt, reconstrói a tensão na carga por resistência
+nominal e agrega os dados por bins de DAC de 10 mV.</p>
+<p>A partir desse conjunto processado, o relatório seleciona a região
+comum de compliance, ajusta modelos lineares, compara modelos aninhados
+por ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia
+heterocedasticidade e autocorrelação temporal e identifica pontos
+influentes. Todas as tabelas são exportadas para a pasta
+<code>tables</code>, e as figuras são exportadas para a pasta
+<code>figures</code>.</p>
+<h1 id="desenho-experimental-e-limitações">5. Desenho experimental e
 limitações</h1>
 <p>Foram analisadas rampas de tensão de DAC e tensão no resistor shunt
 para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A
@@ -191,11 +273,100 @@ por resistência nominal. Como o sistema opera em malha aberta, a
 regressão caracteriza o comportamento observado no ensaio, mas não
 garante corrente entregue em operação real quando a carga, contato
 eletrodo-pele ou condições térmicas mudam.</p>
-<h1 id="importação-e-pré-processamento">2. Importação e
+<h1 id="importação-e-pré-processamento">6. Importação e
 pré-processamento</h1>
 <p>Os CSVs foram importados diretamente dos arquivos do osciloscópio,
 removendo os segmentos estacionários antes e depois da rampa útil. As
 três cargas foram equalizadas para a mesma quantidade de amostras.</p>
+<p>Cada arquivo contém duas grandezas principais:
+<code>dac_volts</code>, que representa a tensão de controle aplicada ao
+estágio de saída, e <code>shunt_volts</code>, que representa a tensão
+medida no resistor shunt e é usada para calcular a corrente.</p>
+<p>Os dados brutos podem ser acessados diretamente nos links:</p>
+<ul>
+<li>1 kOhm: <a
+href="https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/1k.csv"
+class="uri">https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/1k.csv</a></li>
+<li>2 kOhm: <a
+href="https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/2k.csv"
+class="uri">https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/2k.csv</a></li>
+<li>4,7 kOhm: <a
+href="https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/4k7.csv"
+class="uri">https://raw.githubusercontent.com/import-tiago/FEI/refs/heads/main/MSc/PME406/0.Data/4k7.csv</a></li>
+</ul>
+<p>Antes de qualquer tratamento, a carga de 1 kOhm possui a seguinte
+prévia dos dados crus:</p>
+<table>
+<thead>
+<tr>
+<th>dac_volts</th>
+<th>shunt_volts</th>
+<th>sample</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.626406</td>
+<td>0.002984</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1.628438</td>
+<td>0.002797</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1.627500</td>
+<td>0.001016</td>
+<td>2</td>
+</tr>
+<tr>
+<td>1.628906</td>
+<td>0.003047</td>
+<td>3</td>
+</tr>
+<tr>
+<td>1.627031</td>
+<td>0.005047</td>
+<td>4</td>
+</tr>
+<tr>
+<td>1.627031</td>
+<td>0.002875</td>
+<td>5</td>
+</tr>
+<tr>
+<td>1.627031</td>
+<td>0.003156</td>
+<td>6</td>
+</tr>
+<tr>
+<td>1.627500</td>
+<td>0.002609</td>
+<td>7</td>
+</tr>
+<tr>
+<td>1.625312</td>
+<td>0.002125</td>
+<td>8</td>
+</tr>
+<tr>
+<td>1.626719</td>
+<td>0.003266</td>
+<td>9</td>
+</tr>
+<tr>
+<td>1.626406</td>
+<td>0.003500</td>
+<td>10</td>
+</tr>
+<tr>
+<td>1.626406</td>
+<td>0.002469</td>
+<td>11</td>
+</tr>
+</tbody>
+</table>
 <table>
 <thead>
 <tr>
@@ -230,7 +401,7 @@ alt="Sinais da rampa após a remoção dos segmentos estacionários" />
 <figcaption aria-hidden="true">Sinais da rampa após a remoção dos
 segmentos estacionários</figcaption>
 </figure>
-<h1 id="conversão-shunt-corrente">3. Conversão shunt-corrente</h1>
+<h1 id="conversão-shunt-corrente">7. Conversão shunt-corrente</h1>
 <p>A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = 10
 Ohm. A tolerância configurada do shunt é 1%.</p>
 <figure>
@@ -239,7 +410,7 @@ alt="Corrente calculada após conversão da tensão no shunt" />
 <figcaption aria-hidden="true">Corrente calculada após conversão da
 tensão no shunt</figcaption>
 </figure>
-<h1 id="identificação-da-região-de-compliance">4. Identificação da
+<h1 id="identificação-da-região-de-compliance">8. Identificação da
 região de compliance</h1>
 <p>A região comum de compliance foi definida antes da regressão usando
 dois critérios: limite físico pela tensão reconstruída na carga e
@@ -326,7 +497,7 @@ alt="Pontos retidos e removidos pelo critério de compliance" />
 <figcaption aria-hidden="true">Pontos retidos e removidos pelo critério
 de compliance</figcaption>
 </figure>
-<h1 id="estatística-descritiva-relevante">5. Estatística descritiva
+<h1 id="estatística-descritiva-relevante">9. Estatística descritiva
 relevante</h1>
 <p>Resumo da região linear retida:</p>
 <table style="width:100%;">
@@ -390,7 +561,7 @@ relevante</h1>
 </tr>
 </tbody>
 </table>
-<h1 id="correlação-exploratória">6. Correlação exploratória</h1>
+<h1 id="correlação-exploratória">10. Correlação exploratória</h1>
 <p>Correlação foi mantida apenas como evidência exploratória de
 associação monotônica/linear entre DAC e corrente. A validade do
 circuito é discutida a partir de erro, resíduos, intervalos e
@@ -449,7 +620,7 @@ residuos, erro e incerteza.</td>
 </tr>
 </tbody>
 </table>
-<h1 id="modelos-lineares-por-carga">7. Modelos lineares por carga</h1>
+<h1 id="modelos-lineares-por-carga">11. Modelos lineares por carga</h1>
 <p>Modelos independentes por carga foram ajustados como current_mA ~
 dac_bin.</p>
 <table style="width:100%;">
@@ -513,7 +684,7 @@ dac_bin.</p>
 </tr>
 </tbody>
 </table>
-<h1 id="modelo-global">8. Modelo global</h1>
+<h1 id="modelo-global">12. Modelo global</h1>
 <p>O modelo global foi ajustado como current_mA ~ dac_bin dentro da
 região comum de compliance.</p>
 <table>
@@ -552,7 +723,7 @@ região comum de compliance.</p>
 </tr>
 </tbody>
 </table>
-<h1 id="modelo-com-interação-carga-x-dac">9. Modelo com interação carga
+<h1 id="modelo-com-interação-carga-x-dac">13. Modelo com interação carga
 x DAC</h1>
 <p>O modelo com interação foi ajustado como current_mA ~ dac_bin *
 load.</p>
@@ -790,7 +961,7 @@ load.</p>
 </tr>
 </tbody>
 </table>
-<h1 id="comparação-entre-modelos">10. Comparação entre modelos</h1>
+<h1 id="comparação-entre-modelos">14. Comparação entre modelos</h1>
 <p>A comparação formal entre o modelo global e o modelo com interação
 foi feita por ANOVA/teste F para modelos aninhados.</p>
 <table style="width:100%;">
@@ -848,7 +1019,7 @@ relacao ao modelo global.</td>
 </tr>
 </tbody>
 </table>
-<h1 id="erro-de-predição">11. Erro de predição</h1>
+<h1 id="erro-de-predição">15. Erro de predição</h1>
 <p>As métricas de erro foram calculadas dentro da região linear: MAE,
 RMSE e maior erro absoluto.</p>
 <table>
@@ -945,7 +1116,7 @@ alt="Banda de predição da corrente em função do DAC" />
 <figcaption aria-hidden="true">Banda de predição da corrente em função
 do DAC</figcaption>
 </figure>
-<h1 id="diagnóstico-dos-resíduos">12. Diagnóstico dos resíduos</h1>
+<h1 id="diagnóstico-dos-resíduos">16. Diagnóstico dos resíduos</h1>
 <table>
 <colgroup>
 <col style="width: 9%" />
@@ -1003,7 +1174,7 @@ alt="Resíduos em função dos valores preditos" />
 <figcaption aria-hidden="true">Resíduos em função dos valores
 preditos</figcaption>
 </figure>
-<h1 id="homocedasticidade">13. Homocedasticidade</h1>
+<h1 id="homocedasticidade">17. Homocedasticidade</h1>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 14%" />
@@ -1038,7 +1209,7 @@ constante e questionavel.</td>
 </tr>
 </tbody>
 </table>
-<h1 id="autocorrelação-temporal">14. Autocorrelação temporal</h1>
+<h1 id="autocorrelação-temporal">18. Autocorrelação temporal</h1>
 <p>Como os dados vêm de uma rampa temporal, a independência dos resíduos
 não foi assumida automaticamente.</p>
 <table style="width:100%;">
@@ -1077,7 +1248,7 @@ regressao podem estar otimistas.</td>
 alt="Autocorrelação dos resíduos" />
 <figcaption aria-hidden="true">Autocorrelação dos resíduos</figcaption>
 </figure>
-<h1 id="outliers-e-influência">15. Outliers e influência</h1>
+<h1 id="outliers-e-influência">19. Outliers e influência</h1>
 <p>Foram calculados resíduos studentizados, leverage e distância de
 Cook. Pontos foram apenas marcados e reportados; a remoção automática
 permanece desativada por padrão.</p>
@@ -1128,7 +1299,7 @@ alt="Leverage versus resíduos studentizados" />
 <figcaption aria-hidden="true">Leverage versus resíduos
 studentizados</figcaption>
 </figure>
-<h1 id="validação-cruzada-por-blocos">16. Validação cruzada por
+<h1 id="validação-cruzada-por-blocos">20. Validação cruzada por
 blocos</h1>
 <p>A validação por blocos usa cinco blocos contíguos ordenados,
 treinando em quatro blocos e testando no bloco remanescente. Isso evita
@@ -1235,198 +1406,24 @@ alt="Erros da validação cruzada por blocos" />
 <figcaption aria-hidden="true">Erros da validação cruzada por
 blocos</figcaption>
 </figure>
-<h1 id="incerteza-metrológica">17. Incerteza metrológica</h1>
-<p>A incerteza foi tratada como orçamento configurável. Parâmetros de
-instrumento que não estavam disponíveis foram deixados como placeholders
-explícitos para substituição por especificações calibradas.</p>
-<table>
-<colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-</colgroup>
-<thead>
-<tr>
-<th>uncertainty_source</th>
-<th>assumed_value</th>
-<th>effect_on_metric</th>
-<th>observation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Shunt resistance tolerance</td>
-<td>1%</td>
-<td>Approx. current standard uncertainty contribution: 0.170101 mA</td>
-<td>Assumes tolerance is representative; replace with calibrated
-resistor data when available.</td>
-</tr>
-<tr>
-<td>Oscilloscope voltage uncertainty</td>
-<td>0.002 V</td>
-<td>Current uncertainty contribution: 0.2 mA</td>
-<td>Placeholder; replace with calibrated instrument specification.</td>
-</tr>
-<tr>
-<td>Load resistance tolerance</td>
-<td>1%</td>
-<td>Reconstructed load-voltage contribution: 0.229392 V</td>
-<td>Assumes nominal load tolerance; replace with measured load
-resistance when available.</td>
-</tr>
-<tr>
-<td>DAC voltage uncertainty</td>
-<td>0.002 V</td>
-<td>Affects predicted current through model slope and DAC input; assumed
-0.002 V.</td>
-<td>Placeholder; replace with calibrated DAC/output measurement
-specification.</td>
-</tr>
-<tr>
-<td>Linear-model coefficient covariance</td>
-<td>vcov(lm)</td>
-<td>Used through predict.lm confidence interval for mean predicted
-current.</td>
-<td>Coefficient uncertainty is represented in mean confidence intervals;
-prediction intervals include residual scatter.</td>
-</tr>
-</tbody>
-</table>
-<table>
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-</colgroup>
-<thead>
-<tr>
-<th>metric</th>
-<th>load</th>
-<th>value</th>
-<th>unit</th>
-<th>observation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>estimated_sampling_rate</td>
-<td>NA</td>
-<td></td>
-<td>Hz</td>
-<td>CSV files do not provide a calibrated time column; sample index
-alone is insufficient.</td>
-</tr>
-<tr>
-<td>current_drift_over_ramp</td>
-<td>1k</td>
-<td>-0.001554</td>
-<td>mA/sample</td>
-<td>Slope estimated over retained compliance region.</td>
-</tr>
-<tr>
-<td>current_drift_over_ramp</td>
-<td>2k</td>
-<td>-0.001524</td>
-<td>mA/sample</td>
-<td>Slope estimated over retained compliance region.</td>
-</tr>
-<tr>
-<td>current_drift_over_ramp</td>
-<td>4k7</td>
-<td>-0.001435</td>
-<td>mA/sample</td>
-<td>Slope estimated over retained compliance region.</td>
-</tr>
-</tbody>
-</table>
-<h1 id="métricas-de-fes-não-avaliadas">18. Métricas de FES não
-avaliadas</h1>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr>
-<th>metric</th>
-<th>reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Cycle-by-cycle amplitude</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Pulse width</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Stimulation frequency</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Charge per phase</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Charge balancing</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Overshoot</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Ringing</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Rise time</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Fall time</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Waveform distortion</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-<tr>
-<td>Long-term thermal/temporal stability</td>
-<td>Os CSVs disponiveis representam apenas rampa DAC e tensao no shunt;
-nao ha aquisicao de forma de onda pulsada.</td>
-</tr>
-</tbody>
-</table>
-<h1 id="conclusões-revisadas">19. Conclusões revisadas</h1>
+<h1 id="conclusões-revisadas">21. Conclusões revisadas</h1>
 <p>A caracterização sustenta um modelo linear de corrente em função do
 DAC apenas dentro da região comum de compliance definida pela tensão
 reconstruída na carga e pela manutenção de inclinação local compatível
 com o trecho linear. O modelo global é útil como aproximação
 operacional, mas sua adequação deve ser julgada junto com os erros de
-predição, intervalos de confiança/predição, diagnóstico residual,
-autocorrelação temporal e orçamento de incerteza. A ausência de
-realimentação de corrente no STIMGRASP limita a garantia de corrente
-entregue em operação real, especialmente fora das condições de carga
-ensaiadas ou quando o circuito se aproxima dos limites de
-compliance.</p>
+predição, intervalos de confiança/predição, diagnóstico residual e
+autocorrelação temporal. A ausência de realimentação de corrente no
+STIMGRASP limita a garantia de corrente entregue em operação real,
+especialmente fora das condições de carga ensaiadas ou quando o circuito
+se aproxima dos limites de compliance.</p>
 <p>Análises como PCA, cluster e testes de média global foram preservadas
 somente como material secundário/didático e não são usadas como
 evidência central de validade metrológica do estágio de saída.</p>
+<h1 id="referências">22. Referências</h1>
+<p>[1] T. P. Silva, “Experimental Characterization of the Output Stage
+of a Functional Electrical Stimulator Based on a Howland Current
+Source,” artigo produzido no contexto da disciplina PEL309, Centro
+Universitário FEI, 2026.</p>
 </body>
 </html>
