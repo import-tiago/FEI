@@ -19,7 +19,7 @@ Nesta arquitetura, o microcontrolador define uma tensão de controle no DAC, e e
 
 O problema central é que o circuito opera em malha aberta: o microcontrolador não mede a corrente real entregue durante a operação. Assim, se a carga mudar, se o contato eletrodo-pele piorar ou se o circuito atingir seu limite de tensão de operação (voltage compliance), a corrente entregue pode deixar de seguir o valor esperado. Como não há realimentação de corrente, essa perda de previsibilidade não é detectada diretamente pelo firmware do STIMGRASP.
 
-Por isso, é necessário caracterizar experimentalmente a relação entre tensão de DAC e corrente de saída, identificando a região em que o circuito se comporta aproximadamente como fonte de corrente, a influência da carga resistiva sobre a corrente entregue, um modelo matemático útil para estimar a corrente a partir do DAC e evidências estatísticas sobre linearidade, erro, incerteza e limitação por compliance.
+Por isso, é necessário caracterizar experimentalmente a relação entre tensão de DAC e corrente de saída, identificando a região em que o circuito se comporta aproximadamente como fonte de corrente, a influência da carga resistiva sobre a corrente entregue, um modelo matemático útil para estimar a corrente a partir do DAC e evidências estatísticas sobre linearidade, erro e limitação por compliance.
 
 # 2. Motivação
 
@@ -27,11 +27,17 @@ Em estimulação elétrica funcional, a amplitude de corrente está associada à
 
 Este relatório é inspirado no artigo _Experimental Characterization of the Output Stage of a Functional Electrical Stimulator Based on a Howland Current Source_, produzido no contexto da disciplina PEL309 [1]. Naquele trabalho, com análise em Python, o STIMGRASP foi caracterizado experimentalmente por meio da relação entre tensão de DAC e corrente de saída, seleção da região de compliance, correlação e regressão linear.
 
-O presente relatório revisa e aprofunda essa caracterização em R, com uma análise estatística mais cuidadosa para a disciplina PME406. A versão atual prioriza a validade metrológica da caracterização: a região útil é definida antes da regressão, os modelos são avaliados por erro, resíduos, intervalos, validação cruzada e incerteza, e análises multivariadas ou didáticas são tratadas como material secundário quando não sustentam diretamente a conclusão técnica.
+O presente relatório revisa e aprofunda essa caracterização em R, com uma análise estatística mais cuidadosa para a disciplina PME406. A versão atual prioriza a consistência estatística da caracterização: a região útil é definida antes da regressão, os modelos são avaliados por erro, resíduos, intervalos e validação cruzada, e análises multivariadas ou didáticas são tratadas como material secundário quando não sustentam diretamente a conclusão técnica.
 
 # 3. Objetivo
 
 O objetivo do script é executar uma análise estatística da relação entre tensão de DAC e corrente de saída para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm.
+
+Seguindo a motivação apresentada no trabalho anterior, a análise é organizada em três perguntas centrais:
+
+- existe linearidade quantificável entre o sinal de controle do DAC e a corrente de saída na região válida de operação?
+- quais são os limites de tensão de operação do estágio de saída antes da limitação por compliance?
+- a relação DAC-corrente permanece consistente quando a carga resistiva muda?
 
 Os objetivos específicos são:
 
@@ -49,11 +55,19 @@ Os objetivos específicos são:
 
 O arquivo principal é [analise_rstudio.R](https://github.com/import-tiago/FEI/blob/main/MSc/PME406/1.Analysis/analise_rstudio.R). O script lê os CSVs exportados do osciloscópio, remove trechos estacionários antes e depois da rampa útil, calcula corrente a partir da tensão no resistor shunt, reconstrói a tensão na carga por resistência nominal e agrega os dados por bins de DAC de 10 mV.
 
+O fluxo de análise segue a sequência: aquisição CSV do osciloscópio, extração da rampa útil, conversão da tensão no shunt para corrente, agregação por bins de DAC, seleção da região de compliance, regressão linear, comparação entre modelos e análise dos resíduos.
+
 A partir desse conjunto processado, o relatório seleciona a região comum de compliance, ajusta modelos lineares, compara modelos aninhados por ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia heterocedasticidade e autocorrelação temporal e identifica pontos influentes. Todas as tabelas são exportadas para a pasta `tables`, e as figuras são exportadas para a pasta `figures`.
 
-# 5. Desenho experimental e limitações
+# 5. Desenho experimental, coleta e limitações
 
 Foram analisadas rampas de tensão de DAC e tensão no resistor shunt para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A análise estima corrente a partir do shunt e reconstrói a tensão na carga por resistência nominal. Como o sistema opera em malha aberta, a regressão caracteriza o comportamento observado no ensaio, mas não garante corrente entregue em operação real quando a carga, contato eletrodo-pele ou condições térmicas mudam.
+
+A coleta foi realizada com firmware experimental dedicado a gerar uma rampa controlada de DAC. A tensão de controle foi medida no canal CH1 do osciloscópio, enquanto a tensão associada à saída foi medida no canal CH2 sobre o arranjo de carga e resistor shunt. O objetivo dessa instrumentação foi caracterizar o estágio de saída, não representar uma sessão completa de estimulação terapêutica.
+
+![Estágio DAC/Howland do STIMGRASP com pontos de medição usados na coleta experimental](figures/00_output_stage_measurement_points.png)
+
+![Bancada experimental usada para aquisição dos sinais de DAC e shunt](figures/00_data_collection_setup.png)
 
 # 6. Importação e pré-processamento
 
@@ -124,13 +138,13 @@ Resumo da região linear retida:
 
 # 10. Correlação exploratória
 
-Correlação foi mantida apenas como evidência exploratória de associação monotônica/linear entre DAC e corrente. A validade do circuito é discutida a partir de erro, resíduos, intervalos e incerteza.
+Correlação foi mantida apenas como evidência exploratória de associação monotônica/linear entre DAC e corrente. A validade do circuito é discutida a partir de erro, resíduos, intervalos e limites de compliance.
 
 | load | pearson_r | pearson_p | spearman_r | spearman_p | samples | interpretation |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1k | -0.999909 | 0 | -1 | 0 | 322 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
-| 2k | -0.999897 | 0 | -1 | 0 | 168 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
-| 4k7 | -0.999815 | 0 | -1 | 0 | 76 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza. |
+| 1k | -0.999909 | 0 | -1 | 0 | 322 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance. |
+| 2k | -0.999897 | 0 | -1 | 0 | 168 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance. |
+| 4k7 | -0.999815 | 0 | -1 | 0 | 76 | Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance. |
 
 # 11. Modelos lineares por carga
 
@@ -158,22 +172,24 @@ O modelo com interação foi ajustado como current_mA ~ dac_bin * load.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | interaction_current_mA_by_dac_load | 0.999813 | 0.999811 | 0.290484 | 566 | 0.223411 | 0.288941 | 0.74369 |
 
-| model | alpha | decision | term | estimate | std_error | statistic | p_value | ci_low | ci_high |
+Nas tabelas de coeficientes, H0 representa a hipótese nula de que o coeficiente avaliado é igual a zero. Com `alpha = 0,05`, a decisão `rejeita_H0` significa que o p-valor ficou abaixo de 0,05 e há evidência estatística de que aquele termo contribui para o modelo. A decisão `nao_rejeita_H0` significa que o teste não encontrou evidência suficiente, nesse nível de significância, para afirmar que o coeficiente seja diferente de zero. Isso não prova que o coeficiente seja exatamente zero; apenas indica ausência de evidência estatística suficiente contra H0.
+
+| model | alpha | decisao | term | estimate | std_error | statistic | p_value | ci_low | ci_high |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| global_current_mA_by_dac | 0.05 | reject_H0 | (Intercept) | 46.348935 | 0.039271 | 1180.239742 | 0 | 46.271801 | 46.426070 |
-| global_current_mA_by_dac | 0.05 | reject_H0 | dac_bin | -28.033152 | 0.021733 | -1289.860154 | 0 | -28.075841 | -27.990464 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | (Intercept) | 46.618138 | 0.032754 | 1423.279796 | 0 | 46.553802 | 46.682473 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin | -28.117716 | 0.017415 | -1614.538039 | 0 | -28.151923 | -28.083509 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | load2k | -1.087684 | 0.086165 | -12.623199 | 0 | -1.256931 | -0.918437 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | load4k7 | -3.699103 | 0.254191 | -14.552452 | 0 | -4.198387 | -3.199818 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin:load2k | 0.521009 | 0.049385 | 10.549968 | 0 | 0.424007 | 0.618011 |
-| interaction_current_mA_by_dac_load | 0.05 | reject_H0 | dac_bin:load4k7 | 1.961584 | 0.152886 | 12.830399 | 0 | 1.661285 | 2.261883 |
-| load_1k | 0.05 | reject_H0 | (Intercept) | 46.618138 | 0.039924 | 1167.658226 | 0 | 46.539590 | 46.696685 |
-| load_1k | 0.05 | reject_H0 | dac_bin | -28.117716 | 0.021228 | -1324.566419 | 0 | -28.159480 | -28.075952 |
-| load_2k | 0.05 | reject_H0 | (Intercept) | 45.530454 | 0.053064 | 858.030359 | 0 | 45.425687 | 45.635221 |
-| load_2k | 0.05 | reject_H0 | dac_bin | -27.596707 | 0.030769 | -896.900438 | 0 | -27.657456 | -27.535958 |
-| load_4k7 | 0.05 | reject_H0 | (Intercept) | 42.919035 | 0.097037 | 442.296331 | 0 | 42.725685 | 43.112385 |
-| load_4k7 | 0.05 | reject_H0 | dac_bin | -26.156132 | 0.058471 | -447.332761 | 0 | -26.272639 | -26.039625 |
+| global_current_mA_by_dac | 0.05 | rejeita_H0 | (Intercept) | 46.348935 | 0.039271 | 1180.239742 | 0 | 46.271801 | 46.426070 |
+| global_current_mA_by_dac | 0.05 | rejeita_H0 | dac_bin | -28.033152 | 0.021733 | -1289.860154 | 0 | -28.075841 | -27.990464 |
+| interaction_current_mA_by_dac_load | 0.05 | rejeita_H0 | (Intercept) | 46.618138 | 0.032754 | 1423.279796 | 0 | 46.553802 | 46.682473 |
+| interaction_current_mA_by_dac_load | 0.05 | rejeita_H0 | dac_bin | -28.117716 | 0.017415 | -1614.538039 | 0 | -28.151923 | -28.083509 |
+| interaction_current_mA_by_dac_load | 0.05 | rejeita_H0 | load2k | -1.087684 | 0.086165 | -12.623199 | 0 | -1.256931 | -0.918437 |
+| interaction_current_mA_by_dac_load | 0.05 | rejeita_H0 | load4k7 | -3.699103 | 0.254191 | -14.552452 | 0 | -4.198387 | -3.199818 |
+| interaction_current_mA_by_dac_load | 0.05 | rejeita_H0 | dac_bin:load2k | 0.521009 | 0.049385 | 10.549968 | 0 | 0.424007 | 0.618011 |
+| interaction_current_mA_by_dac_load | 0.05 | rejeita_H0 | dac_bin:load4k7 | 1.961584 | 0.152886 | 12.830399 | 0 | 1.661285 | 2.261883 |
+| load_1k | 0.05 | rejeita_H0 | (Intercept) | 46.618138 | 0.039924 | 1167.658226 | 0 | 46.539590 | 46.696685 |
+| load_1k | 0.05 | rejeita_H0 | dac_bin | -28.117716 | 0.021228 | -1324.566419 | 0 | -28.159480 | -28.075952 |
+| load_2k | 0.05 | rejeita_H0 | (Intercept) | 45.530454 | 0.053064 | 858.030359 | 0 | 45.425687 | 45.635221 |
+| load_2k | 0.05 | rejeita_H0 | dac_bin | -27.596707 | 0.030769 | -896.900438 | 0 | -27.657456 | -27.535958 |
+| load_4k7 | 0.05 | rejeita_H0 | (Intercept) | 42.919035 | 0.097037 | 442.296331 | 0 | 42.725685 | 43.112385 |
+| load_4k7 | 0.05 | rejeita_H0 | dac_bin | -26.156132 | 0.058471 | -447.332761 | 0 | -26.272639 | -26.039625 |
 
 # 14. Comparação entre modelos
 
@@ -262,7 +278,9 @@ A validação por blocos usa cinco blocos contíguos ordenados, treinando em qua
 
 # 21. Conclusões revisadas
 
-A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida pela tensão reconstruída na carga e pela manutenção de inclinação local compatível com o trecho linear. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual e autocorrelação temporal. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.
+A caracterização sustenta três conclusões principais. Primeiro, há linearidade quantificável entre tensão de DAC e corrente de saída dentro da região comum de compliance, com correlações próximas de -1 e erros de predição baixos. Segundo, o STIMGRASP possui limites claros de operação em tensão: essa limitação não é necessariamente uma falha, mas reduz a faixa de corrente útil à medida que a carga aumenta. Terceiro, como a arquitetura é open-loop, o firmware não detecta em tempo real quando o estágio entra em saturação e a corrente entregue passa a ser menor do que a prevista pelo modelo.
+
+O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual e autocorrelação temporal. A principal melhoria arquitetural sugerida pela caracterização é a inclusão de realimentação de corrente, monitoramento de compliance ou outra forma de operação em malha fechada.
 
 Análises como PCA, cluster e testes de média global foram preservadas somente como material secundário/didático e não são usadas como evidência central de validade metrológica do estágio de saída.
 

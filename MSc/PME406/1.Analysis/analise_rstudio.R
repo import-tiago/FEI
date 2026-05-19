@@ -90,7 +90,7 @@ markdown_figure <- function(path, caption) {
 
 hypothesis_decision <- function(p_value, alpha = 0.05) {
   if_else(is.na(p_value), NA_character_,
-          if_else(p_value < alpha, "reject_H0", "do_not_reject_H0"))
+          if_else(p_value < alpha, "rejeita_H0", "nao_rejeita_H0"))
 }
 
 prediction_error_metrics <- function(actual, predicted) {
@@ -140,7 +140,8 @@ model_coefficients_ci <- function(model, model_name) {
       alpha = alpha,
       decision = hypothesis_decision(p_value, alpha),
       .before = 1
-    )
+    ) |>
+    rename(decisao = decision)
 }
 
 add_prediction_intervals <- function(model, data) {
@@ -630,7 +631,7 @@ correlation_summary <- linear_long |>
     spearman_r = cor(dac_bin, current_mA, method = "spearman"),
     spearman_p = cor.test(dac_bin, current_mA, method = "spearman", exact = FALSE)$p.value,
     samples = n(),
-    interpretation = "Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza.",
+    interpretation = "Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance.",
     .groups = "drop"
   )
 
@@ -1019,7 +1020,7 @@ report_sections <- c(
   "",
   "O problema central é que o circuito opera em malha aberta: o microcontrolador não mede a corrente real entregue durante a operação. Assim, se a carga mudar, se o contato eletrodo-pele piorar ou se o circuito atingir seu limite de tensão de operação (voltage compliance), a corrente entregue pode deixar de seguir o valor esperado. Como não há realimentação de corrente, essa perda de previsibilidade não é detectada diretamente pelo firmware do STIMGRASP.",
   "",
-  "Por isso, é necessário caracterizar experimentalmente a relação entre tensão de DAC e corrente de saída, identificando a região em que o circuito se comporta aproximadamente como fonte de corrente, a influência da carga resistiva sobre a corrente entregue, um modelo matemático útil para estimar a corrente a partir do DAC e evidências estatísticas sobre linearidade, erro, incerteza e limitação por compliance.",
+  "Por isso, é necessário caracterizar experimentalmente a relação entre tensão de DAC e corrente de saída, identificando a região em que o circuito se comporta aproximadamente como fonte de corrente, a influência da carga resistiva sobre a corrente entregue, um modelo matemático útil para estimar a corrente a partir do DAC e evidências estatísticas sobre linearidade, erro e limitação por compliance.",
   "",
   "# 2. Motivação",
   "",
@@ -1027,11 +1028,17 @@ report_sections <- c(
   "",
   "Este relatório é inspirado no artigo _Experimental Characterization of the Output Stage of a Functional Electrical Stimulator Based on a Howland Current Source_, produzido no contexto da disciplina PEL309 [1]. Naquele trabalho, com análise em Python, o STIMGRASP foi caracterizado experimentalmente por meio da relação entre tensão de DAC e corrente de saída, seleção da região de compliance, correlação e regressão linear.",
   "",
-  "O presente relatório revisa e aprofunda essa caracterização em R, com uma análise estatística mais cuidadosa para a disciplina PME406. A versão atual prioriza a validade metrológica da caracterização: a região útil é definida antes da regressão, os modelos são avaliados por erro, resíduos, intervalos, validação cruzada e incerteza, e análises multivariadas ou didáticas são tratadas como material secundário quando não sustentam diretamente a conclusão técnica.",
+  "O presente relatório revisa e aprofunda essa caracterização em R, com uma análise estatística mais cuidadosa para a disciplina PME406. A versão atual prioriza a consistência estatística da caracterização: a região útil é definida antes da regressão, os modelos são avaliados por erro, resíduos, intervalos e validação cruzada, e análises multivariadas ou didáticas são tratadas como material secundário quando não sustentam diretamente a conclusão técnica.",
   "",
   "# 3. Objetivo",
   "",
   "O objetivo do script é executar uma análise estatística da relação entre tensão de DAC e corrente de saída para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm.",
+  "",
+  "Seguindo a motivação apresentada no trabalho anterior, a análise é organizada em três perguntas centrais:",
+  "",
+  "- existe linearidade quantificável entre o sinal de controle do DAC e a corrente de saída na região válida de operação?",
+  "- quais são os limites de tensão de operação do estágio de saída antes da limitação por compliance?",
+  "- a relação DAC-corrente permanece consistente quando a carga resistiva muda?",
   "",
   "Os objetivos específicos são:",
   "",
@@ -1049,11 +1056,19 @@ report_sections <- c(
   "",
   "O arquivo principal é [analise_rstudio.R](https://github.com/import-tiago/FEI/blob/main/MSc/PME406/1.Analysis/analise_rstudio.R). O script lê os CSVs exportados do osciloscópio, remove trechos estacionários antes e depois da rampa útil, calcula corrente a partir da tensão no resistor shunt, reconstrói a tensão na carga por resistência nominal e agrega os dados por bins de DAC de 10 mV.",
   "",
+  "O fluxo de análise segue a sequência: aquisição CSV do osciloscópio, extração da rampa útil, conversão da tensão no shunt para corrente, agregação por bins de DAC, seleção da região de compliance, regressão linear, comparação entre modelos e análise dos resíduos.",
+  "",
   "A partir desse conjunto processado, o relatório seleciona a região comum de compliance, ajusta modelos lineares, compara modelos aninhados por ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia heterocedasticidade e autocorrelação temporal e identifica pontos influentes. Todas as tabelas são exportadas para a pasta `tables`, e as figuras são exportadas para a pasta `figures`.",
   "",
-  "# 5. Desenho experimental e limitações",
+  "# 5. Desenho experimental, coleta e limitações",
   "",
   "Foram analisadas rampas de tensão de DAC e tensão no resistor shunt para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A análise estima corrente a partir do shunt e reconstrói a tensão na carga por resistência nominal. Como o sistema opera em malha aberta, a regressão caracteriza o comportamento observado no ensaio, mas não garante corrente entregue em operação real quando a carga, contato eletrodo-pele ou condições térmicas mudam.",
+  "",
+  "A coleta foi realizada com firmware experimental dedicado a gerar uma rampa controlada de DAC. A tensão de controle foi medida no canal CH1 do osciloscópio, enquanto a tensão associada à saída foi medida no canal CH2 sobre o arranjo de carga e resistor shunt. O objetivo dessa instrumentação foi caracterizar o estágio de saída, não representar uma sessão completa de estimulação terapêutica.",
+  "",
+  markdown_figure("figures/00_output_stage_measurement_points.png", "Estágio DAC/Howland do STIMGRASP com pontos de medição usados na coleta experimental"),
+  "",
+  markdown_figure("figures/00_data_collection_setup.png", "Bancada experimental usada para aquisição dos sinais de DAC e shunt"),
   "",
   "# 6. Importação e pré-processamento",
   "",
@@ -1101,7 +1116,7 @@ report_sections <- c(
   "",
   "# 10. Correlação exploratória",
   "",
-  "Correlação foi mantida apenas como evidência exploratória de associação monotônica/linear entre DAC e corrente. A validade do circuito é discutida a partir de erro, resíduos, intervalos e incerteza.",
+  "Correlação foi mantida apenas como evidência exploratória de associação monotônica/linear entre DAC e corrente. A validade do circuito é discutida a partir de erro, resíduos, intervalos e limites de compliance.",
   "",
   markdown_table(correlation_summary),
   "",
@@ -1122,6 +1137,8 @@ report_sections <- c(
   "O modelo com interação foi ajustado como current_mA ~ dac_bin * load.",
   "",
   markdown_table(interaction_model_summary),
+  "",
+  "Nas tabelas de coeficientes, H0 representa a hipótese nula de que o coeficiente avaliado é igual a zero. Com `alpha = 0,05`, a decisão `rejeita_H0` significa que o p-valor ficou abaixo de 0,05 e há evidência estatística de que aquele termo contribui para o modelo. A decisão `nao_rejeita_H0` significa que o teste não encontrou evidência suficiente, nesse nível de significância, para afirmar que o coeficiente seja diferente de zero. Isso não prova que o coeficiente seja exatamente zero; apenas indica ausência de evidência estatística suficiente contra H0.",
   "",
   markdown_table(model_coefficients_ci_table, max_rows = 30),
   "",
@@ -1187,7 +1204,9 @@ report_sections <- c(
   "",
   "# 21. Conclusões revisadas",
   "",
-  "A caracterização sustenta um modelo linear de corrente em função do DAC apenas dentro da região comum de compliance definida pela tensão reconstruída na carga e pela manutenção de inclinação local compatível com o trecho linear. O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual e autocorrelação temporal. A ausência de realimentação de corrente no STIMGRASP limita a garantia de corrente entregue em operação real, especialmente fora das condições de carga ensaiadas ou quando o circuito se aproxima dos limites de compliance.",
+  "A caracterização sustenta três conclusões principais. Primeiro, há linearidade quantificável entre tensão de DAC e corrente de saída dentro da região comum de compliance, com correlações próximas de -1 e erros de predição baixos. Segundo, o STIMGRASP possui limites claros de operação em tensão: essa limitação não é necessariamente uma falha, mas reduz a faixa de corrente útil à medida que a carga aumenta. Terceiro, como a arquitetura é open-loop, o firmware não detecta em tempo real quando o estágio entra em saturação e a corrente entregue passa a ser menor do que a prevista pelo modelo.",
+  "",
+  "O modelo global é útil como aproximação operacional, mas sua adequação deve ser julgada junto com os erros de predição, intervalos de confiança/predição, diagnóstico residual e autocorrelação temporal. A principal melhoria arquitetural sugerida pela caracterização é a inclusão de realimentação de corrente, monitoramento de compliance ou outra forma de operação em malha fechada.",
   "",
   "Análises como PCA, cluster e testes de média global foram preservadas somente como material secundário/didático e não são usadas como evidência central de validade metrológica do estágio de saída.",
   "",

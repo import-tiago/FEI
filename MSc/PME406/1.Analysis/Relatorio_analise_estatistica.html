@@ -210,8 +210,7 @@ tensão de DAC e corrente de saída, identificando a região em que o
 circuito se comporta aproximadamente como fonte de corrente, a
 influência da carga resistiva sobre a corrente entregue, um modelo
 matemático útil para estimar a corrente a partir do DAC e evidências
-estatísticas sobre linearidade, erro, incerteza e limitação por
-compliance.</p>
+estatísticas sobre linearidade, erro e limitação por compliance.</p>
 <h1 id="motivação">2. Motivação</h1>
 <p>Em estimulação elétrica funcional, a amplitude de corrente está
 associada à resposta neuromuscular, ao conforto do usuário e à
@@ -227,15 +226,25 @@ tensão de DAC e corrente de saída, seleção da região de compliance,
 correlação e regressão linear.</p>
 <p>O presente relatório revisa e aprofunda essa caracterização em R, com
 uma análise estatística mais cuidadosa para a disciplina PME406. A
-versão atual prioriza a validade metrológica da caracterização: a região
-útil é definida antes da regressão, os modelos são avaliados por erro,
-resíduos, intervalos, validação cruzada e incerteza, e análises
-multivariadas ou didáticas são tratadas como material secundário quando
-não sustentam diretamente a conclusão técnica.</p>
+versão atual prioriza a consistência estatística da caracterização: a
+região útil é definida antes da regressão, os modelos são avaliados por
+erro, resíduos, intervalos e validação cruzada, e análises multivariadas
+ou didáticas são tratadas como material secundário quando não sustentam
+diretamente a conclusão técnica.</p>
 <h1 id="objetivo">3. Objetivo</h1>
 <p>O objetivo do script é executar uma análise estatística da relação
 entre tensão de DAC e corrente de saída para três cargas resistivas
 nominais: 1 kOhm, 2 kOhm e 4,7 kOhm.</p>
+<p>Seguindo a motivação apresentada no trabalho anterior, a análise é
+organizada em três perguntas centrais:</p>
+<ul>
+<li>existe linearidade quantificável entre o sinal de controle do DAC e
+a corrente de saída na região válida de operação?</li>
+<li>quais são os limites de tensão de operação do estágio de saída antes
+da limitação por compliance?</li>
+<li>a relação DAC-corrente permanece consistente quando a carga
+resistiva muda?</li>
+</ul>
 <p>Os objetivos específicos são:</p>
 <ul>
 <li>importar os dados experimentais do osciloscópio;</li>
@@ -257,6 +266,10 @@ O script lê os CSVs exportados do osciloscópio, remove trechos
 estacionários antes e depois da rampa útil, calcula corrente a partir da
 tensão no resistor shunt, reconstrói a tensão na carga por resistência
 nominal e agrega os dados por bins de DAC de 10 mV.</p>
+<p>O fluxo de análise segue a sequência: aquisição CSV do osciloscópio,
+extração da rampa útil, conversão da tensão no shunt para corrente,
+agregação por bins de DAC, seleção da região de compliance, regressão
+linear, comparação entre modelos e análise dos resíduos.</p>
 <p>A partir desse conjunto processado, o relatório seleciona a região
 comum de compliance, ajusta modelos lineares, compara modelos aninhados
 por ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia
@@ -264,8 +277,8 @@ heterocedasticidade e autocorrelação temporal e identifica pontos
 influentes. Todas as tabelas são exportadas para a pasta
 <code>tables</code>, e as figuras são exportadas para a pasta
 <code>figures</code>.</p>
-<h1 id="desenho-experimental-e-limitações">5. Desenho experimental e
-limitações</h1>
+<h1 id="desenho-experimental-coleta-e-limitações">5. Desenho
+experimental, coleta e limitações</h1>
 <p>Foram analisadas rampas de tensão de DAC e tensão no resistor shunt
 para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A
 análise estima corrente a partir do shunt e reconstrói a tensão na carga
@@ -273,6 +286,24 @@ por resistência nominal. Como o sistema opera em malha aberta, a
 regressão caracteriza o comportamento observado no ensaio, mas não
 garante corrente entregue em operação real quando a carga, contato
 eletrodo-pele ou condições térmicas mudam.</p>
+<p>A coleta foi realizada com firmware experimental dedicado a gerar uma
+rampa controlada de DAC. A tensão de controle foi medida no canal CH1 do
+osciloscópio, enquanto a tensão associada à saída foi medida no canal
+CH2 sobre o arranjo de carga e resistor shunt. O objetivo dessa
+instrumentação foi caracterizar o estágio de saída, não representar uma
+sessão completa de estimulação terapêutica.</p>
+<figure>
+<img src="figures/00_output_stage_measurement_points.png"
+alt="Estágio DAC/Howland do STIMGRASP com pontos de medição usados na coleta experimental" />
+<figcaption aria-hidden="true">Estágio DAC/Howland do STIMGRASP com
+pontos de medição usados na coleta experimental</figcaption>
+</figure>
+<figure>
+<img src="figures/00_data_collection_setup.png"
+alt="Bancada experimental usada para aquisição dos sinais de DAC e shunt" />
+<figcaption aria-hidden="true">Bancada experimental usada para aquisição
+dos sinais de DAC e shunt</figcaption>
+</figure>
 <h1 id="importação-e-pré-processamento">6. Importação e
 pré-processamento</h1>
 <p>Os CSVs foram importados diretamente dos arquivos do osciloscópio,
@@ -564,8 +595,8 @@ relevante</h1>
 <h1 id="correlação-exploratória">10. Correlação exploratória</h1>
 <p>Correlação foi mantida apenas como evidência exploratória de
 associação monotônica/linear entre DAC e corrente. A validade do
-circuito é discutida a partir de erro, resíduos, intervalos e
-incerteza.</p>
+circuito é discutida a partir de erro, resíduos, intervalos e limites de
+compliance.</p>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 14%" />
@@ -596,7 +627,7 @@ incerteza.</p>
 <td>0</td>
 <td>322</td>
 <td>Associacao linear exploratoria; validade do modelo avaliada por
-residuos, erro e incerteza.</td>
+residuos, erro e limites de compliance.</td>
 </tr>
 <tr>
 <td>2k</td>
@@ -606,7 +637,7 @@ residuos, erro e incerteza.</td>
 <td>0</td>
 <td>168</td>
 <td>Associacao linear exploratoria; validade do modelo avaliada por
-residuos, erro e incerteza.</td>
+residuos, erro e limites de compliance.</td>
 </tr>
 <tr>
 <td>4k7</td>
@@ -616,7 +647,7 @@ residuos, erro e incerteza.</td>
 <td>0</td>
 <td>76</td>
 <td>Associacao linear exploratoria; validade do modelo avaliada por
-residuos, erro e incerteza.</td>
+residuos, erro e limites de compliance.</td>
 </tr>
 </tbody>
 </table>
@@ -763,6 +794,15 @@ load.</p>
 </tr>
 </tbody>
 </table>
+<p>Nas tabelas de coeficientes, H0 representa a hipótese nula de que o
+coeficiente avaliado é igual a zero. Com <code>alpha = 0,05</code>, a
+decisão <code>rejeita_H0</code> significa que o p-valor ficou abaixo de
+0,05 e há evidência estatística de que aquele termo contribui para o
+modelo. A decisão <code>nao_rejeita_H0</code> significa que o teste não
+encontrou evidência suficiente, nesse nível de significância, para
+afirmar que o coeficiente seja diferente de zero. Isso não prova que o
+coeficiente seja exatamente zero; apenas indica ausência de evidência
+estatística suficiente contra H0.</p>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 10%" />
@@ -780,7 +820,7 @@ load.</p>
 <tr>
 <th>model</th>
 <th>alpha</th>
-<th>decision</th>
+<th>decisao</th>
 <th>term</th>
 <th>estimate</th>
 <th>std_error</th>
@@ -794,7 +834,7 @@ load.</p>
 <tr>
 <td>global_current_mA_by_dac</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>(Intercept)</td>
 <td>46.348935</td>
 <td>0.039271</td>
@@ -806,7 +846,7 @@ load.</p>
 <tr>
 <td>global_current_mA_by_dac</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin</td>
 <td>-28.033152</td>
 <td>0.021733</td>
@@ -818,7 +858,7 @@ load.</p>
 <tr>
 <td>interaction_current_mA_by_dac_load</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>(Intercept)</td>
 <td>46.618138</td>
 <td>0.032754</td>
@@ -830,7 +870,7 @@ load.</p>
 <tr>
 <td>interaction_current_mA_by_dac_load</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin</td>
 <td>-28.117716</td>
 <td>0.017415</td>
@@ -842,7 +882,7 @@ load.</p>
 <tr>
 <td>interaction_current_mA_by_dac_load</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>load2k</td>
 <td>-1.087684</td>
 <td>0.086165</td>
@@ -854,7 +894,7 @@ load.</p>
 <tr>
 <td>interaction_current_mA_by_dac_load</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>load4k7</td>
 <td>-3.699103</td>
 <td>0.254191</td>
@@ -866,7 +906,7 @@ load.</p>
 <tr>
 <td>interaction_current_mA_by_dac_load</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin:load2k</td>
 <td>0.521009</td>
 <td>0.049385</td>
@@ -878,7 +918,7 @@ load.</p>
 <tr>
 <td>interaction_current_mA_by_dac_load</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin:load4k7</td>
 <td>1.961584</td>
 <td>0.152886</td>
@@ -890,7 +930,7 @@ load.</p>
 <tr>
 <td>load_1k</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>(Intercept)</td>
 <td>46.618138</td>
 <td>0.039924</td>
@@ -902,7 +942,7 @@ load.</p>
 <tr>
 <td>load_1k</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin</td>
 <td>-28.117716</td>
 <td>0.021228</td>
@@ -914,7 +954,7 @@ load.</p>
 <tr>
 <td>load_2k</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>(Intercept)</td>
 <td>45.530454</td>
 <td>0.053064</td>
@@ -926,7 +966,7 @@ load.</p>
 <tr>
 <td>load_2k</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin</td>
 <td>-27.596707</td>
 <td>0.030769</td>
@@ -938,7 +978,7 @@ load.</p>
 <tr>
 <td>load_4k7</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>(Intercept)</td>
 <td>42.919035</td>
 <td>0.097037</td>
@@ -950,7 +990,7 @@ load.</p>
 <tr>
 <td>load_4k7</td>
 <td>0.05</td>
-<td>reject_H0</td>
+<td>rejeita_H0</td>
 <td>dac_bin</td>
 <td>-26.156132</td>
 <td>0.058471</td>
@@ -1407,16 +1447,21 @@ alt="Erros da validação cruzada por blocos" />
 blocos</figcaption>
 </figure>
 <h1 id="conclusões-revisadas">21. Conclusões revisadas</h1>
-<p>A caracterização sustenta um modelo linear de corrente em função do
-DAC apenas dentro da região comum de compliance definida pela tensão
-reconstruída na carga e pela manutenção de inclinação local compatível
-com o trecho linear. O modelo global é útil como aproximação
-operacional, mas sua adequação deve ser julgada junto com os erros de
-predição, intervalos de confiança/predição, diagnóstico residual e
-autocorrelação temporal. A ausência de realimentação de corrente no
-STIMGRASP limita a garantia de corrente entregue em operação real,
-especialmente fora das condições de carga ensaiadas ou quando o circuito
-se aproxima dos limites de compliance.</p>
+<p>A caracterização sustenta três conclusões principais. Primeiro, há
+linearidade quantificável entre tensão de DAC e corrente de saída dentro
+da região comum de compliance, com correlações próximas de -1 e erros de
+predição baixos. Segundo, o STIMGRASP possui limites claros de operação
+em tensão: essa limitação não é necessariamente uma falha, mas reduz a
+faixa de corrente útil à medida que a carga aumenta. Terceiro, como a
+arquitetura é open-loop, o firmware não detecta em tempo real quando o
+estágio entra em saturação e a corrente entregue passa a ser menor do
+que a prevista pelo modelo.</p>
+<p>O modelo global é útil como aproximação operacional, mas sua
+adequação deve ser julgada junto com os erros de predição, intervalos de
+confiança/predição, diagnóstico residual e autocorrelação temporal. A
+principal melhoria arquitetural sugerida pela caracterização é a
+inclusão de realimentação de corrente, monitoramento de compliance ou
+outra forma de operação em malha fechada.</p>
 <p>Análises como PCA, cluster e testes de média global foram preservadas
 somente como material secundário/didático e não são usadas como
 evidência central de validade metrológica do estágio de saída.</p>

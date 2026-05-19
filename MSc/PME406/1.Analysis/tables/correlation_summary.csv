@@ -1,4 +1,4 @@
 load,pearson_r,pearson_p,spearman_r,spearman_p,samples,interpretation
-1k,-0.9999088171634333,0,-1,0,322,"Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza."
-2k,-0.9998968373685321,7.893446413674545e-308,-1,0,168,"Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza."
-4k7,-0.9998151498190022,9.438334746542945e-129,-1,0,76,"Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e incerteza."
+1k,-0.9999088171634333,0,-1,0,322,"Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance."
+2k,-0.9998968373685321,7.893446413674545e-308,-1,0,168,"Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance."
+4k7,-0.9998151498190022,9.438334746542945e-129,-1,0,76,"Associacao linear exploratoria; validade do modelo avaliada por residuos, erro e limites de compliance."
