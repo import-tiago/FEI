@@ -1,0 +1,24 @@
+\babel@toc {brazilian}{}\relax 
+\contentsline {section}{\numberline {1}Problema}{2}{section.1}%
+\contentsline {section}{\numberline {2}Motivação}{2}{section.2}%
+\contentsline {section}{\numberline {3}Objetivo}{2}{section.3}%
+\contentsline {section}{\numberline {4}Estrutura da análise}{3}{section.4}%
+\contentsline {section}{\numberline {5}Desenho experimental, coleta e limitações}{4}{section.5}%
+\contentsline {section}{\numberline {6}Importação e pré-processamento}{5}{section.6}%
+\contentsline {section}{\numberline {7}Conversão shunt-corrente}{6}{section.7}%
+\contentsline {section}{\numberline {8}Redução de granularidade por binning}{6}{section.8}%
+\contentsline {section}{\numberline {9}Identificação da região de compliance}{7}{section.9}%
+\contentsline {section}{\numberline {10}Estatística descritiva relevante}{8}{section.10}%
+\contentsline {section}{\numberline {11}Correlação exploratória}{8}{section.11}%
+\contentsline {section}{\numberline {12}Modelos lineares por carga}{8}{section.12}%
+\contentsline {section}{\numberline {13}Modelo global}{8}{section.13}%
+\contentsline {section}{\numberline {14}Modelo com interação carga x DAC}{9}{section.14}%
+\contentsline {section}{\numberline {15}Comparação entre modelos}{10}{section.15}%
+\contentsline {section}{\numberline {16}Erro de predição}{10}{section.16}%
+\contentsline {section}{\numberline {17}Diagnóstico dos resíduos}{12}{section.17}%
+\contentsline {section}{\numberline {18}Homocedasticidade}{14}{section.18}%
+\contentsline {section}{\numberline {19}Autocorrelação temporal}{14}{section.19}%
+\contentsline {section}{\numberline {20}Outliers e influência}{15}{section.20}%
+\contentsline {section}{\numberline {21}Validação cruzada por blocos}{17}{section.21}%
+\contentsline {section}{\numberline {22}Conclusões revisadas}{18}{section.22}%
+\contentsline {section}{Referências}{18}{section*.14}%

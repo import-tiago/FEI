@@ -1,0 +1,1304 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  brazilian,
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+  \setmainfont[]{Times New Roman}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off]{babel}
+\else
+\usepackage[bidi=default,shorthands=off]{babel}
+\fi
+\ifPDFTeX
+\else
+\babelfont{rm}[]{Times New Roman}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\setlength{\emergencystretch}{5em}
+\AtBeginEnvironment{longtable}{\setlength{\tabcolsep}{3pt}\scriptsize}
+\usepackage{caption}
+\usepackage{placeins}
+\let\oldunderscore\_
+\renewcommand{\_}{\oldunderscore\discretionary{}{}{}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Relatório de Caracterização Experimental e Estatística do Estágio de Saída de um Estimulador Elétrico Funcional},
+  pdfauthor={Tiago de Paula Silva},
+  pdflang={pt-BR},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Relatório de Caracterização Experimental e Estatística do Estágio
+de Saída de um Estimulador Elétrico Funcional}
+\author{Tiago de Paula Silva}
+\date{21 de maio de 2026}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\section{Problema}\label{problema}
+
+O item de estudo é o estágio de saída de um estimulador elétrico
+funcional (FES) baseado em uma fonte de corrente Howland. Mais
+especificamente, trata-se do eletroestimulador STIMGRASP, desenvolvido
+por Renato Barelli em 2017 como parte de uma dissertação de mestrado.
+
+Na dissertação de Renato Barelli, a arquitetura é apresentada e a
+linearidade do estágio de saída é afirmada como característica esperada
+do circuito, mas não é feita uma caracterização experimental
+quantitativa dessa linearidade. Também não são avaliadas, de forma
+sistemática, a dependência da corrente em relação à carga conectada nem
+os limites de operação em tensão impostos pela arquitetura.
+
+Nesta arquitetura, o microcontrolador define uma tensão de controle no
+DAC, e essa tensão deve produzir uma corrente de saída previsível no
+paciente ou em uma carga equivalente.
+
+O problema central é que o circuito opera em malha aberta: o
+microcontrolador não mede a corrente real entregue durante a operação.
+Assim, se a carga mudar, se o contato eletrodo-pele piorar ou se o
+circuito atingir seu limite de tensão de operação (voltage compliance),
+a corrente entregue pode deixar de seguir o valor esperado. Como não há
+realimentação de corrente, essa perda de previsibilidade não é detectada
+diretamente pelo firmware do STIMGRASP.
+
+Por isso, é necessário caracterizar experimentalmente a relação entre
+tensão de DAC e corrente de saída, identificando a região em que o
+circuito se comporta aproximadamente como fonte de corrente, a
+influência da carga resistiva sobre a corrente entregue, um modelo
+matemático útil para estimar a corrente a partir do DAC e evidências
+estatísticas sobre linearidade, erro e limitação por compliance.
+
+\section{Motivação}\label{motivauxe7uxe3o}
+
+Em estimulação elétrica funcional, a amplitude de corrente está
+associada à resposta neuromuscular, ao conforto do usuário e à
+repetibilidade do protocolo de estimulação. Se a corrente real não for
+previsível, o mesmo comando digital pode gerar respostas diferentes em
+diferentes condições de carga.
+
+Este relatório é inspirado no artigo \emph{Experimental Characterization
+of the Output Stage of a Functional Electrical Stimulator Based on a
+Howland Current Source}, produzido no contexto da disciplina PEL309
+{[}1{]}. Naquele trabalho, com análise em Python, o STIMGRASP foi
+caracterizado experimentalmente por meio da relação entre tensão de DAC
+e corrente de saída, seleção da região de compliance, correlação e
+regressão linear.
+
+O presente relatório revisa e aprofunda essa caracterização em R, com
+uma análise estatística mais cuidadosa para a disciplina PME406. A
+versão atual prioriza a consistência estatística da caracterização: a
+região útil é definida antes da regressão, os modelos são avaliados por
+erro, resíduos, intervalos e validação cruzada, e análises multivariadas
+ou didáticas são tratadas como material secundário quando não sustentam
+diretamente a conclusão técnica.
+
+\section{Objetivo}\label{objetivo}
+
+O objetivo do script é executar uma análise estatística da relação entre
+tensão de DAC e corrente de saída para três cargas resistivas nominais:
+1 kOhm, 2 kOhm e 4,7 kOhm.
+
+Seguindo a motivação apresentada no trabalho anterior, a análise é
+organizada em três perguntas centrais:
+
+\begin{itemize}
+\tightlist
+\item
+  existe linearidade quantificável entre o sinal de controle do DAC e a
+  corrente de saída na região válida de operação?
+\item
+  quais são os limites de tensão de operação do estágio de saída antes
+  da limitação por compliance?
+\item
+  a relação DAC-corrente permanece consistente quando a carga resistiva
+  muda?
+\end{itemize}
+
+Os objetivos específicos são:
+
+\begin{itemize}
+\tightlist
+\item
+  importar os dados experimentais do osciloscópio;
+\item
+  extrair a região útil da rampa de DAC;
+\item
+  converter tensão no resistor shunt em corrente de saída;
+\item
+  agregar os dados por bins de tensão de DAC;
+\item
+  identificar a região comum de compliance;
+\item
+  avaliar linearidade por correlação e regressão;
+\item
+  comparar modelo global e modelo com interação carga x DAC;
+\item
+  quantificar erro de predição, resíduos, autocorrelação temporal e
+  pontos influentes;
+\item
+  explicitar limitações de normalidade e independência dos resíduos.
+\end{itemize}
+
+\section{Estrutura da análise}\label{estrutura-da-anuxe1lise}
+
+O script em R lê os CSVs exportados do osciloscópio, remove trechos
+estacionários antes e depois da rampa útil, calcula corrente a partir da
+tensão no resistor shunt, reconstrói a tensão na carga por resistência
+nominal e agrega os dados por bins de DAC de 10 mV. O script e os dados
+brutos estão disponíveis no repositório indicado nas Referências.
+
+O fluxo de análise segue a sequência: aquisição CSV do osciloscópio,
+extração da rampa útil, conversão da tensão no shunt para corrente,
+agregação por bins de DAC, seleção da região de compliance, regressão
+linear, comparação entre modelos e análise dos resíduos.
+
+A partir desse conjunto processado, o relatório seleciona a região comum
+de compliance, ajusta modelos lineares, compara modelos aninhados por
+ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia
+heterocedasticidade e autocorrelação temporal e identifica pontos
+influentes. Todas as tabelas são exportadas para a pasta
+\texttt{tables}, e as figuras são exportadas para a pasta
+\texttt{figures}.
+
+\clearpage
+
+\section{Desenho experimental, coleta e
+limitações}\label{desenho-experimental-coleta-e-limitauxe7uxf5es}
+
+Foram analisadas rampas de tensão de DAC e tensão no resistor shunt para
+três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A análise
+estima corrente a partir do shunt e reconstrói a tensão na carga por
+resistência nominal. Como o sistema opera em malha aberta, a regressão
+caracteriza o comportamento observado no ensaio, mas não garante
+corrente entregue em operação real quando a carga, contato eletrodo-pele
+ou condições térmicas mudam.
+
+A coleta foi realizada com firmware experimental dedicado a gerar uma
+rampa controlada de DAC. A tensão de controle foi medida no canal CH1 do
+osciloscópio, enquanto a tensão associada à saída foi medida no canal
+CH2 sobre o arranjo de carga e resistor shunt. O objetivo dessa
+instrumentação foi caracterizar o estágio de saída, não representar uma
+sessão completa de estimulação terapêutica.
+
+\begin{center}
+\begin{minipage}[t]{0.495\linewidth}
+\centering
+\includegraphics[width=\linewidth,keepaspectratio]{figures/00_output_stage_measurement_points.png}
+\captionof{figure}{Estágio DAC/Howland do STIMGRASP com pontos de medição usados na coleta experimental}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.495\linewidth}
+\centering
+\includegraphics[width=\linewidth,keepaspectratio]{figures/00_data_collection_setup.png}
+\captionof{figure}{Bancada experimental usada para aquisição dos sinais de DAC e shunt}
+\end{minipage}
+\end{center}
+\clearpage
+
+\section{Importação e
+pré-processamento}\label{importauxe7uxe3o-e-pruxe9-processamento}
+
+Os CSVs foram importados diretamente dos arquivos do osciloscópio,
+removendo os segmentos estacionários antes e depois da rampa útil. As
+três cargas foram equalizadas para a mesma quantidade de amostras.
+
+Cada arquivo contém duas grandezas principais: \texttt{dac\_volts}, que
+representa a tensão de controle aplicada ao estágio de saída, e
+\texttt{shunt\_volts}, que representa a tensão medida no resistor shunt
+e é usada para calcular a corrente.
+
+Os dados brutos utilizados nesta etapa estão disponíveis no repositório
+indicado nas Referências.
+
+Antes de qualquer tratamento, apenas como um exemplo, a carga de 1 kOhm
+possui a seguinte prévia dos dados crus:
+
+\begin{table}[htbp]
+\centering
+\makebox[\textwidth][c]{%
+\begin{minipage}[t]{0.42\textwidth}
+\vspace{0pt}
+\centering
+\scriptsize
+\begin{tabular}{@{}lll@{}}
+\toprule
+Tensão DAC (V) & Tensão no shunt (V) & Amostra \\
+\midrule
+1.626406 & 0.002984 & 0 \\
+1.628438 & 0.002797 & 1 \\
+1.627500 & 0.001016 & 2 \\
+1.628906 & 0.003047 & 3 \\
+1.627031 & 0.005047 & 4 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+}
+\end{table}
+\FloatBarrier
+
+\begin{center}
+\captionsetup{font=small}
+\begin{minipage}[t]{0.495\linewidth}
+\centering
+\includegraphics[width=\linewidth,keepaspectratio]{figures/01_raw_signals_before_stationary_removal.png}
+\captionof{figure}{Sinais brutos antes da remoção dos segmentos estacionários}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.495\linewidth}
+\centering
+\includegraphics[width=\linewidth,keepaspectratio]{figures/02_ramp_signals_after_stationary_removal.png}
+\captionof{figure}{Sinais da rampa após a remoção dos segmentos estacionários}
+\end{minipage}
+\end{center}
+\FloatBarrier
+
+\section{Conversão shunt-corrente}\label{conversuxe3o-shunt-corrente}
+
+A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = 10 Ohm. A
+tolerância configurada do shunt é 1\%.
+
+\section{Redução de granularidade por
+binning}\label{reduuxe7uxe3o-de-granularidade-por-binning}
+
+Após a conversão da tensão do shunt em corrente, os pontos ainda estavam
+na granularidade temporal da aquisição do osciloscópio. Como a variável
+de interesse para a regressão é a relação entre tensão de DAC e corrente
+de saída, os dados foram agrupados por \texttt{dac\_bin}: cada valor de
+\texttt{dac\_volts} foi arredondado para o centro de um intervalo de
+0.01 V, e as medições com o mesmo \texttt{dac\_bin} e a mesma carga
+foram substituídas pela média de corrente, tensão do shunt, tensão de
+DAC e tensão reconstruída na carga.
+
+Esse binning reduz a quantidade de pontos repetidos ou quase repetidos
+ao longo da rampa, diminui ruído local de aquisição e evita que regiões
+com muitas amostras temporais tenham peso desproporcional apenas por
+terem sido amostradas mais vezes. A análise passa, portanto, a
+representar a resposta média do estágio de saída para cada nível
+discretizado de DAC.
+
+A largura de 10 mV preserva a tendência da rampa em escala
+suficientemente fina para a caracterização, mas torna as etapas
+seguintes mais estáveis: identificação da região de compliance, cálculo
+de inclinações locais, correlação e regressões lineares.
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\resizebox{0.82\textwidth}{!}{%
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Carga & Amostras originais & Bins de DAC & Largura do bin (V) & Amostras/bin \\
+\midrule
+1k & 58386 & 325 & 0.01 & 179.649 \\
+2k & 58386 & 325 & 0.01 & 179.649 \\
+4k7 & 58386 & 325 & 0.01 & 179.649 \\
+\bottomrule
+\end{tabular}
+}%
+\end{center}
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth,keepaspectratio]{figures/03_current_after_conversion.png}
+\caption{Corrente calculada após conversão da tensão no shunt}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth,keepaspectratio]{figures/04_binned_current_by_load.png}
+\caption{Corrente média em função dos bins de DAC após a redução de granularidade}
+\end{minipage}
+\end{figure}
+\FloatBarrier
+
+\clearpage
+
+\section{Identificação da região de
+compliance}\label{identificauxe7uxe3o-da-regiuxe3o-de-compliance}
+
+A região comum de compliance foi definida antes da regressão usando dois
+critérios: limite físico pela tensão reconstruída na carga e inclinação
+local mínima compatível com o trecho linear de cada carga. O limite
+comum de tensão foi tomado como a menor magnitude máxima de tensão
+reconstruída entre as cargas, definindo uma faixa simétrica comum em
+torno de zero; em seguida, foram mantidos apenas os pontos do maior
+trecho contínuo com inclinação local suficiente. O modelo linear deve
+ser interpretado apenas dentro dessa região comum.
+
+\begin{center}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Carga & Faixa medida (V) & Faixa comum (V) & Pontos retidos & Pontos removidos & Removidos (\%) \\
+\midrule
+1k & -43.80 a 46.33 & -46.33 a 46.33 & 322 & 3 & 0.923 \\
+2k & -46.22 a 49.56 & -46.33 a 46.33 & 168 & 157 & 48.308 \\
+4k7 & -47.62 a 47.78 & -46.33 a 46.33 & 76 & 249 & 76.615 \\
+\bottomrule
+\end{tabular}
+}%
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.72\linewidth,keepaspectratio]{figures/05_compliance_retained_removed.png}
+\captionof{figure}{Pontos retidos e removidos pelo critério de compliance}
+\end{center}
+\FloatBarrier
+
+\FloatBarrier
+
+\newpage
+\section{Estatística descritiva
+relevante}\label{estatuxedstica-descritiva-relevante}
+
+Resumo da região linear retida:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Carga
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Média (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio padrão (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mínimo (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Q1 (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mediana (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Q3 (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Máximo (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1k & 322 & 0.645672 & 26.179311 & -43.739572 & -21.889446 & -0.004240 &
+23.329117 & 46.122148 \\
+2k & 168 & -0.142096 & 13.424850 & -22.740101 & -11.670383 & -0.463385 &
+11.370625 & 23.062448 \\
+4k7 & 76 & -0.107802 & 5.777173 & -9.731551 & -5.021909 & -0.269278 &
+4.849080 & 9.812040 \\
+\end{longtable}
+}
+
+\section{Correlação
+exploratória}\label{correlauxe7uxe3o-exploratuxf3ria}
+
+Correlação foi mantida apenas como evidência exploratória de associação
+monotônica/linear entre DAC e corrente. A validade do circuito é
+discutida a partir de erro, resíduos, intervalos e limites de
+compliance.
+
+Associacao linear exploratoria; validade do modelo avaliada por
+residuos, erro e limites de compliance.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Carga
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Correlação Pearson
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p Pearson
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Correlação Spearman
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p Spearman
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1k & -0.999909 & 0 & -1 & 0 & 322 \\
+2k & -0.999897 & 0 & -1 & 0 & 168 \\
+4k7 & -0.999815 & 0 & -1 & 0 & 76 \\
+\end{longtable}
+}
+
+Os coeficientes de Pearson próximos de -1 indicam uma relação linear
+decrescente muito forte entre a tensão de DAC e a corrente medida. O
+mesmo comportamento aparece em Spearman, que avalia a associação
+monotônica por postos e é menos dependente da escala numérica. Como os
+p-valores são inferiores ao nível de significância adotado, a associação
+é estatisticamente evidente; ainda assim, essa tabela não substitui a
+avaliação de erro e de resíduos, pois correlação alta pode coexistir com
+viés, saturação ou dependência temporal.
+
+\section{Modelos lineares por carga}\label{modelos-lineares-por-carga}
+
+Modelos independentes por carga foram ajustados como current\_mA
+\textasciitilde{} dac\_bin.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Carga
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2 ajustado
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio residual (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro absoluto máximo (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+load\_1k & 1k & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 &
+0.352975 & 0.743690 \\
+load\_2k & 2k & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 &
+0.192255 & 0.445245 \\
+load\_4k7 & 4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 &
+0.110343 & 0.252044 \\
+\end{longtable}
+}
+
+Os três modelos por carga apresentam R2 ajustado acima de 0,999, o que
+mostra que a variação da corrente dentro da região linear é quase toda
+explicada pelo bin de DAC. A carga de 1 kOhm tem mais pontos válidos e
+maior erro absoluto máximo, enquanto 4,7 kOhm possui menos pontos após a
+seleção de compliance e menor dispersão residual. Essa diferença não
+significa que a carga maior seja sempre mais precisa; ela também reflete
+a faixa útil menor que permaneceu no ajuste.
+
+\section{Modelo global}\label{modelo-global}
+
+O modelo global foi ajustado como
+\texttt{current\_mA\ \textasciitilde{}\ dac\_bin} dentro da região comum
+de compliance.
+
+Para obter esse modelo, não foi ajustada uma regressão separada para
+cada carga. Após o binning e a seleção da região comum de compliance, os
+dados das três cargas foram mantidos em formato longo em
+\texttt{linear\_long}: cada linha contém um par (\texttt{dac\_bin},
+\texttt{current\_mA}) e o rótulo da carga correspondente (\texttt{1k},
+\texttt{2k} ou \texttt{4k7}). Em seguida, todas essas linhas foram
+usadas juntas em uma única regressão linear.
+
+Na prática, isso equivale a empilhar os pontos válidos das três cargas
+em um único conjunto de observações. A variável \texttt{load} permanece
+disponível para identificação, gráficos e diagnósticos, mas não
+participa da equação do modelo global. Assim, o ajuste estima uma única
+inclinação e um único intercepto para representar a relação média entre
+bin de DAC e corrente de saída, independentemente da carga, desde que os
+pontos estejam dentro da região comum de compliance.
+
+Esse procedimento é coerente com o objetivo de obter uma equação
+operacional única para estimativa em malha aberta. Se as curvas das
+cargas permanecem próximas após a remoção dos pontos limitados por
+compliance, um único modelo global pode representar o comportamento do
+estágio de saída sem exigir coeficientes específicos por carga. A
+comparação posterior com o modelo com interação carga x DAC verifica
+justamente se adicionar dependência explícita da carga melhora de forma
+relevante essa representação.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2 ajustado
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio residual (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro absoluto máximo (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+global\_current\_mA\_by\_dac & 0.999661 & 0.999661 & 0.389648 & 566 &
+0.331486 & 0.388959 & 0.934792 \\
+\end{longtable}
+}
+
+O modelo global mantém R2 ajustado muito alto, mas seu desvio residual e
+seus erros são maiores que os observados para algumas cargas
+individualmente. Isso é esperado, pois uma única reta passa a representar
+curvas que não são exatamente coincidentes. O resultado é adequado para
+uma equação operacional simples, desde que o erro típico de
+aproximadamente 0,33 mA e o erro máximo próximo de 0,93 mA sejam
+compatíveis com a aplicação.
+
+\section{Modelo com interação carga x
+DAC}\label{modelo-com-interauxe7uxe3o-carga-x-dac}
+
+O modelo com interação foi ajustado como current\_mA \textasciitilde{}
+dac\_bin * load.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2 ajustado
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio residual (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro absoluto máximo (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+interaction\_current\_mA\_by\_dac\_load & 0.999813 & 0.999811 & 0.290484
+& 566 & 0.223411 & 0.288941 & 0.74369 \\
+\end{longtable}
+}
+
+Ao incluir a interação entre carga e DAC, o ajuste reduz o desvio
+residual, o MAE, o RMSE e o erro absoluto máximo em relação ao modelo
+global. Em termos práticos, isso indica que a carga não afeta apenas um
+deslocamento fixo da curva: ela também altera levemente a inclinação da
+relação DAC-corrente. O ganho de ajuste deve ser ponderado contra a
+perda de simplicidade, pois esse modelo exige identificar a carga para
+aplicar a equação correta.
+
+Nas tabelas de coeficientes, H0 representa a hipótese nula de que o
+coeficiente avaliado é igual a zero. Com \texttt{alpha\ =\ 0,05}, a
+decisão \texttt{rejeita\_H0} significa que o p-valor ficou abaixo de
+0,05 e há evidência estatística de que aquele termo contribui para o
+modelo. A decisão \texttt{nao\_rejeita\_H0} significa que o teste não
+encontrou evidência suficiente, nesse nível de significância, para
+afirmar que o coeficiente seja diferente de zero. Isso não prova que o
+coeficiente seja exatamente zero; apenas indica ausência de evidência
+estatística suficiente contra H0.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Nível alpha
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Decisão
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Termo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estimativa
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro padrão
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estatística
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+IC inferior
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+IC superior
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+global\_current\_mA\_by\_dac & 0.05 & rejeita\_H0 & (Intercept) &
+46.348935 & 0.039271 & 1180.239742 & 0 & 46.271801 & 46.426070 \\
+global\_current\_mA\_by\_dac & 0.05 & rejeita\_H0 & dac\_bin &
+-28.033152 & 0.021733 & -1289.860154 & 0 & -28.075841 & -27.990464 \\
+interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 &
+(Intercept) & 46.618138 & 0.032754 & 1423.279796 & 0 & 46.553802 &
+46.682473 \\
+interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 & dac\_bin
+& -28.117716 & 0.017415 & -1614.538039 & 0 & -28.151923 & -28.083509 \\
+interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 & load2k &
+-1.087684 & 0.086165 & -12.623199 & 0 & -1.256931 & -0.918437 \\
+interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 & load4k7 &
+-3.699103 & 0.254191 & -14.552452 & 0 & -4.198387 & -3.199818 \\
+interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 &
+dac\_bin:load2k & 0.521009 & 0.049385 & 10.549968 & 0 & 0.424007 &
+0.618011 \\
+interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 &
+dac\_bin:load4k7 & 1.961584 & 0.152886 & 12.830399 & 0 & 1.661285 &
+2.261883 \\
+load\_1k & 0.05 & rejeita\_H0 & (Intercept) & 46.618138 & 0.039924 &
+1167.658226 & 0 & 46.539590 & 46.696685 \\
+load\_1k & 0.05 & rejeita\_H0 & dac\_bin & -28.117716 & 0.021228 &
+-1324.566419 & 0 & -28.159480 & -28.075952 \\
+load\_2k & 0.05 & rejeita\_H0 & (Intercept) & 45.530454 & 0.053064 &
+858.030359 & 0 & 45.425687 & 45.635221 \\
+load\_2k & 0.05 & rejeita\_H0 & dac\_bin & -27.596707 & 0.030769 &
+-896.900438 & 0 & -27.657456 & -27.535958 \\
+load\_4k7 & 0.05 & rejeita\_H0 & (Intercept) & 42.919035 & 0.097037 &
+442.296331 & 0 & 42.725685 & 43.112385 \\
+load\_4k7 & 0.05 & rejeita\_H0 & dac\_bin & -26.156132 & 0.058471 &
+-447.332761 & 0 & -26.272639 & -26.039625 \\
+\end{longtable}
+}
+
+No modelo global, o intercepto representa a corrente estimada quando o
+DAC extrapola para zero dentro da formulação linear, enquanto o
+coeficiente de \texttt{dac\_bin} indica a variação média de corrente por
+volt de DAC. A inclinação negativa confirma que, nesta montagem, o
+aumento da tensão de DAC reduz a corrente calculada no sentido adotado
+para o sinal. No modelo com interação, \texttt{load2k} e
+\texttt{load4k7} deslocam o intercepto em relação à referência de 1 kOhm,
+e os termos \texttt{dac\_bin:load2k} e \texttt{dac\_bin:load4k7}
+corrigem a inclinação para essas cargas. Como todos os intervalos de
+confiança ficam afastados de zero e todos os p-valores rejeitam H0, há
+evidência de que essas diferenças entre cargas são estatisticamente
+relevantes.
+
+\section{Comparação entre modelos}\label{comparauxe7uxe3o-entre-modelos}
+
+A comparação formal entre o modelo global e o modelo com interação foi
+feita por ANOVA/teste F para modelos aninhados.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelos comparados
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Nível alpha
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Índice do modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+GL residual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Soma quad. residual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+GL
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Soma dos quadrados
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estatística F
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p (F)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+current\_mA \textasciitilde{} dac\_bin & 0.05 & 1 & 564 & 85.629792 & &
+& & \\
+current\_mA \textasciitilde{} dac\_bin * load & 0.05 & 2 & 560 &
+47.253472 & 4 & 38.37632 & 113.699262 & 0 \\
+\end{longtable}
+}
+
+O modelo com interação melhora significativamente o ajuste em relação ao
+modelo global. A queda da soma dos quadrados residual de 85,63 para
+47,25 mA\textsuperscript{2} mostra redução relevante da variabilidade não explicada, e o
+teste F elevado, com p-valor abaixo de 0,05, indica que os quatro termos
+adicionais associados à carga e à interação não são apenas complexidade
+supérflua. Assim, para fins de descrição estatística, o modelo com
+interação é superior; para controle simples em malha aberta, o modelo
+global ainda pode ser útil se o erro adicional for aceitável.
+
+\section{Erro de predição}\label{erro-de-prediuxe7uxe3o}
+
+As métricas de erro foram calculadas dentro da região linear: MAE, RMSE
+e maior erro absoluto.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R2 ajustado
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio residual (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro absoluto máximo (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+global\_current\_mA\_by\_dac & 0.999661 & 0.999661 & 0.389648 & 566 &
+0.331486 & 0.388959 & 0.934792 \\
+interaction\_current\_mA\_by\_dac\_load & 0.999813 & 0.999811 & 0.290484
+& 566 & 0.223411 & 0.288941 & 0.743690 \\
+load\_1k & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 & 0.352975 &
+0.743690 \\
+load\_2k & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 & 0.192255 &
+0.445245 \\
+load\_4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0.110343 &
+0.252044 \\
+\end{longtable}
+}
+
+As métricas de erro colocam os modelos em escala física, em mA, e por
+isso são mais diretamente interpretáveis que o R2. O modelo com interação
+reduz o MAE de 0,331 mA para 0,223 mA e o RMSE de 0,389 mA para
+0,289 mA em relação ao modelo global, além de diminuir o pior erro
+observado. Entre os modelos por carga, os erros absolutos menores em
+4,7 kOhm devem ser lidos junto com o menor número de amostras e a faixa
+linear mais restrita.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Corrente medida versus corrente predita}]{figures/06_measured_vs_predicted.png}}
+\caption{Corrente medida versus corrente predita}
+\end{figure}
+
+\FloatBarrier
+
+\begin{figure}
+\centering
+\includegraphics[width=0.92\linewidth,keepaspectratio]{figures/07_current_vs_dac_confidence_band.png}
+\caption{Banda de confiança da corrente em função do DAC}
+\end{figure}
+
+\FloatBarrier
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Banda de predição da corrente em função do DAC}]{figures/08_current_vs_dac_prediction_band.png}}
+\caption{Banda de predição da corrente em função do DAC}
+\end{figure}
+
+\FloatBarrier
+
+\section{Diagnóstico dos resíduos}\label{diagnuxf3stico-dos-resuxedduos}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Modelo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Média dos resíduos (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio dos resíduos (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mediana dos resíduos (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Resíduo mínimo (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Resíduo máximo (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras no Shapiro
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p Shapiro
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+global\_current\_mA\_by\_dac & 0 & 0.389303 & 0.015381 & -0.934792 &
+0.738906 & 0.331486 & 0.388959 & 566 & 0 \\
+\end{longtable}
+}
+
+A média dos resíduos próxima de zero indica ausência de viés médio
+importante no modelo global. Ainda assim, os extremos assimétricos
+(-0,935 mA e 0,739 mA), o RMSE de 0,389 mA e o p-valor nulo no teste de
+Shapiro-Wilk indicam que a distribuição dos resíduos não é bem descrita
+por uma normal perfeita. Portanto, a normalidade dos resíduos é
+questionável, e inferências baseadas estritamente nessa hipótese devem
+ser tratadas com cautela.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos em função do DAC}]{figures/09_residuals_vs_dac.png}}
+\caption{Resíduos em função do DAC}
+\end{figure}
+
+\FloatBarrier
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos em função dos valores preditos}]{figures/10_residuals_vs_predicted.png}}
+\caption{Resíduos em função dos valores preditos}
+\end{figure}
+
+\FloatBarrier
+
+\section{Homocedasticidade}\label{homocedasticidade}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Teste
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estatística
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parâmetro
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Método
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Nível alpha
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+manual\_breusch\_pagan\_residual\_squared\_on\_fitted & 27.838682 & 1 &
+0 & fallback & 0.05 \\
+\end{longtable}
+}
+
+O teste de Breusch-Pagan avalia se a variância dos resíduos permanece
+constante ao longo dos valores ajustados. A estatística elevada e o
+p-valor inferior a 0,05 indicam evidência de heterocedasticidade; assim,
+a hipótese de variância constante é questionável. Na prática, os erros
+padrão e intervalos de confiança clássicos podem ficar otimistas ou mal
+calibrados, embora a equação ajustada ainda possa ser útil para predição
+na faixa caracterizada.
+
+\section{Autocorrelação temporal}\label{autocorrelauxe7uxe3o-temporal}
+
+Como os dados vêm de uma rampa temporal, a independência dos resíduos
+não foi assumida automaticamente.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Teste
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estatística
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Valor-p
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Método
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Nível alpha
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+manual\_durbin\_watson\_approximation & 0.068879 & 0 &
+fallback\_normal\_approximation & 0.05 \\
+\end{longtable}
+}
+
+O valor de Durbin-Watson muito abaixo de 2 indica autocorrelação positiva
+forte entre resíduos vizinhos na ordem temporal da rampa. Como o p-valor
+é inferior a 0,05, há evidência de que os erros não são independentes.
+Isso não invalida a relação média estimada, mas reduz a confiança em
+p-valores clássicos da regressão e justifica a validação por blocos,
+mais compatível com a estrutura temporal dos dados.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Autocorrelação dos resíduos}]{figures/11_residual_acf.png}}
+\caption{Autocorrelação dos resíduos}
+\end{figure}
+
+\FloatBarrier
+
+\section{Outliers e influência}\label{outliers-e-influuxeancia}
+
+Foram calculados resíduos studentizados, leverage e distância de Cook.
+Pontos foram apenas marcados e reportados; a remoção automática
+permanece desativada por padrão.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Amostras
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pontos influentes
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pontos influentes (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Limite de Cook
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Maior distância de Cook
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Maior resíduo studentizado abs.
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+566 & 51 & 9.010601 & 0.007067 & 0.0178 & 2.411942 \\
+\end{longtable}
+}
+
+A distância de Cook máxima supera o limite adotado, e cerca de 9,0\% dos
+pontos foram marcados como influentes. Esses pontos merecem inspeção
+porque podem puxar a reta ajustada ou representar regiões de transição
+próximas aos limites de compliance. O maior resíduo studentizado absoluto
+ficou em torno de 2,41, valor que sugere desvios moderados, mas não
+extremos a ponto de justificar remoção automática sem critério físico.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Distância de Cook por índice}]{figures/12_cook_distance_by_index.png}}
+\caption{Distância de Cook por índice}
+\end{figure}
+
+\FloatBarrier
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos studentizados por índice}]{figures/13_studentized_residuals_by_index.png}}
+\caption{Resíduos studentizados por índice}
+\end{figure}
+
+\FloatBarrier
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Leverage versus resíduos studentizados}]{figures/14_leverage_vs_studentized_residuals.png}}
+\caption{Leverage versus resíduos studentizados}
+\end{figure}
+
+\FloatBarrier
+
+\section{Validação cruzada por
+blocos}\label{validauxe7uxe3o-cruzada-por-blocos}
+
+A validação por blocos usa cinco blocos contíguos ordenados, treinando
+em quatro blocos e testando no bloco remanescente. Isso evita usar
+apenas uma validação aleatória que mistura pontos vizinhos da rampa.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Bloco
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras de treino
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Amostras de teste
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro absoluto máximo (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 452 & 114 & 1.094951 & 1.149833 & 1.640076 \\
+2 & 453 & 113 & 0.336214 & 0.391106 & 0.604763 \\
+3 & 453 & 113 & 0.614323 & 0.672667 & 1.249332 \\
+4 & 453 & 113 & 0.287021 & 0.314989 & 0.575789 \\
+5 & 453 & 113 & 0.469936 & 0.525130 & 0.978239 \\
+\end{longtable}
+}
+
+Os erros variam de forma clara entre blocos: o primeiro bloco apresenta
+MAE e RMSE maiores, indicando pior extrapolação local ou maior
+dificuldade do modelo naquela região da rampa. Os blocos centrais têm
+erros menores, o que sugere comportamento mais estável dentro da faixa
+linear principal. Essa diferença reforça que uma validação aleatória
+poderia subestimar o erro real ao misturar pontos vizinhos de treino e
+teste.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Blocos
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMSE médio (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio do RMSE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MAE médio (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio do MAE (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Erro máx. médio (mA)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Desvio do erro máx. (mA)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+5 & 0.610745 & 0.330716 & 0.560489 & 0.324743 & 1.00964 & 0.449455 \\
+\end{longtable}
+}
+
+Na média dos cinco blocos, o RMSE fica em 0,611 mA e o MAE em 0,560 mA,
+valores maiores que os erros calculados no ajuste completo. Essa
+diferença é esperada porque a validação por blocos mede capacidade de
+generalização para trechos contíguos não vistos, em vez de apenas
+qualidade de ajuste nos próprios dados usados pela regressão. O desvio
+dos erros entre blocos mostra que a incerteza prática não é uniforme ao
+longo da rampa.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Erros da validação cruzada por blocos}]{figures/15_block_cross_validation_errors.png}}
+\caption{Erros da validação cruzada por blocos}
+\end{figure}
+
+\FloatBarrier
+
+\section{Conclusões revisadas}\label{conclusuxf5es-revisadas}
+
+A caracterização sustenta três conclusões principais. Primeiro, há
+linearidade quantificável entre tensão de DAC e corrente de saída dentro
+da região comum de compliance, com correlações próximas de -1 e erros de
+predição baixos. Segundo, o STIMGRASP possui limites claros de operação
+em tensão: essa limitação não é necessariamente uma falha, mas reduz a
+faixa de corrente útil à medida que a carga aumenta. Terceiro, como a
+arquitetura é open-loop, o firmware não detecta em tempo real quando o
+estágio entra em saturação e a corrente entregue passa a ser menor do
+que a prevista pelo modelo.
+
+O modelo global é útil como aproximação operacional, mas sua adequação
+deve ser julgada junto com os erros de predição, intervalos de
+confiança/predição, diagnóstico residual e autocorrelação temporal. A
+principal melhoria arquitetural sugerida pela caracterização é a
+inclusão de realimentação de corrente, monitoramento de compliance ou
+outra forma de operação em malha fechada.
+
+Análises como PCA, cluster e testes de média global foram preservadas
+somente como material secundário/didático e não são usadas como
+evidência central de validade metrológica do estágio de saída.
+
+\section*{Referências}\label{referuxeancias}
+\addcontentsline{toc}{section}{Referências}
+
+{[}1{]} Tiago de Paula Silva, ``Experimental Characterization of the
+Output Stage of a Functional Electrical Stimulator Based on a Howland
+Current Source,'' artigo produzido no contexto da disciplina PEL309,
+Centro Universitário FEI, 2026.
+
+{[}2{]} Tiago de Paula Silva, ``FEI - PME406: dados brutos e script R da
+análise estatística,'' repositório GitHub. Disponível em:
+\url{https://github.com/import-tiago/FEI/tree/main/MSc/PME406}.
+
+\end{document}

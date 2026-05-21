@@ -10,7 +10,8 @@ options(digits = 15)
 
 figures_dir <- "figures"
 tables_dir <- "tables"
-report_path <- "Relatorio_analise_estatistica.md"
+report_tex_path <- "Relatorio_analise_estatistica.tex"
+report_temp_md_path <- file.path(tempdir(), "Relatorio_analise_estatistica_tmp.md")
 
 remove_influential_points <- FALSE
 alpha <- 0.05
@@ -68,6 +69,142 @@ format_pt_date <- function(date = Sys.Date()) {
          " de ", format(date, "%Y"))
 }
 
+column_label_map <- c(
+  dac_volts = "Tensão DAC (V)",
+  shunt_volts = "Tensão no shunt (V)",
+  sample = "Amostra",
+  sample_index = "Índice da amostra",
+  samples = "Amostras",
+  samples_in_bin = "Amostras no bin",
+  load = "Carga",
+  model = "Modelo",
+  R2 = "R2",
+  adjusted_R2 = "R2 ajustado",
+  sigma_mA = "Desvio residual (mA)",
+  MAE_mA = "MAE (mA)",
+  RMSE_mA = "RMSE (mA)",
+  max_abs_error_mA = "Erro absoluto máximo (mA)",
+  alpha = "Nível alpha",
+  decisao = "Decisão",
+  decision = "Decisão",
+  term = "Termo",
+  estimate = "Estimativa",
+  std_error = "Erro padrão",
+  statistic = "Estatística",
+  p_value = "Valor-p",
+  raw_p_value = "Valor-p bruto",
+  adjusted_p_value = "Valor-p ajustado",
+  ci_low = "IC inferior",
+  ci_high = "IC superior",
+  compared_models = "Modelos comparados",
+  interpretation = "Interpretação",
+  model_index = "Índice do modelo",
+  `Res.Df` = "GL residual",
+  RSS = "Soma quad. residual",
+  Df = "GL",
+  `Sum of Sq` = "Soma dos quadrados",
+  F = "Estatística F",
+  `Pr(>F)` = "Valor-p (F)",
+  Vmin = "Tensão mínima (V)",
+  Vmax = "Tensão máxima (V)",
+  common_Vmin = "Limite comum mín. (V)",
+  common_Vmax = "Limite comum máx. (V)",
+  reference_slope_mA_per_V = "Inclinação ref. (mA/V)",
+  slope_threshold_mA_per_V = "Limite de inclinação (mA/V)",
+  previous_slope_mA_per_V = "Inclinação anterior (mA/V)",
+  next_slope_mA_per_V = "Inclinação seguinte (mA/V)",
+  local_slope_mA_per_V = "Inclinação local (mA/V)",
+  total_points = "Pontos totais",
+  retained_points = "Pontos retidos",
+  removed_points = "Pontos removidos",
+  removed_percent = "Removidos (%)",
+  pearson_r = "Correlação Pearson",
+  pearson_p = "Valor-p Pearson",
+  spearman_r = "Correlação Spearman",
+  spearman_p = "Valor-p Spearman",
+  count = "N",
+  mean_mA = "Média (mA)",
+  sd_mA = "Desvio padrão (mA)",
+  min_mA = "Mínimo (mA)",
+  q25_mA = "Q1 (mA)",
+  median_mA = "Mediana (mA)",
+  q75_mA = "Q3 (mA)",
+  max_mA = "Máximo (mA)",
+  mean_residual_mA = "Média dos resíduos (mA)",
+  sd_residual_mA = "Desvio dos resíduos (mA)",
+  median_residual_mA = "Mediana dos resíduos (mA)",
+  min_residual_mA = "Resíduo mínimo (mA)",
+  max_residual_mA = "Resíduo máximo (mA)",
+  shapiro_sample_n = "Amostras no Shapiro",
+  shapiro_p_value = "Valor-p Shapiro",
+  parameter = "Parâmetro",
+  method = "Método",
+  test = "Teste",
+  fold = "Bloco",
+  folds = "Blocos",
+  train_samples = "Amostras de treino",
+  test_samples = "Amostras de teste",
+  RMSE_mean_mA = "RMSE médio (mA)",
+  RMSE_sd_mA = "Desvio do RMSE (mA)",
+  MAE_mean_mA = "MAE médio (mA)",
+  MAE_sd_mA = "Desvio do MAE (mA)",
+  max_abs_error_mean_mA = "Erro máx. médio (mA)",
+  max_abs_error_sd_mA = "Desvio do erro máx. (mA)",
+  influential_points = "Pontos influentes",
+  influential_percent = "Pontos influentes (%)",
+  cook_threshold = "Limite de Cook",
+  max_cook_distance = "Maior distância de Cook",
+  max_abs_studentized_residual = "Maior resíduo studentizado abs.",
+  metric = "Métrica",
+  reason = "Motivo",
+  value = "Valor",
+  unit = "Unidade",
+  observation = "Observação",
+  figure = "Figura",
+  path = "Arquivo",
+  uncertainty_source = "Fonte de incerteza",
+  assumed_value = "Valor assumido",
+  effect_on_metric = "Efeito na métrica",
+  analysis = "Análise",
+  status = "Status",
+  component = "Componente",
+  variance_proportion = "Proporção da variância",
+  cumulative_variance = "Variância acumulada",
+  comparison = "Comparação",
+  estimated_difference_mA = "Diferença estimada (mA)",
+  correction = "Correção",
+  current_mA = "Corrente (mA)",
+  load_resistance_ohm = "Resistência da carga (Ohm)",
+  load_voltage_V = "Tensão na carga (V)",
+  fitted_mA = "Corrente ajustada (mA)",
+  residual_mA = "Resíduo (mA)",
+  studentized_residual = "Resíduo studentizado",
+  leverage = "Leverage",
+  cook_distance = "Distância de Cook",
+  row_index = "Índice da linha",
+  inside_common_voltage_limit = "Dentro do limite comum",
+  inside_linear_slope_region = "Dentro da região linear",
+  compliance_candidate = "Candidato a compliance",
+  compliance_run_id = "ID do trecho",
+  compliance_run_points = "Pontos do trecho",
+  max_compliance_run_points = "Maior trecho",
+  in_common_compliance_region = "Na região comum",
+  measured_voltage_range_V = "Faixa medida (V)",
+  common_voltage_range_V = "Faixa comum (V)",
+  raw_samples = "Amostras originais",
+  dac_bins = "Bins de DAC",
+  bin_width_V = "Largura do bin (V)",
+  mean_samples_per_bin = "Amostras/bin",
+  influential_by_cook = "Influente por Cook",
+  outlier_by_studentized_residual = "Outlier por resíduo studentizado",
+  flagged = "Marcado"
+)
+
+friendly_column_names <- function(names_in) {
+  labels <- unname(column_label_map[names_in])
+  ifelse(is.na(labels), gsub("_", " ", names_in), labels)
+}
+
 markdown_table <- function(df, digits = 6, max_rows = Inf) {
   if (is.null(df) || nrow(df) == 0) {
     return("_Tabela sem linhas._")
@@ -77,7 +214,7 @@ markdown_table <- function(df, digits = 6, max_rows = Inf) {
     slice_head(n = max_rows) |>
     mutate(across(where(is.numeric), \(x) format_number(x, digits)))
 
-  header <- paste(names(display), collapse = " | ")
+  header <- paste(friendly_column_names(names(display)), collapse = " | ")
   separator <- paste(rep("---", ncol(display)), collapse = " | ")
   rows <- apply(display, 1, \(row) paste(row, collapse = " | "))
   paste(c(paste0("| ", header, " |"), paste0("| ", separator, " |"),
@@ -85,7 +222,156 @@ markdown_table <- function(df, digits = 6, max_rows = Inf) {
 }
 
 markdown_figure <- function(path, caption) {
-  paste0("![", caption, "](", path, ")")
+  c(paste0("![", caption, "](", path, ")"), "", "\\FloatBarrier")
+}
+
+latex_centered_figure <- function(path, caption, width = "0.78\\linewidth") {
+  c(
+    "\\begin{center}",
+    paste0("\\includegraphics[width=", width, ",keepaspectratio]{", path, "}"),
+    paste0("\\captionof{figure}{", latex_escape(caption), "}"),
+    "\\end{center}",
+    "\\FloatBarrier"
+  )
+}
+
+latex_escape <- function(x) {
+  x <- as.character(x)
+  x <- gsub("\\\\", "\\\\textbackslash{}", x)
+  x <- gsub("&", "\\\\&", x)
+  x <- gsub("%", "\\\\%", x)
+  x <- gsub("\\$", "\\\\$", x)
+  x <- gsub("#", "\\\\#", x)
+  x <- gsub("_", "\\\\_", x)
+  x <- gsub("\\{", "\\\\{", x)
+  x <- gsub("\\}", "\\\\}", x)
+  x
+}
+
+latex_tabular <- function(df, digits = 6, max_rows = Inf) {
+  if (is.null(df) || nrow(df) == 0) {
+    return("_Tabela sem linhas._")
+  }
+
+  display <- df |>
+    slice_head(n = max_rows) |>
+    mutate(across(where(is.numeric), \(x) format_number(x, digits))) |>
+    mutate(across(everything(), latex_escape))
+
+  alignment <- paste(rep("l", ncol(display)), collapse = "")
+  header <- paste(latex_escape(friendly_column_names(names(display))), collapse = " & ")
+  rows <- apply(display, 1, \(row) paste(row, collapse = " & "))
+
+  c(
+    paste0("\\begin{tabular}{@{}", alignment, "@{}}"),
+    "\\toprule",
+    paste0(header, " \\\\"),
+    "\\midrule",
+    paste0(rows, " \\\\"),
+    "\\bottomrule",
+    "\\end{tabular}"
+  )
+}
+
+latex_compact_table <- function(df, digits = 3, font_size = "\\scriptsize") {
+  c(
+    "\\begin{center}",
+    font_size,
+    "\\resizebox{\\textwidth}{!}{%",
+    latex_tabular(df, digits = digits),
+    "}%",
+    "\\end{center}"
+  )
+}
+
+latex_side_by_side_figures <- function(left_path, left_caption, right_path, right_caption) {
+  c(
+    "\\begin{center}",
+    "\\begin{minipage}[t]{0.495\\linewidth}",
+    "\\centering",
+    paste0("\\includegraphics[width=\\linewidth,keepaspectratio]{", left_path, "}"),
+    paste0("\\captionof{figure}{", latex_escape(left_caption), "}"),
+    "\\end{minipage}",
+    "\\hfill",
+    "\\begin{minipage}[t]{0.495\\linewidth}",
+    "\\centering",
+    paste0("\\includegraphics[width=\\linewidth,keepaspectratio]{", right_path, "}"),
+    paste0("\\captionof{figure}{", latex_escape(right_caption), "}"),
+    "\\end{minipage}",
+    "\\end{center}",
+    "\\clearpage"
+  )
+}
+
+latex_compact_side_by_side_figures <- function(left_path, left_caption, right_path, right_caption) {
+  c(
+    "\\begin{center}",
+    "\\captionsetup{font=small}",
+    "\\begin{minipage}[t]{0.495\\linewidth}",
+    "\\centering",
+    paste0("\\includegraphics[width=\\linewidth,keepaspectratio]{", left_path, "}"),
+    paste0("\\captionof{figure}{", latex_escape(left_caption), "}"),
+    "\\end{minipage}",
+    "\\hfill",
+    "\\begin{minipage}[t]{0.495\\linewidth}",
+    "\\centering",
+    paste0("\\includegraphics[width=\\linewidth,keepaspectratio]{", right_path, "}"),
+    paste0("\\captionof{figure}{", latex_escape(right_caption), "}"),
+    "\\end{minipage}",
+    "\\end{center}",
+    "\\FloatBarrier"
+  )
+}
+
+latex_side_by_side_tables <- function(left_df, right_df) {
+  c(
+    "\\begin{table}[htbp]",
+    "\\centering",
+    "\\makebox[\\textwidth][c]{%",
+    "\\begin{minipage}[t]{0.42\\textwidth}",
+    "\\vspace{0pt}",
+    "\\centering",
+    "\\scriptsize",
+    latex_tabular(left_df),
+    "\\end{minipage}%",
+    "\\hspace{0.03\\textwidth}%",
+    "\\begin{minipage}[t]{0.18\\textwidth}",
+    "\\vspace{0pt}",
+    "\\centering",
+    "\\small",
+    latex_tabular(right_df),
+    "\\end{minipage}%",
+    "}",
+    "\\end{table}",
+    "\\FloatBarrier"
+  )
+}
+
+render_report_tex <- function(markdown_lines, temp_md_path, tex_path) {
+  writeLines(markdown_lines, temp_md_path, useBytes = TRUE)
+  on.exit(unlink(temp_md_path), add = TRUE)
+
+  pandoc_path <- Sys.which("pandoc")
+  if (pandoc_path == "") {
+    stop("Pandoc executable was not found in PATH.")
+  }
+
+  pandoc_args <- c(
+    temp_md_path,
+    "--standalone",
+    "--from", "markdown",
+    "--to", "latex",
+    "--output", tex_path
+  )
+
+  pandoc_output <- system2(pandoc_path, args = pandoc_args, stdout = TRUE, stderr = TRUE)
+  pandoc_status <- attr(pandoc_output, "status")
+
+  if (!is.null(pandoc_status) && pandoc_status != 0) {
+    stop(
+      paste(c("Pandoc failed while generating the LaTeX report:", pandoc_output), collapse = "\n")
+    )
+  }
 }
 
 hypothesis_decision <- function(p_value, alpha = 0.05) {
@@ -479,7 +765,7 @@ raw_long <- imap_dfr(raw_data, \(df, load) {
 })
 
 raw_1k_preview <- raw_data[["1k"]] |>
-  slice_head(n = 12)
+  slice_head(n = 5)
 
 ramp_data <- raw_data |>
   map(\(df) extract_ramp_region(df, column = "dac_volts")) |>
@@ -516,6 +802,16 @@ processed_current_data <- converted_data |>
     .groups = "drop"
   ) |>
   arrange(load, dac_bin)
+
+binning_summary <- processed_current_data |>
+  group_by(load) |>
+  summarise(
+    raw_samples = sum(samples_in_bin),
+    dac_bins = n(),
+    bin_width_V = dac_step,
+    mean_samples_per_bin = mean(samples_in_bin),
+    .groups = "drop"
+  )
 
 processed_wide <- processed_current_data |>
   select(dac_bin, load, current_mA) |>
@@ -595,6 +891,18 @@ compliance_summary <- compliance_class_data |>
     removed_points = total_points - retained_points,
     removed_percent = 100 * removed_points / total_points,
     .groups = "drop"
+  )
+
+compliance_summary_display <- compliance_summary |>
+  transmute(
+    load,
+    measured_voltage_range_V = paste0(format_number(Vmin, 2), " a ", format_number(Vmax, 2)),
+    common_voltage_range_V = paste0(format_number(common_Vmin, 2), " a ", format_number(common_Vmax, 2)),
+    reference_slope_mA_per_V,
+    slope_threshold_mA_per_V,
+    retained_points,
+    removed_points,
+    removed_percent
   )
 
 linear_long <- compliance_class_data |>
@@ -819,35 +1127,88 @@ fes_metrics_not_evaluated_table <- fes_metrics_not_evaluated
 
 raw_stationary_segments_plot <- raw_long |>
   pivot_longer(c(dac_volts, shunt_volts), names_to = "signal", values_to = "voltage") |>
-  mutate(signal = recode(signal, dac_volts = "DAC voltage", shunt_volts = "Shunt voltage")) |>
+  mutate(signal = recode(signal, dac_volts = "DAC", shunt_volts = "Shunt")) |>
   ggplot(aes(sample, voltage, color = signal)) +
-  geom_line(linewidth = 0.35) +
+  geom_line(linewidth = 0.45) +
   facet_wrap(~ load, ncol = 1, scales = "free_x") +
   coord_cartesian(ylim = c(-0.5, 3.5)) +
-  labs(x = "Sample", y = "Voltage [V]", color = NULL) +
-  theme_minimal()
+  labs(x = "Amostra", y = "Tensão [V]", color = "Sinal") +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "top",
+    legend.direction = "horizontal",
+    legend.margin = margin(0, 0, 0, 0),
+    legend.box.margin = margin(0, 0, -2, 0),
+    panel.spacing.y = unit(0.5, "lines"),
+    axis.text = element_text(size = 11),
+    axis.title = element_text(size = 13),
+    strip.text = element_text(size = 13),
+    legend.title = element_text(size = 13),
+    legend.text = element_text(size = 13),
+    legend.key.width = unit(1.2, "lines"),
+    plot.margin = margin(2, 2, 2, 2)
+  )
 
 ramp_signals_plot <- imap_dfr(ramp_data, \(df, load) mutate(df, load = load)) |>
   pivot_longer(c(dac_volts, shunt_volts), names_to = "signal", values_to = "voltage") |>
-  mutate(signal = recode(signal, dac_volts = "DAC voltage", shunt_volts = "Shunt voltage")) |>
+  mutate(signal = recode(signal, dac_volts = "DAC", shunt_volts = "Shunt")) |>
   ggplot(aes(sample, voltage, color = signal)) +
-  geom_line(linewidth = 0.35) +
+  geom_line(linewidth = 0.45) +
   facet_wrap(~ load, ncol = 1, scales = "free_x") +
   coord_cartesian(ylim = c(-0.5, 3.5)) +
-  labs(x = "Sample", y = "Voltage [V]", color = NULL) +
-  theme_minimal()
+  labs(x = "Amostra", y = "Tensão [V]", color = "Sinal") +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "top",
+    legend.direction = "horizontal",
+    legend.margin = margin(0, 0, 0, 0),
+    legend.box.margin = margin(0, 0, -2, 0),
+    panel.spacing.y = unit(0.5, "lines"),
+    axis.text = element_text(size = 11),
+    axis.title = element_text(size = 13),
+    strip.text = element_text(size = 13),
+    legend.title = element_text(size = 13),
+    legend.text = element_text(size = 13),
+    legend.key.width = unit(1.2, "lines"),
+    plot.margin = margin(2, 2, 2, 2)
+  )
 
 current_after_conversion_plot <- converted_data |>
   ggplot(aes(sample_index, current_mA, color = load)) +
-  geom_line(linewidth = 0.5) +
-  labs(x = "Sample", y = "Output current [mA]", color = "Load") +
-  theme_minimal()
+  geom_line(linewidth = 0.45) +
+  labs(x = "Amostra", y = "Corrente [mA]", color = "Carga") +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    legend.direction = "horizontal",
+    axis.title = element_text(size = 15),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 13),
+    plot.margin = margin(4, 4, 4, 4)
+  )
 
 full_current_plot <- processed_current_data |>
   ggplot(aes(dac_bin, current_mA, color = load)) +
   geom_line(linewidth = 0.8) +
   labs(x = "DAC voltage [V]", y = "Output current [mA]", color = "Load") +
   theme_minimal()
+
+binned_current_by_load_plot <- processed_current_data |>
+  ggplot(aes(dac_bin, current_mA, color = load)) +
+  geom_line(linewidth = 0.75) +
+  geom_point(alpha = 0.65, size = 0.8) +
+  labs(x = "Bin de DAC [V]", y = "Corrente média [mA]", color = "Carga") +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "top",
+    legend.direction = "horizontal",
+    axis.title = element_text(size = 15),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 13),
+    plot.margin = margin(4, 4, 4, 4)
+  )
 
 compliance_highlight_plot <- compliance_class_data |>
   ggplot(aes(dac_bin, current_mA, color = in_common_compliance_region)) +
@@ -940,10 +1301,11 @@ block_cv_plot <- block_cv_folds |>
   theme_minimal()
 
 figure_paths <- list(
-  raw_stationary_segments_plot = save_report_plot(raw_stationary_segments_plot, "01_raw_signals_before_stationary_removal.png", 8, 8),
-  ramp_signals_plot = save_report_plot(ramp_signals_plot, "02_ramp_signals_after_stationary_removal.png", 8, 8),
-  current_after_conversion_plot = save_report_plot(current_after_conversion_plot, "03_current_after_conversion.png"),
+  raw_stationary_segments_plot = save_report_plot(raw_stationary_segments_plot, "01_raw_signals_before_stationary_removal.png", 4.2, 7.2),
+  ramp_signals_plot = save_report_plot(ramp_signals_plot, "02_ramp_signals_after_stationary_removal.png", 4.2, 7.2),
+  current_after_conversion_plot = save_report_plot(current_after_conversion_plot, "03_current_after_conversion.png", 7, 4),
   full_current_plot = save_report_plot(full_current_plot, "04_full_current_vs_dac.png"),
+  binned_current_by_load_plot = save_report_plot(binned_current_by_load_plot, "04_binned_current_by_load.png", 7, 4),
   compliance_highlight_plot = save_report_plot(compliance_highlight_plot, "05_compliance_retained_removed.png", 8, 8),
   measured_vs_predicted_plot = save_report_plot(measured_vs_predicted_plot, "06_measured_vs_predicted.png"),
   confidence_band_plot = save_report_plot(confidence_band_plot, "07_current_vs_dac_confidence_band.png"),
@@ -996,21 +1358,70 @@ table_paths <- imap(summary_tables, \(table, name) {
   }
 })
 
+correlation_interpretation_text <- correlation_summary |>
+  summarise(text = first(interpretation)) |>
+  pull(text)
+
+model_comparison_interpretation_text <- model_comparison_table |>
+  filter(!is.na(interpretation)) |>
+  slice_head(n = 1) |>
+  pull(interpretation)
+
+if (length(model_comparison_interpretation_text) == 0) {
+  model_comparison_interpretation_text <- "Interpretacao nao disponivel para comparacao de modelos."
+}
+
+normality_interpretation_text <- residual_diagnostics_summary |>
+  summarise(text = first(normality_interpretation)) |>
+  pull(text)
+
+heteroscedasticity_interpretation_text <- heteroscedasticity_test_summary |>
+  summarise(text = first(interpretation)) |>
+  pull(text)
+
+autocorrelation_interpretation_text <- autocorrelation_test_summary |>
+  summarise(text = first(interpretation)) |>
+  pull(text)
+
+correlation_summary_table <- correlation_summary |>
+  select(-interpretation)
+
+model_comparison_table_display <- model_comparison_table |>
+  select(-interpretation)
+
+residual_diagnostics_summary_table <- residual_diagnostics_summary |>
+  select(-normality_interpretation)
+
+heteroscedasticity_test_table <- heteroscedasticity_test_summary |>
+  select(-interpretation)
+
+autocorrelation_test_table <- autocorrelation_test_summary |>
+  select(-interpretation)
+
 # Report ---------------------------------------------------------------------
 
 report_sections <- c(
   "---",
   'title: "Relatório de Caracterização Experimental e Estatística do Estágio de Saída de um Estimulador Elétrico Funcional"',
-  'author: "Tiago P. Silva"',
+  'author: "Tiago de Paula Silva"',
   paste0('date: "', format_pt_date(Sys.Date()), '"'),
   "lang: pt-BR",
   "toc: true",
   "numbersections: true",
-  "geometry: margin=2.5cm",
+  "geometry: margin=2cm",
   'mainfont: "Times New Roman"',
+  "header-includes:",
+  "  - \\setlength{\\LTleft}{0pt}",
+  "  - \\setlength{\\LTright}{0pt}",
+  "  - \\setlength{\\emergencystretch}{5em}",
+  "  - \\AtBeginEnvironment{longtable}{\\setlength{\\tabcolsep}{3pt}\\scriptsize}",
+  "  - \\usepackage{caption}",
+  "  - \\usepackage{placeins}",
+  "  - \\let\\oldunderscore\\_",
+  "  - \\renewcommand{\\_}{\\oldunderscore\\discretionary{}{}{}}",
   "---",
   "",
-  "# 1. Problema",
+  "# Problema",
   "",
   "O item de estudo é o estágio de saída de um estimulador elétrico funcional (FES) baseado em uma fonte de corrente Howland. Mais especificamente, trata-se do eletroestimulador STIMGRASP, desenvolvido por Renato Barelli em 2017 como parte de uma dissertação de mestrado.",
   "",
@@ -1022,7 +1433,7 @@ report_sections <- c(
   "",
   "Por isso, é necessário caracterizar experimentalmente a relação entre tensão de DAC e corrente de saída, identificando a região em que o circuito se comporta aproximadamente como fonte de corrente, a influência da carga resistiva sobre a corrente entregue, um modelo matemático útil para estimar a corrente a partir do DAC e evidências estatísticas sobre linearidade, erro e limitação por compliance.",
   "",
-  "# 2. Motivação",
+  "# Motivação",
   "",
   "Em estimulação elétrica funcional, a amplitude de corrente está associada à resposta neuromuscular, ao conforto do usuário e à repetibilidade do protocolo de estimulação. Se a corrente real não for previsível, o mesmo comando digital pode gerar respostas diferentes em diferentes condições de carga.",
   "",
@@ -1030,7 +1441,7 @@ report_sections <- c(
   "",
   "O presente relatório revisa e aprofunda essa caracterização em R, com uma análise estatística mais cuidadosa para a disciplina PME406. A versão atual prioriza a consistência estatística da caracterização: a região útil é definida antes da regressão, os modelos são avaliados por erro, resíduos, intervalos e validação cruzada, e análises multivariadas ou didáticas são tratadas como material secundário quando não sustentam diretamente a conclusão técnica.",
   "",
-  "# 3. Objetivo",
+  "# Objetivo",
   "",
   "O objetivo do script é executar uma análise estatística da relação entre tensão de DAC e corrente de saída para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm.",
   "",
@@ -1052,87 +1463,139 @@ report_sections <- c(
   "- quantificar erro de predição, resíduos, autocorrelação temporal e pontos influentes;",
   "- explicitar limitações de normalidade e independência dos resíduos.",
   "",
-  "# 4. Estrutura da análise",
+  "# Estrutura da análise",
   "",
-  "O arquivo principal é [analise_rstudio.R](https://github.com/import-tiago/FEI/blob/main/MSc/PME406/1.Analysis/analise_rstudio.R). O script lê os CSVs exportados do osciloscópio, remove trechos estacionários antes e depois da rampa útil, calcula corrente a partir da tensão no resistor shunt, reconstrói a tensão na carga por resistência nominal e agrega os dados por bins de DAC de 10 mV.",
+  "O script em R lê os CSVs exportados do osciloscópio, remove trechos estacionários antes e depois da rampa útil, calcula corrente a partir da tensão no resistor shunt, reconstrói a tensão na carga por resistência nominal e agrega os dados por bins de DAC de 10 mV. O script e os dados brutos estão disponíveis no repositório indicado nas Referências.",
   "",
   "O fluxo de análise segue a sequência: aquisição CSV do osciloscópio, extração da rampa útil, conversão da tensão no shunt para corrente, agregação por bins de DAC, seleção da região de compliance, regressão linear, comparação entre modelos e análise dos resíduos.",
   "",
   "A partir desse conjunto processado, o relatório seleciona a região comum de compliance, ajusta modelos lineares, compara modelos aninhados por ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia heterocedasticidade e autocorrelação temporal e identifica pontos influentes. Todas as tabelas são exportadas para a pasta `tables`, e as figuras são exportadas para a pasta `figures`.",
   "",
-  "# 5. Desenho experimental, coleta e limitações",
+  "\\clearpage",
+  "",
+  "# Desenho experimental, coleta e limitações",
   "",
   "Foram analisadas rampas de tensão de DAC e tensão no resistor shunt para três cargas resistivas nominais: 1 kOhm, 2 kOhm e 4,7 kOhm. A análise estima corrente a partir do shunt e reconstrói a tensão na carga por resistência nominal. Como o sistema opera em malha aberta, a regressão caracteriza o comportamento observado no ensaio, mas não garante corrente entregue em operação real quando a carga, contato eletrodo-pele ou condições térmicas mudam.",
   "",
   "A coleta foi realizada com firmware experimental dedicado a gerar uma rampa controlada de DAC. A tensão de controle foi medida no canal CH1 do osciloscópio, enquanto a tensão associada à saída foi medida no canal CH2 sobre o arranjo de carga e resistor shunt. O objetivo dessa instrumentação foi caracterizar o estágio de saída, não representar uma sessão completa de estimulação terapêutica.",
   "",
-  markdown_figure("figures/00_output_stage_measurement_points.png", "Estágio DAC/Howland do STIMGRASP com pontos de medição usados na coleta experimental"),
+  latex_side_by_side_figures(
+    "figures/00_output_stage_measurement_points.png",
+    "Estágio DAC/Howland do STIMGRASP com pontos de medição usados na coleta experimental",
+    "figures/00_data_collection_setup.png",
+    "Bancada experimental usada para aquisição dos sinais de DAC e shunt"
+  ),
   "",
-  markdown_figure("figures/00_data_collection_setup.png", "Bancada experimental usada para aquisição dos sinais de DAC e shunt"),
-  "",
-  "# 6. Importação e pré-processamento",
+  "# Importação e pré-processamento",
   "",
   "Os CSVs foram importados diretamente dos arquivos do osciloscópio, removendo os segmentos estacionários antes e depois da rampa útil. As três cargas foram equalizadas para a mesma quantidade de amostras.",
   "",
   "Cada arquivo contém duas grandezas principais: `dac_volts`, que representa a tensão de controle aplicada ao estágio de saída, e `shunt_volts`, que representa a tensão medida no resistor shunt e é usada para calcular a corrente.",
   "",
-  "Os dados brutos podem ser acessados diretamente nos links:",
+  "Os dados brutos utilizados nesta etapa estão disponíveis no repositório indicado nas Referências.",
   "",
-  paste0("- 1 kOhm: <", url_1k, ">"),
-  paste0("- 2 kOhm: <", url_2k, ">"),
-  paste0("- 4,7 kOhm: <", url_4k7, ">"),
+  "Antes de qualquer tratamento, apenas como um exemplo, a carga de 1 kOhm possui a seguinte prévia dos dados crus:",
   "",
-  "Antes de qualquer tratamento, a carga de 1 kOhm possui a seguinte prévia dos dados crus:",
+  latex_side_by_side_tables(raw_1k_preview, ramp_sample_summary),
   "",
-  markdown_table(raw_1k_preview),
+  latex_compact_side_by_side_figures(
+    figure_paths$raw_stationary_segments_plot,
+    "Sinais brutos antes da remoção dos segmentos estacionários",
+    figure_paths$ramp_signals_plot,
+    "Sinais da rampa após a remoção dos segmentos estacionários"
+  ),
   "",
-  markdown_table(ramp_sample_summary),
+  "\\clearpage",
   "",
-  markdown_figure(figure_paths$raw_stationary_segments_plot, "Sinais brutos antes da remoção dos segmentos estacionários"),
-  "",
-  markdown_figure(figure_paths$ramp_signals_plot, "Sinais da rampa após a remoção dos segmentos estacionários"),
-  "",
-  "# 7. Conversão shunt-corrente",
+  "# Conversão shunt-corrente",
   "",
   paste0("A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = ",
          shunt_resistance_ohm, " Ohm. A tolerância configurada do shunt é ",
          shunt_resistance_tolerance * 100, "%."),
   "",
-  markdown_figure(figure_paths$current_after_conversion_plot, "Corrente calculada após conversão da tensão no shunt"),
+  latex_centered_figure(
+    figure_paths$current_after_conversion_plot,
+    "Corrente calculada após conversão da tensão no shunt",
+    "0.78\\linewidth"
+  ),
   "",
-  "# 8. Identificação da região de compliance",
+  "\\FloatBarrier",
+  "",
+  "\\clearpage",
+  "",
+  "# Redução de granularidade por binning",
+  "",
+  paste0(
+    "Após a conversão da tensão do shunt em corrente, os pontos ainda estavam na granularidade temporal da aquisição do osciloscópio. ",
+    "Como a variável de interesse para a regressão é a relação entre tensão de DAC e corrente de saída, os dados foram agrupados por `dac_bin`: ",
+    "cada valor de `dac_volts` foi arredondado para o centro de um intervalo de ",
+    format_number(dac_step, 2),
+    " V, e as medições com o mesmo `dac_bin` e a mesma carga foram substituídas pela média de corrente, tensão do shunt, tensão de DAC e tensão reconstruída na carga."
+  ),
+  "",
+  "Esse binning reduz a quantidade de pontos repetidos ou quase repetidos ao longo da rampa, diminui ruído local de aquisição e evita que regiões com muitas amostras temporais tenham peso desproporcional apenas por terem sido amostradas mais vezes. A análise passa, portanto, a representar a resposta média do estágio de saída para cada nível discretizado de DAC.",
+  "",
+  "A largura de 10 mV preserva a tendência da rampa em escala suficientemente fina para a caracterização, mas torna as etapas seguintes mais estáveis: identificação da região de compliance, cálculo de inclinações locais, correlação e regressões lineares.",
+  "",
+  latex_compact_table(binning_summary),
+  "",
+  latex_centered_figure(
+    figure_paths$binned_current_by_load_plot,
+    "Corrente média em função dos bins de DAC após a redução de granularidade",
+    "0.78\\linewidth"
+  ),
+  "",
+  "\\FloatBarrier",
+  "",
+  "\\clearpage",
+  "",
+  "# Identificação da região de compliance",
   "",
   "A região comum de compliance foi definida antes da regressão usando dois critérios: limite físico pela tensão reconstruída na carga e inclinação local mínima compatível com o trecho linear de cada carga. O limite comum de tensão foi tomado como a menor magnitude máxima de tensão reconstruída entre as cargas, definindo uma faixa simétrica comum em torno de zero; em seguida, foram mantidos apenas os pontos do maior trecho contínuo com inclinação local suficiente. O modelo linear deve ser interpretado apenas dentro dessa região comum.",
   "",
-  markdown_table(compliance_summary),
+  latex_compact_table(compliance_summary_display),
   "",
-  markdown_figure(figure_paths$compliance_highlight_plot, "Pontos retidos e removidos pelo critério de compliance"),
+  latex_centered_figure(
+    figure_paths$compliance_highlight_plot,
+    "Pontos retidos e removidos pelo critério de compliance",
+    "0.72\\linewidth"
+  ),
   "",
-  "# 9. Estatística descritiva relevante",
+  "\\FloatBarrier",
+  "",
+  "# Estatística descritiva relevante",
   "",
   "Resumo da região linear retida:",
   "",
   markdown_table(linear_region_stats),
   "",
-  "# 10. Correlação exploratória",
+  "# Correlação exploratória",
   "",
   "Correlação foi mantida apenas como evidência exploratória de associação monotônica/linear entre DAC e corrente. A validade do circuito é discutida a partir de erro, resíduos, intervalos e limites de compliance.",
   "",
-  markdown_table(correlation_summary),
+  correlation_interpretation_text,
   "",
-  "# 11. Modelos lineares por carga",
+  markdown_table(correlation_summary_table),
+  "",
+  "# Modelos lineares por carga",
   "",
   "Modelos independentes por carga foram ajustados como current_mA ~ dac_bin.",
   "",
   markdown_table(per_load_model_summary),
   "",
-  "# 12. Modelo global",
+  "# Modelo global",
   "",
-  "O modelo global foi ajustado como current_mA ~ dac_bin dentro da região comum de compliance.",
+  "O modelo global foi ajustado como `current_mA ~ dac_bin` dentro da região comum de compliance.",
+  "",
+  "Para obter esse modelo, não foi ajustada uma regressão separada para cada carga. Após o binning e a seleção da região comum de compliance, os dados das três cargas foram mantidos em formato longo em `linear_long`: cada linha contém um par (`dac_bin`, `current_mA`) e o rótulo da carga correspondente (`1k`, `2k` ou `4k7`). Em seguida, todas essas linhas foram usadas juntas em uma única regressão linear.",
+  "",
+  "Na prática, isso equivale a empilhar os pontos válidos das três cargas em um único conjunto de observações. A variável `load` permanece disponível para identificação, gráficos e diagnósticos, mas não participa da equação do modelo global. Assim, o ajuste estima uma única inclinação e um único intercepto para representar a relação média entre bin de DAC e corrente de saída, independentemente da carga, desde que os pontos estejam dentro da região comum de compliance.",
+  "",
+  "Esse procedimento é coerente com o objetivo de obter uma equação operacional única para estimativa em malha aberta. Se as curvas das cargas permanecem próximas após a remoção dos pontos limitados por compliance, um único modelo global pode representar o comportamento do estágio de saída sem exigir coeficientes específicos por carga. A comparação posterior com o modelo com interação carga x DAC verifica justamente se adicionar dependência explícita da carga melhora de forma relevante essa representação.",
   "",
   markdown_table(global_model_summary),
   "",
-  "# 13. Modelo com interação carga x DAC",
+  "# Modelo com interação carga x DAC",
   "",
   "O modelo com interação foi ajustado como current_mA ~ dac_bin * load.",
   "",
@@ -1142,13 +1605,15 @@ report_sections <- c(
   "",
   markdown_table(model_coefficients_ci_table, max_rows = 30),
   "",
-  "# 14. Comparação entre modelos",
+  "# Comparação entre modelos",
   "",
   "A comparação formal entre o modelo global e o modelo com interação foi feita por ANOVA/teste F para modelos aninhados.",
   "",
-  markdown_table(model_comparison_table),
+  markdown_table(model_comparison_table_display),
   "",
-  "# 15. Erro de predição",
+  model_comparison_interpretation_text,
+  "",
+  "# Erro de predição",
   "",
   "As métricas de erro foram calculadas dentro da região linear: MAE, RMSE e maior erro absoluto.",
   "",
@@ -1160,27 +1625,33 @@ report_sections <- c(
   "",
   markdown_figure(figure_paths$prediction_band_plot, "Banda de predição da corrente em função do DAC"),
   "",
-  "# 16. Diagnóstico dos resíduos",
+  "# Diagnóstico dos resíduos",
   "",
-  markdown_table(residual_diagnostics_summary),
+  markdown_table(residual_diagnostics_summary_table),
+  "",
+  normality_interpretation_text,
   "",
   markdown_figure(figure_paths$residuals_vs_dac_plot, "Resíduos em função do DAC"),
   "",
   markdown_figure(figure_paths$residuals_vs_predicted_plot, "Resíduos em função dos valores preditos"),
   "",
-  "# 17. Homocedasticidade",
+  "# Homocedasticidade",
   "",
-  markdown_table(heteroscedasticity_test_summary),
+  markdown_table(heteroscedasticity_test_table),
   "",
-  "# 18. Autocorrelação temporal",
+  heteroscedasticity_interpretation_text,
+  "",
+  "# Autocorrelação temporal",
   "",
   "Como os dados vêm de uma rampa temporal, a independência dos resíduos não foi assumida automaticamente.",
   "",
-  markdown_table(autocorrelation_test_summary),
+  markdown_table(autocorrelation_test_table),
+  "",
+  autocorrelation_interpretation_text,
   "",
   markdown_figure(figure_paths$acf_residual_plot, "Autocorrelação dos resíduos"),
   "",
-  "# 19. Outliers e influência",
+  "# Outliers e influência",
   "",
   "Foram calculados resíduos studentizados, leverage e distância de Cook. Pontos foram apenas marcados e reportados; a remoção automática permanece desativada por padrão.",
   "",
@@ -1192,7 +1663,7 @@ report_sections <- c(
   "",
   markdown_figure(figure_paths$leverage_studentized_plot, "Leverage versus resíduos studentizados"),
   "",
-  "# 20. Validação cruzada por blocos",
+  "# Validação cruzada por blocos",
   "",
   "A validação por blocos usa cinco blocos contíguos ordenados, treinando em quatro blocos e testando no bloco remanescente. Isso evita usar apenas uma validação aleatória que mistura pontos vizinhos da rampa.",
   "",
@@ -1202,7 +1673,7 @@ report_sections <- c(
   "",
   markdown_figure(figure_paths$block_cv_plot, "Erros da validação cruzada por blocos"),
   "",
-  "# 21. Conclusões revisadas",
+  "# Conclusões revisadas",
   "",
   "A caracterização sustenta três conclusões principais. Primeiro, há linearidade quantificável entre tensão de DAC e corrente de saída dentro da região comum de compliance, com correlações próximas de -1 e erros de predição baixos. Segundo, o STIMGRASP possui limites claros de operação em tensão: essa limitação não é necessariamente uma falha, mas reduz a faixa de corrente útil à medida que a carga aumenta. Terceiro, como a arquitetura é open-loop, o firmware não detecta em tempo real quando o estágio entra em saturação e a corrente entregue passa a ser menor do que a prevista pelo modelo.",
   "",
@@ -1210,17 +1681,19 @@ report_sections <- c(
   "",
   "Análises como PCA, cluster e testes de média global foram preservadas somente como material secundário/didático e não são usadas como evidência central de validade metrológica do estágio de saída.",
   "",
-  "# 22. Referências",
+  "# Referências {-}",
   "",
-  "[1] T. P. Silva, \"Experimental Characterization of the Output Stage of a Functional Electrical Stimulator Based on a Howland Current Source,\" artigo produzido no contexto da disciplina PEL309, Centro Universitário FEI, 2026.",
+  "[1] Tiago de Paula Silva, \"Experimental Characterization of the Output Stage of a Functional Electrical Stimulator Based on a Howland Current Source,\" artigo produzido no contexto da disciplina PEL309, Centro Universitário FEI, 2026.",
+  "",
+  "[2] Tiago de Paula Silva, \"FEI - PME406: dados brutos e script R da análise estatística,\" repositório GitHub. Disponível em: \\url{https://github.com/import-tiago/FEI/tree/main/MSc/PME406}.",
   ""
 )
 
-writeLines(report_sections, report_path, useBytes = TRUE)
+render_report_tex(report_sections, report_temp_md_path, report_tex_path)
 
 message("Analysis completed.")
 message("Figures saved in: ", normalizePath(figures_dir, winslash = "/"))
 message("Tables saved in: ", normalizePath(tables_dir, winslash = "/"))
-message("Report saved as: ", normalizePath(report_path, winslash = "/"))
+message("Report saved as: ", normalizePath(report_tex_path, winslash = "/"))
 
 invisible(summary_tables)
