@@ -85,6 +85,12 @@
 \setlength{\emergencystretch}{5em}
 \AtBeginEnvironment{longtable}{\setlength{\tabcolsep}{3pt}\scriptsize}
 \usepackage{caption}
+\newcommand{\tablecaptionbelow}[1]{%
+  \begin{center}
+  \begin{minipage}{\linewidth}
+  \captionof{table}{#1}
+  \end{minipage}
+  \end{center}}
 \usepackage{placeins}
 \let\oldunderscore\_
 \renewcommand{\_}{\oldunderscore\discretionary{}{}{}}
@@ -494,6 +500,7 @@ Máximo (mA)
 4.849080 & 9.812040 \\
 \end{longtable}
 }
+\tablecaptionbelow{Resumo estatístico da região linear retida por carga}
 
 \section{Correlação
 exploratória}\label{correlauxe7uxe3o-exploratuxf3ria}
@@ -537,6 +544,7 @@ Amostras
 4k7 & -0.999815 & 0 & -1 & 0 & 76 \\
 \end{longtable}
 }
+\tablecaptionbelow{Correlação exploratória entre tensão de DAC e corrente por carga}
 
 \section{Modelos lineares por carga}\label{modelos-lineares-por-carga}
 
@@ -593,6 +601,7 @@ Modelo da carga de 4,7 kOhm & 4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.0959
 0.110343 & 0.252044 \\
 \end{longtable}
 }
+\tablecaptionbelow{Desempenho dos modelos lineares independentes por carga}
 
 \[
 \begin{aligned}
@@ -701,23 +710,47 @@ Modelo global & 0.999661 & 0.999661 & 0.389648 & 566 &
 0.331486 & 0.388959 & 0.934792 \\
 \end{longtable}
 }
+\tablecaptionbelow{Desempenho do modelo global para a região linear retida}
 
 \section{Interação entre carga e comando de
 DAC}\label{modelo-com-interauxe7uxe3o-carga-x-dac}
 
-Este ajuste foi usado para verificar se a relação entre tensão de DAC e
-corrente é a mesma para todas as cargas ou se muda levemente conforme a
-carga conectada. No modelo global, uma única reta é usada para
-representar todas as cargas, assumindo o mesmo intercepto e a mesma
-inclinação. Ao incluir a interação entre carga e comando de DAC, por
-outro lado, a carga pode alterar tanto o deslocamento vertical da reta
-quanto sua inclinação:
+Este tópico usa uma extensão direta da regressão linear múltipla
+apresentada na disciplina. A tensão de DAC é tratada como variável
+explicativa quantitativa, enquanto a carga resistiva é tratada como
+variável categórica. Como modelos de regressão não utilizam diretamente
+nomes de categorias, as cargas são representadas por variáveis
+indicadoras, também chamadas de variáveis \emph{dummies}. Neste relatório,
+essas variáveis são indicadas pela letra \(D\), justamente para
+diferenciá-las da resistência física da carga. Elas permitem incluir no
+mesmo modelo o fato de a medição pertencer à carga de 1 kOhm, 2 kOhm ou
+4,7 kOhm.
+
+O objetivo deste ajuste não é substituir a análise anterior por uma
+técnica desconectada do conteúdo da disciplina, mas complementar o modelo
+global. No modelo global, uma única reta é usada para representar todas
+as cargas, assumindo o mesmo intercepto e a mesma inclinação. Essa
+hipótese é simples e útil, mas pode esconder pequenas diferenças entre as
+cargas. Ao incluir a interação entre carga e comando de DAC, verifica-se
+se a relação entre tensão de DAC e corrente é a mesma para todas as
+cargas ou se muda levemente conforme a carga conectada.
+
+Em termos estatísticos, uma interação indica que o efeito de uma variável
+explicativa depende do nível de outra variável. Neste relatório, isso
+significa perguntar se a variação da corrente causada por uma mudança na
+tensão de DAC é igual para todas as cargas. Se não houver interação
+relevante, as retas associadas às cargas tendem a ser paralelas. Se
+houver interação relevante, a inclinação da reta também muda com a carga.
+Assim, a carga pode alterar tanto o deslocamento vertical da reta quanto
+sua inclinação:
 \[
 I = \beta_0 + \beta_1 V_{\mathrm{DAC}} + \gamma_R +
 \delta_R V_{\mathrm{DAC}} + \varepsilon,
 \]
 em que \(I\) é a corrente medida e \(V_{\mathrm{DAC}}\) é a tensão de
-comando do DAC. Os parâmetros do modelo são:
+comando do DAC. Essa forma resume a ideia geral do modelo: a carga de
+referência possui uma reta própria, e as demais cargas entram como
+correções dessa reta. Os parâmetros são:
 
 \begin{itemize}
 \tightlist
@@ -734,9 +767,23 @@ comando do DAC. Os parâmetros do modelo são:
   modelo.
 \end{itemize}
 
-Neste ajuste, portanto, a carga de 1 kOhm é tomada como referência; os
-termos associados a 2 kOhm e 4,7 kOhm indicam quanto essas cargas se
-afastam da reta de referência.
+Neste ajuste, portanto, a carga de 1 kOhm é tomada como referência. Essa
+escolha não significa que ela seja mais importante fisicamente; trata-se
+apenas de uma convenção estatística para escrever o modelo sem
+redundância. Como existem três cargas, são necessárias apenas duas
+variáveis indicadoras: \(D_{2k}\) para a carga de 2 kOhm e
+\(D_{4{,}7k}\) para a carga de 4,7 kOhm. Quando ambas valem zero, a
+observação pertence automaticamente à carga de 1 kOhm.
+
+Esse procedimento evita multicolinearidade perfeita. Se fossem usadas
+três variáveis indicadoras, uma para cada carga, junto com o intercepto do
+modelo, haveria uma relação linear exata entre elas, pois a soma das três
+indicadoras seria sempre igual a 1. Nesse caso, uma coluna da matriz de
+regressão poderia ser escrita como combinação das demais, e os
+coeficientes não seriam estimados de forma única. Ao omitir a dummy da
+carga de referência, o modelo mantém a mesma informação categórica sem
+criar essa redundância. Os termos associados a 2 kOhm e 4,7 kOhm indicam
+quanto essas cargas se afastam da reta de referência.
 
 Em termos simples, essa formulação testa se mudar a carga apenas desloca
 a curva para cima ou para baixo, ou se também modifica a sensibilidade da
@@ -749,18 +796,18 @@ A equação completa estimada para o ajuste com interação é:
 \begin{aligned}
 I\,[\mathrm{mA}] =\;& 46{,}6181
 - 28{,}1177\,V_{\mathrm{DAC}}\,[\mathrm{V}]
-- 1{,}0877\,R_{2k}
-- 3{,}6991\,R_{4{,}7k}\\
-&+ 0{,}5210\,V_{\mathrm{DAC}}\,[\mathrm{V}]\,R_{2k}
-+ 1{,}9616\,V_{\mathrm{DAC}}\,[\mathrm{V}]\,R_{4{,}7k},
+- 1{,}0877\,D_{2k}
+- 3{,}6991\,D_{4{,}7k}\\
+&+ 0{,}5210\,V_{\mathrm{DAC}}\,[\mathrm{V}]\,D_{2k}
++ 1{,}9616\,V_{\mathrm{DAC}}\,[\mathrm{V}]\,D_{4{,}7k},
 \end{aligned}
 \]
-em que \(R_{2k}\) é uma variável indicadora que vale 1 quando a carga
-resistiva é 2 kOhm e 0 nos demais casos, e \(R_{4{,}7k}\) é uma variável
+em que \(D_{2k}\) é uma variável indicadora que vale 1 quando a carga
+resistiva é 2 kOhm e 0 nos demais casos, e \(D_{4{,}7k}\) é uma variável
 indicadora que vale 1 quando a carga resistiva é 4,7 kOhm e 0 nos demais
 casos. Para a carga de 1 kOhm, ambas as variáveis indicadoras valem 0,
-pois ela é a referência do modelo. Aqui, \(R_{2k}\) e \(R_{4{,}7k}\) não
-representam o valor da resistência em ohms, mas apenas a presença daquela
+pois ela é a referência do modelo. Aqui, \(D_{2k}\) e \(D_{4{,}7k}\) não
+representam valores de resistência em ohms, mas apenas a presença de cada
 carga no ajuste.
 
 A partir dos coeficientes do ajuste com interação, as retas finais por
@@ -837,6 +884,7 @@ Interação carga-DAC & 0.999813 & 0.999811 & 0.290484
 & 566 & 0.223411 & 0.288941 & 0.74369 \\
 \end{longtable}
 }
+\tablecaptionbelow{Desempenho do ajuste com interação entre carga e comando de DAC}
 
 Ao incluir a interação entre carga e comando de DAC, o ajuste reduz o
 desvio residual, o MAE, o RMSE e o erro absoluto máximo em relação ao
@@ -931,6 +979,7 @@ Modelo da carga de 4,7 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -26.15613
 -447.332761 & 0 & -26.272639 & -26.039625 \\
 \end{longtable}
 }
+\tablecaptionbelow{Coeficientes estimados e testes de significância dos modelos lineares}
 
 \section{Comparação entre modelos}\label{comparauxe7uxe3o-entre-modelos}
 
@@ -979,6 +1028,7 @@ Interação carga-DAC & 0.05 & 2 & 560 &
 47.253472 & 4 & 38.37632 & 113.699262 & 0 \\
 \end{longtable}
 }
+\tablecaptionbelow{Comparação por ANOVA entre o modelo global e o ajuste com interação}
 
 Incluir a interação entre carga e comando de DAC melhora
 significativamente o ajuste em relação ao modelo global. A queda da soma
@@ -1039,6 +1089,7 @@ Modelo da carga de 4,7 kOhm & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0
 0.252044 \\
 \end{longtable}
 }
+\tablecaptionbelow{Métricas de erro de predição dos modelos avaliados}
 
 \begin{figure}
 \centering
@@ -1108,6 +1159,7 @@ global\_current\_mA\_by\_dac & 0 & 0.389303 & 0.015381 & -0.934792 &
 0.738906 & 0.331486 & 0.388959 & 566 & 0 \\
 \end{longtable}
 }
+\tablecaptionbelow{Resumo dos resíduos do modelo global e teste de normalidade}
 
 A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk.
 
@@ -1159,6 +1211,7 @@ manual\_breusch\_pagan\_residual\_squared\_on\_fitted & 27.838682 & 1 &
 0 & fallback & 0.05 \\
 \end{longtable}
 }
+\tablecaptionbelow{Teste de homocedasticidade dos resíduos}
 
 Ha evidencia de heterocedasticidade; a hipotese de variancia constante e
 questionavel.
@@ -1195,6 +1248,7 @@ manual\_durbin\_watson\_approximation & 0.068879 & 0 &
 fallback\_normal\_approximation & 0.05 \\
 \end{longtable}
 }
+\tablecaptionbelow{Teste de autocorrelação temporal dos resíduos}
 
 Ha evidencia de autocorrelacao temporal; p-valores classicos da
 regressao podem estar otimistas.
@@ -1242,6 +1296,7 @@ Maior resíduo studentizado abs.
 566 & 51 & 9.010601 & 0.007067 & 0.0178 & 2.411942 \\
 \end{longtable}
 }
+\tablecaptionbelow{Resumo de pontos influentes e critérios de influência}
 
 \begin{figure}
 \centering
@@ -1307,6 +1362,7 @@ Erro absoluto máximo (mA)
 5 & 453 & 113 & 0.469936 & 0.525130 & 0.978239 \\
 \end{longtable}
 }
+\tablecaptionbelow{Erros de validação cruzada por bloco}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1340,6 +1396,7 @@ Desvio do erro máx. (mA)
 5 & 0.610745 & 0.330716 & 0.560489 & 0.324743 & 1.00964 & 0.449455 \\
 \end{longtable}
 }
+\tablecaptionbelow{Resumo agregado da validação cruzada por blocos}
 
 \begin{figure}
 \centering
