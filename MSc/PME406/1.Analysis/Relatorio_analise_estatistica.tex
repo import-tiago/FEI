@@ -559,6 +559,19 @@ discretizado de comando do conversor digital-analógico, \(\beta_0\) é o
 intercepto, \(\beta_1\) é a inclinação da relação corrente-DAC e
 \(\varepsilon\) representa o erro residual do ajuste.
 
+As equações estimadas para cada carga foram:
+\[
+\begin{aligned}
+I_{1\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 46{,}6181 - 28{,}1177\,D_{\mathrm{DAC}}\,[\mathrm{V}],\\
+I_{2\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 45{,}5305 - 27{,}5967\,D_{\mathrm{DAC}}\,[\mathrm{V}],\\
+I_{4{,}7\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 42{,}9190 - 26{,}1561\,D_{\mathrm{DAC}}\,[\mathrm{V}].
+\end{aligned}
+\]
+Assim, os coeficientes angulares variam de aproximadamente -28,12 mA/V a
+-26,16 mA/V, enquanto os coeficientes lineares variam de 46,62 mA a
+42,92 mA. Essa diferença mostra que as retas por carga são muito
+próximas, mas não exatamente coincidentes.
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
@@ -621,6 +634,14 @@ uma única reta para todas as cargas:
 \[
 I = \beta_0 + \beta_1 D_{\mathrm{DAC}} + \varepsilon.
 \]
+Com os dados deste ensaio, a equação estimada foi:
+\[
+I\,[\mathrm{mA}] = 46{,}3489 - 28{,}0332\,D_{\mathrm{DAC}}\,[\mathrm{V}].
+\]
+Assim, o coeficiente linear do modelo global é 46,3489 mA, e
+o coeficiente angular é -28,0332 mA/V. O sinal negativo indica que,
+nesta montagem, o aumento da tensão de DAC reduz a corrente calculada no
+sentido adotado para o sinal.
 
 Para obter esse modelo, não foi ajustada uma regressão separada para cada
 carga. Após o binning e a seleção da região comum de compliance, os dados
@@ -710,16 +731,30 @@ compatíveis com a aplicação.
 \section{Modelo com interação carga x
 DAC}\label{modelo-com-interauxe7uxe3o-carga-x-dac}
 
-O modelo com interação permite que a relação entre corrente e DAC mude
-com a carga. Nessa formulação, a carga pode alterar tanto o intercepto
-quanto a inclinação da reta:
+O modelo com interação foi ajustado para verificar se a relação entre
+tensão de DAC e corrente é a mesma para todas as cargas ou se muda
+levemente conforme a carga conectada. No modelo global, uma única reta é
+usada para representar todas as cargas, assumindo o mesmo intercepto e a
+mesma inclinação. No modelo com interação, por outro lado, a carga pode
+alterar tanto o deslocamento vertical da reta quanto sua inclinação:
 \[
 I = \beta_0 + \beta_1 D_{\mathrm{DAC}} + \gamma_R +
 \delta_R D_{\mathrm{DAC}} + \varepsilon,
 \]
-em que \(\gamma_R\) representa o deslocamento associado à carga e
-\(\delta_R\) representa a alteração de inclinação em relação à carga de
-referência.
+em que \(I\) é a corrente medida, \(D_{\mathrm{DAC}}\) é o nível de
+comando do DAC, \(\beta_0\) é o intercepto da carga de referência,
+\(\beta_1\) é a inclinação da carga de referência, \(\gamma_R\)
+representa o deslocamento de intercepto associado à carga \(R\),
+\(\delta_R\) representa a alteração de inclinação associada à carga
+\(R\), e \(\varepsilon\) representa o erro residual. Neste ajuste, a carga
+de 1 kOhm é tomada como referência; assim, os termos associados a 2 kOhm
+e 4,7 kOhm indicam quanto essas cargas se afastam da reta de referência.
+
+Em termos simples, o modelo testa se mudar a carga apenas desloca a curva
+para cima ou para baixo, ou se também modifica a sensibilidade da corrente
+ao comando de DAC. Se os termos de interação forem relevantes, isso indica
+que as curvas das cargas não são paralelas: além de terem interceptos
+diferentes, também possuem inclinações ligeiramente distintas.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -760,11 +795,15 @@ Modelo com interação carga-DAC & 0.999813 & 0.999811 & 0.290484
 
 Ao incluir a interação entre carga e DAC, o ajuste reduz o desvio
 residual, o MAE, o RMSE e o erro absoluto máximo em relação ao modelo
-global. Em termos práticos, isso indica que a carga não afeta apenas um
-deslocamento fixo da curva: ela também altera levemente a inclinação da
-relação DAC-corrente. O ganho de ajuste deve ser ponderado contra a
-perda de simplicidade, pois esse modelo exige identificar a carga para
-aplicar a equação correta.
+global. Em termos práticos, isso indica que as curvas das três cargas são
+muito próximas, mas não perfeitamente coincidentes. A carga não afeta
+apenas um deslocamento fixo da curva: ela também altera levemente a
+inclinação da relação DAC-corrente. Portanto, para descrição estatística
+dos dados, o modelo com interação representa melhor o comportamento
+observado. Para uma aplicação embarcada simples em malha aberta, porém, o
+modelo global ainda pode ser preferível se o erro adicional for aceitável,
+pois o modelo com interação exige conhecer ou estimar a carga conectada
+para aplicar os coeficientes corretos.
 
 Nas tabelas de coeficientes, \(H_0\) representa a hipótese nula de que o
 coeficiente avaliado é igual a zero. Com nível de significância de 5\%
