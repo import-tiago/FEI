@@ -277,10 +277,9 @@ Os CSVs foram importados diretamente dos arquivos do osciloscópio,
 removendo os segmentos estacionários antes e depois da rampa útil. As
 três cargas foram equalizadas para a mesma quantidade de amostras.
 
-Cada arquivo contém duas grandezas principais: \texttt{dac\_volts}, que
-representa a tensão de controle aplicada ao estágio de saída, e
-\texttt{shunt\_volts}, que representa a tensão medida no resistor shunt
-e é usada para calcular a corrente.
+Cada arquivo contém duas grandezas principais: a tensão de controle
+aplicada ao estágio de saída, medida no sinal de DAC, e a tensão no
+resistor shunt, usada posteriormente para calcular a corrente.
 
 Os dados brutos utilizados nesta etapa estão disponíveis no repositório
 indicado nas Referências.
@@ -338,11 +337,11 @@ binning}\label{reduuxe7uxe3o-de-granularidade-por-binning}
 Após a conversão da tensão do shunt em corrente, os pontos ainda estavam
 na granularidade temporal da aquisição do osciloscópio. Como a variável
 de interesse para a regressão é a relação entre tensão de DAC e corrente
-de saída, os dados foram agrupados por \texttt{dac\_bin}: cada valor de
-\texttt{dac\_volts} foi arredondado para o centro de um intervalo de
-0.01 V, e as medições com o mesmo \texttt{dac\_bin} e a mesma carga
-foram substituídas pela média de corrente, tensão do shunt, tensão de
-DAC e tensão reconstruída na carga.
+de saída, os dados foram agrupados em intervalos de 10 mV da tensão de
+DAC: cada valor foi arredondado para o centro do intervalo correspondente,
+e as medições com o mesmo nível discretizado de DAC e a mesma carga foram
+substituídas pela média de corrente, tensão do shunt, tensão de DAC e
+tensão reconstruída na carga.
 
 Esse binning reduz a quantidade de pontos repetidos ou quase repetidos
 ao longo da rampa, diminui ruído local de aquisição e evita que regiões
@@ -425,10 +424,16 @@ Carga & Faixa medida (V) & Faixa comum (V) & Pontos retidos & Pontos removidos &
 \FloatBarrier
 
 \newpage
-\section{Estatística descritiva
-relevante}\label{estatuxedstica-descritiva-relevante}
+\section{Estatística descritiva da região linear
+retida}\label{estatuxedstica-descritiva-da-regiuxe3o-linear-retida}
 
-Resumo da região linear retida:
+A estatística descritiva abaixo resume apenas os pontos mantidos após o
+critério de compliance e de inclinação local. Assim, os valores não
+representam toda a faixa originalmente medida, mas a região usada nas
+análises de linearidade e nos modelos de regressão. A redução progressiva
+do número de amostras de 1k para 4k7 reflete a menor extensão útil da
+região linear comum para cargas maiores, enquanto a redução do desvio
+padrão acompanha a menor faixa de corrente efetivamente retida.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -482,8 +487,16 @@ monotônica/linear entre DAC e corrente. A validade do circuito é
 discutida a partir de erro, resíduos, intervalos e limites de
 compliance.
 
-Associacao linear exploratoria; validade do modelo avaliada por
-residuos, erro e limites de compliance.
+Como a arquitetura do circuito já sugere uma relação aproximadamente
+linear entre o comando de DAC e a corrente de saída, os testes de
+correlação não foram usados como critério principal de validação, mas como
+verificação inicial da direção e da monotonicidade da resposta. Nessa
+formulação, a hipótese nula usual é de correlação populacional igual a
+zero, \(H_0: \rho = 0\), contra a hipótese alternativa de correlação
+diferente de zero, \(H_1: \rho \neq 0\). Portanto, a rejeição de
+\(H_0\) apenas confirma uma associação esperada; a validade metrológica do
+circuito depende principalmente da análise dos erros, dos resíduos, dos
+intervalos de confiança e dos limites de operação.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -529,15 +542,22 @@ entre os pontos não são relevantes. A concordância entre Pearson e
 Spearman indica, portanto, que a associação observada é simultaneamente
 linear e monotônica decrescente. Considerando o nível de significância de
 5\% adotado nesta análise (\(\alpha = 0{,}05\)), os p-valores inferiores a
-0,05 indicam rejeição da hipótese nula de correlação igual a zero. Assim,
-a associação é estatisticamente evidente; ainda assim, essa tabela não
-substitui a avaliação de erro e de resíduos, pois correlação alta pode
-coexistir com viés, saturação ou dependência temporal.
+0,05 indicam rejeição de \(H_0\). Ainda assim, essa tabela não substitui a
+avaliação de erro e de resíduos, pois correlação alta pode coexistir com
+viés, saturação ou dependência temporal.
 
 \section{Modelos lineares por carga}\label{modelos-lineares-por-carga}
 
-Modelos independentes por carga foram ajustados como current\_mA
-\textasciitilde{} dac\_bin.
+Para cada carga, foi ajustado um modelo linear independente relacionando
+a corrente de saída medida ao nível de comando do DAC. Em termos
+estatísticos, o modelo pode ser escrito como
+\[
+I = \beta_0 + \beta_1 D_{\mathrm{DAC}} + \varepsilon,
+\]
+em que \(I\) é a corrente medida, \(D_{\mathrm{DAC}}\) representa o nível
+discretizado de comando do conversor digital-analógico, \(\beta_0\) é o
+intercepto, \(\beta_1\) é a inclinação da relação corrente-DAC e
+\(\varepsilon\) representa o erro residual do ajuste.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -574,11 +594,11 @@ Erro absoluto máximo (mA)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-load\_1k & 1k & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 &
+Modelo da carga de 1 kOhm & 1k & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 &
 0.352975 & 0.743690 \\
-load\_2k & 2k & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 &
+Modelo da carga de 2 kOhm & 2k & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 &
 0.192255 & 0.445245 \\
-load\_4k7 & 4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 &
+Modelo da carga de 4,7 kOhm & 4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 &
 0.110343 & 0.252044 \\
 \end{longtable}
 }
@@ -591,27 +611,32 @@ seleção de compliance e menor dispersão residual. Essa diferença não
 significa que a carga maior seja sempre mais precisa; ela também reflete
 a faixa útil menor que permaneceu no ajuste.
 
+\newpage
+
 \section{Modelo global}\label{modelo-global}
 
-O modelo global foi ajustado como
-\texttt{current\_mA\ \textasciitilde{}\ dac\_bin} dentro da região comum
-de compliance.
+O modelo global foi ajustado dentro da região comum de compliance,
+relacionando a corrente de saída medida ao nível de comando do DAC por
+uma única reta para todas as cargas:
+\[
+I = \beta_0 + \beta_1 D_{\mathrm{DAC}} + \varepsilon.
+\]
 
-Para obter esse modelo, não foi ajustada uma regressão separada para
-cada carga. Após o binning e a seleção da região comum de compliance, os
-dados das três cargas foram mantidos em formato longo em
-\texttt{linear\_long}: cada linha contém um par (\texttt{dac\_bin},
-\texttt{current\_mA}) e o rótulo da carga correspondente (\texttt{1k},
-\texttt{2k} ou \texttt{4k7}). Em seguida, todas essas linhas foram
-usadas juntas em uma única regressão linear.
+Para obter esse modelo, não foi ajustada uma regressão separada para cada
+carga. Após o binning e a seleção da região comum de compliance, os dados
+das três cargas foram organizados em uma mesma tabela: cada linha contém
+um par formado pelo nível discretizado de DAC e pela corrente medida, além
+do rótulo da carga correspondente (1 kOhm, 2 kOhm ou 4,7 kOhm). Em
+seguida, todas essas linhas foram usadas juntas em uma única regressão
+linear.
 
-Na prática, isso equivale a empilhar os pontos válidos das três cargas
-em um único conjunto de observações. A variável \texttt{load} permanece
-disponível para identificação, gráficos e diagnósticos, mas não
-participa da equação do modelo global. Assim, o ajuste estima uma única
-inclinação e um único intercepto para representar a relação média entre
-bin de DAC e corrente de saída, independentemente da carga, desde que os
-pontos estejam dentro da região comum de compliance.
+Na prática, isso equivale a empilhar os pontos válidos das três cargas em
+um único conjunto de observações. A identificação da carga permanece
+disponível para gráficos e diagnósticos, mas não participa da equação do
+modelo global. Assim, o ajuste estima uma única inclinação e um único
+intercepto para representar a relação média entre comando de DAC e
+corrente de saída, independentemente da carga, desde que os pontos estejam
+dentro da região comum de compliance.
 
 Esse procedimento é coerente com o objetivo de obter uma equação
 operacional única para estimativa em malha aberta. Se as curvas das
@@ -621,6 +646,21 @@ estágio de saída sem exigir coeficientes específicos por carga. A
 comparação posterior com o modelo com interação carga x DAC verifica
 justamente se adicionar dependência explícita da carga melhora de forma
 relevante essa representação.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.92\linewidth,keepaspectratio]{figures/06_linear_region_global_model.png}
+\caption{Curvas experimentais de corrente e modelo linear global}
+\end{figure}
+
+\FloatBarrier
+
+A figura permite avaliar visualmente o compromisso do modelo global: a
+reta única acompanha bem a tendência média das três cargas, mas pequenos
+desvios sistemáticos entre as cores indicam que as curvas não são
+perfeitamente coincidentes. Essa diferença visual antecipa a análise do
+modelo com interação, que testa formalmente se a carga altera a relação
+entre DAC e corrente.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -654,7 +694,7 @@ Erro absoluto máximo (mA)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-global\_current\_mA\_by\_dac & 0.999661 & 0.999661 & 0.389648 & 566 &
+Modelo global & 0.999661 & 0.999661 & 0.389648 & 566 &
 0.331486 & 0.388959 & 0.934792 \\
 \end{longtable}
 }
@@ -670,8 +710,16 @@ compatíveis com a aplicação.
 \section{Modelo com interação carga x
 DAC}\label{modelo-com-interauxe7uxe3o-carga-x-dac}
 
-O modelo com interação foi ajustado como current\_mA \textasciitilde{}
-dac\_bin * load.
+O modelo com interação permite que a relação entre corrente e DAC mude
+com a carga. Nessa formulação, a carga pode alterar tanto o intercepto
+quanto a inclinação da reta:
+\[
+I = \beta_0 + \beta_1 D_{\mathrm{DAC}} + \gamma_R +
+\delta_R D_{\mathrm{DAC}} + \varepsilon,
+\]
+em que \(\gamma_R\) representa o deslocamento associado à carga e
+\(\delta_R\) representa a alteração de inclinação em relação à carga de
+referência.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -705,7 +753,7 @@ Erro absoluto máximo (mA)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-interaction\_current\_mA\_by\_dac\_load & 0.999813 & 0.999811 & 0.290484
+Modelo com interação carga-DAC & 0.999813 & 0.999811 & 0.290484
 & 566 & 0.223411 & 0.288941 & 0.74369 \\
 \end{longtable}
 }
@@ -718,15 +766,15 @@ relação DAC-corrente. O ganho de ajuste deve ser ponderado contra a
 perda de simplicidade, pois esse modelo exige identificar a carga para
 aplicar a equação correta.
 
-Nas tabelas de coeficientes, H0 representa a hipótese nula de que o
-coeficiente avaliado é igual a zero. Com \texttt{alpha\ =\ 0,05}, a
-decisão \texttt{rejeita\_H0} significa que o p-valor ficou abaixo de
-0,05 e há evidência estatística de que aquele termo contribui para o
-modelo. A decisão \texttt{nao\_rejeita\_H0} significa que o teste não
-encontrou evidência suficiente, nesse nível de significância, para
-afirmar que o coeficiente seja diferente de zero. Isso não prova que o
-coeficiente seja exatamente zero; apenas indica ausência de evidência
-estatística suficiente contra H0.
+Nas tabelas de coeficientes, \(H_0\) representa a hipótese nula de que o
+coeficiente avaliado é igual a zero. Com nível de significância de 5\%
+(\(\alpha = 0{,}05\)), a decisão ``rejeita \(H_0\)'' significa que o
+p-valor ficou abaixo de 0,05 e há evidência estatística de que aquele
+termo contribui para o modelo. A decisão ``não rejeita \(H_0\)''
+significa que o teste não encontrou evidência suficiente, nesse nível de
+significância, para afirmar que o coeficiente seja diferente de zero. Isso
+não prova que o coeficiente seja exatamente zero; apenas indica ausência
+de evidência estatística suficiente contra \(H_0\).
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -744,7 +792,7 @@ estatística suficiente contra H0.
 \begin{minipage}[b]{\linewidth}\raggedright
 Modelo
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+Nível de significância
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Decisão
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -766,52 +814,50 @@ IC superior
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-global\_current\_mA\_by\_dac & 0.05 & rejeita\_H0 & (Intercept) &
+Modelo global & 0.05 & Rejeita \(H_0\) & Intercepto &
 46.348935 & 0.039271 & 1180.239742 & 0 & 46.271801 & 46.426070 \\
-global\_current\_mA\_by\_dac & 0.05 & rejeita\_H0 & dac\_bin &
+Modelo global & 0.05 & Rejeita \(H_0\) & Nível de DAC &
 -28.033152 & 0.021733 & -1289.860154 & 0 & -28.075841 & -27.990464 \\
-interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 &
-(Intercept) & 46.618138 & 0.032754 & 1423.279796 & 0 & 46.553802 &
+Modelo com interação carga-DAC & 0.05 & Rejeita \(H_0\) &
+Intercepto & 46.618138 & 0.032754 & 1423.279796 & 0 & 46.553802 &
 46.682473 \\
-interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 & dac\_bin
+Modelo com interação carga-DAC & 0.05 & Rejeita \(H_0\) & Nível de DAC
 & -28.117716 & 0.017415 & -1614.538039 & 0 & -28.151923 & -28.083509 \\
-interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 & load2k &
+Modelo com interação carga-DAC & 0.05 & Rejeita \(H_0\) & Carga de 2 kOhm &
 -1.087684 & 0.086165 & -12.623199 & 0 & -1.256931 & -0.918437 \\
-interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 & load4k7 &
+Modelo com interação carga-DAC & 0.05 & Rejeita \(H_0\) & Carga de 4,7 kOhm &
 -3.699103 & 0.254191 & -14.552452 & 0 & -4.198387 & -3.199818 \\
-interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 &
-dac\_bin:load2k & 0.521009 & 0.049385 & 10.549968 & 0 & 0.424007 &
+Modelo com interação carga-DAC & 0.05 & Rejeita \(H_0\) &
+Interação DAC-carga de 2 kOhm & 0.521009 & 0.049385 & 10.549968 & 0 & 0.424007 &
 0.618011 \\
-interaction\_current\_mA\_by\_dac\_load & 0.05 & rejeita\_H0 &
-dac\_bin:load4k7 & 1.961584 & 0.152886 & 12.830399 & 0 & 1.661285 &
+Modelo com interação carga-DAC & 0.05 & Rejeita \(H_0\) &
+Interação DAC-carga de 4,7 kOhm & 1.961584 & 0.152886 & 12.830399 & 0 & 1.661285 &
 2.261883 \\
-load\_1k & 0.05 & rejeita\_H0 & (Intercept) & 46.618138 & 0.039924 &
+Modelo da carga de 1 kOhm & 0.05 & Rejeita \(H_0\) & Intercepto & 46.618138 & 0.039924 &
 1167.658226 & 0 & 46.539590 & 46.696685 \\
-load\_1k & 0.05 & rejeita\_H0 & dac\_bin & -28.117716 & 0.021228 &
+Modelo da carga de 1 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -28.117716 & 0.021228 &
 -1324.566419 & 0 & -28.159480 & -28.075952 \\
-load\_2k & 0.05 & rejeita\_H0 & (Intercept) & 45.530454 & 0.053064 &
+Modelo da carga de 2 kOhm & 0.05 & Rejeita \(H_0\) & Intercepto & 45.530454 & 0.053064 &
 858.030359 & 0 & 45.425687 & 45.635221 \\
-load\_2k & 0.05 & rejeita\_H0 & dac\_bin & -27.596707 & 0.030769 &
+Modelo da carga de 2 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -27.596707 & 0.030769 &
 -896.900438 & 0 & -27.657456 & -27.535958 \\
-load\_4k7 & 0.05 & rejeita\_H0 & (Intercept) & 42.919035 & 0.097037 &
+Modelo da carga de 4,7 kOhm & 0.05 & Rejeita \(H_0\) & Intercepto & 42.919035 & 0.097037 &
 442.296331 & 0 & 42.725685 & 43.112385 \\
-load\_4k7 & 0.05 & rejeita\_H0 & dac\_bin & -26.156132 & 0.058471 &
+Modelo da carga de 4,7 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -26.156132 & 0.058471 &
 -447.332761 & 0 & -26.272639 & -26.039625 \\
 \end{longtable}
 }
 
 No modelo global, o intercepto representa a corrente estimada quando o
-DAC extrapola para zero dentro da formulação linear, enquanto o
-coeficiente de \texttt{dac\_bin} indica a variação média de corrente por
-volt de DAC. A inclinação negativa confirma que, nesta montagem, o
-aumento da tensão de DAC reduz a corrente calculada no sentido adotado
-para o sinal. No modelo com interação, \texttt{load2k} e
-\texttt{load4k7} deslocam o intercepto em relação à referência de 1 kOhm,
-e os termos \texttt{dac\_bin:load2k} e \texttt{dac\_bin:load4k7}
-corrigem a inclinação para essas cargas. Como todos os intervalos de
-confiança ficam afastados de zero e todos os p-valores rejeitam H0, há
-evidência de que essas diferenças entre cargas são estatisticamente
-relevantes.
+DAC extrapola para zero dentro da formulação linear, enquanto a inclinação
+indica a variação média de corrente por volt de DAC. A inclinação negativa
+confirma que, nesta montagem, o aumento da tensão de DAC reduz a corrente
+calculada no sentido adotado para o sinal. No modelo com interação, os
+termos associados às cargas de 2 kOhm e 4,7 kOhm deslocam o intercepto em
+relação à referência de 1 kOhm, enquanto os termos de interação corrigem a
+inclinação para essas cargas. Como todos os intervalos de confiança ficam
+afastados de zero e todos os p-valores rejeitam \(H_0\), há evidência de
+que essas diferenças entre cargas são estatisticamente relevantes.
 
 \section{Comparação entre modelos}\label{comparauxe7uxe3o-entre-modelos}
 
@@ -833,7 +879,7 @@ feita por ANOVA/teste F para modelos aninhados.
 \begin{minipage}[b]{\linewidth}\raggedright
 Modelos comparados
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+Nível de significância
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Índice do modelo
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -853,9 +899,9 @@ Valor-p (F)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-current\_mA \textasciitilde{} dac\_bin & 0.05 & 1 & 564 & 85.629792 & &
+Modelo global & 0.05 & 1 & 564 & 85.629792 & &
 & & \\
-current\_mA \textasciitilde{} dac\_bin * load & 0.05 & 2 & 560 &
+Modelo com interação carga-DAC & 0.05 & 2 & 560 &
 47.253472 & 4 & 38.37632 & 113.699262 & 0 \\
 \end{longtable}
 }
@@ -906,15 +952,15 @@ Erro absoluto máximo (mA)
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-global\_current\_mA\_by\_dac & 0.999661 & 0.999661 & 0.389648 & 566 &
+Modelo global & 0.999661 & 0.999661 & 0.389648 & 566 &
 0.331486 & 0.388959 & 0.934792 \\
-interaction\_current\_mA\_by\_dac\_load & 0.999813 & 0.999811 & 0.290484
+Modelo com interação carga-DAC & 0.999813 & 0.999811 & 0.290484
 & 566 & 0.223411 & 0.288941 & 0.743690 \\
-load\_1k & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 & 0.352975 &
+Modelo da carga de 1 kOhm & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 & 0.352975 &
 0.743690 \\
-load\_2k & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 & 0.192255 &
+Modelo da carga de 2 kOhm & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 & 0.192255 &
 0.445245 \\
-load\_4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0.110343 &
+Modelo da carga de 4,7 kOhm & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0.110343 &
 0.252044 \\
 \end{longtable}
 }
@@ -931,14 +977,6 @@ linear mais restrita.
 \centering
 \pandocbounded{\includegraphics[keepaspectratio,alt={Corrente medida versus corrente predita}]{figures/06_measured_vs_predicted.png}}
 \caption{Corrente medida versus corrente predita}
-\end{figure}
-
-\FloatBarrier
-
-\begin{figure}
-\centering
-\includegraphics[width=0.92\linewidth,keepaspectratio]{figures/07_current_vs_dac_confidence_band.png}
-\caption{Banda de confiança da corrente em função do DAC}
 \end{figure}
 
 \FloatBarrier
@@ -991,7 +1029,7 @@ Valor-p Shapiro
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-global\_current\_mA\_by\_dac & 0 & 0.389303 & 0.015381 & -0.934792 &
+Modelo global & 0 & 0.389303 & 0.015381 & -0.934792 &
 0.738906 & 0.331486 & 0.388959 & 566 & 0 \\
 \end{longtable}
 }
@@ -1014,11 +1052,11 @@ ser tratadas com cautela.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos em função dos valores preditos}]{figures/10_residuals_vs_predicted.png}}
+\includegraphics[width=0.82\linewidth,keepaspectratio]{figures/10_residuals_vs_predicted.png}
 \caption{Resíduos em função dos valores preditos}
 \end{figure}
 
-\FloatBarrier
+\clearpage
 
 \section{Homocedasticidade}\label{homocedasticidade}
 
@@ -1042,14 +1080,14 @@ Valor-p
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Método
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+Nível de significância
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-manual\_breusch\_pagan\_residual\_squared\_on\_fitted & 27.838682 & 1 &
-0 & fallback & 0.05 \\
+Breusch-Pagan & 27.838682 & 1 &
+0 & Aproximação manual & 0.05 \\
 \end{longtable}
 }
 
@@ -1060,6 +1098,8 @@ a hipótese de variância constante é questionável. Na prática, os erros
 padrão e intervalos de confiança clássicos podem ficar otimistas ou mal
 calibrados, embora a equação ajustada ainda possa ser útil para predição
 na faixa caracterizada.
+
+\FloatBarrier
 
 \section{Autocorrelação temporal}\label{autocorrelauxe7uxe3o-temporal}
 
@@ -1083,14 +1123,14 @@ Valor-p
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Método
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+Nível de significância
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-manual\_durbin\_watson\_approximation & 0.068879 & 0 &
-fallback\_normal\_approximation & 0.05 \\
+Durbin-Watson & 0.068879 & 0 &
+Aproximação normal & 0.05 \\
 \end{longtable}
 }
 
@@ -1103,7 +1143,7 @@ mais compatível com a estrutura temporal dos dados.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Autocorrelação dos resíduos}]{figures/11_residual_acf.png}}
+\includegraphics[width=0.82\linewidth,keepaspectratio]{figures/11_residual_acf.png}
 \caption{Autocorrelação dos resíduos}
 \end{figure}
 

@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1779458956.51359 "c:/Projects/FEI/MSc/PME406/1.Analysis/Relatorio_analise_estatistica.tex" "Relatorio_analise_estatistica.pdf" "Relatorio_analise_estatistica" 1779458960.27908 0
+["pdflatex"] 1779458965.81941 "Relatorio_analise_estatistica.tex" "build/Relatorio_analise_estatistica.pdf" "Relatorio_analise_estatistica" 1779458969.59353 0
   "C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc" 1256929440 2375 baa924870cfb487815765f9094cf3728 ""
   "C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-mathit.enc" 1256929440 2405 5dcf2c1b967ee25cc46c58cd52244aed ""
   "C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-mathsy.enc" 1256929440 2840 216e6e45ad352e2456e1149f28885bee ""
@@ -143,11 +143,13 @@
   "C:/Program Files/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Program Files/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "C:/Program Files/MiKTeX/tex/latex/xurl/xurl.sty" 1641733940 4675 e4b8c405820368c2dfb03526e16d725a ""
+  "C:/Projects/FEI/MSc/PME406/1.Analysis/build/Relatorio_analise_estatistica.aux" 1779458969.33911 19114 52eddaef78504c608360b912f9536752 ""
+  "C:/Projects/FEI/MSc/PME406/1.Analysis/build/Relatorio_analise_estatistica.toc" 1779458969.34839 1915 a355c3a1c38ff875d177f89d71592f3c ""
   "C:/Users/Admin/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1778104157.01097 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1778153048.35326 13340204 862da7b6f06822323e0bd15fccdc2007 ""
-  "Relatorio_analise_estatistica.aux" 1779458960.06545 19114 52eddaef78504c608360b912f9536752 "pdflatex"
-  "Relatorio_analise_estatistica.toc" 1779458960.07553 1915 a355c3a1c38ff875d177f89d71592f3c "pdflatex"
-  "c:/Projects/FEI/MSc/PME406/1.Analysis/Relatorio_analise_estatistica.tex" 1779458952.22264 58225 920826f5dda65c44cbc674c40647e845 ""
+  "Relatorio_analise_estatistica.tex" 1779458952.22264 58225 920826f5dda65c44cbc674c40647e845 ""
+  "build/Relatorio_analise_estatistica.aux" 1779458969.33911 19114 52eddaef78504c608360b912f9536752 "pdflatex"
+  "build/Relatorio_analise_estatistica.toc" 1779458969.34839 1915 a355c3a1c38ff875d177f89d71592f3c "pdflatex"
   "figures/00_data_collection_setup.png" 1779219057.40851 945300 1780cd620c12809da544bc452e0812ee ""
   "figures/00_output_stage_measurement_points.png" 1779219057.07654 18432 4af49bb1ce603acc40060f2f9de9795b ""
   "figures/01_raw_signals_before_stationary_removal.png" 1779385185.22205 98926 0c20746434179dbb26eaabb2a02b49aa ""
@@ -166,8 +168,8 @@
   "figures/14_leverage_vs_studentized_residuals.png" 1779385188.60878 311778 36503fcd480ecd8990cdd2f777fc06af ""
   "figures/15_block_cross_validation_errors.png" 1779385188.77105 170485 1c3144551d6020b79b3e5417ba86f5f5 ""
   (generated)
-  "Relatorio_analise_estatistica.aux"
-  "Relatorio_analise_estatistica.log"
-  "Relatorio_analise_estatistica.pdf"
-  "Relatorio_analise_estatistica.toc"
+  "build/Relatorio_analise_estatistica.aux"
+  "build/Relatorio_analise_estatistica.log"
+  "build/Relatorio_analise_estatistica.pdf"
+  "build/Relatorio_analise_estatistica.toc"
   (rewritten before read)

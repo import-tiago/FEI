@@ -1,7 +1,7 @@
 PWD C:\Projects\FEI\MSc\PME406\1.Analysis
 INPUT C:\Users\Admin\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Projects\FEI\MSc\PME406\1.Analysis\Relatorio_analise_estatistica.tex
-OUTPUT Relatorio_analise_estatistica.log
+INPUT Relatorio_analise_estatistica.tex
+OUTPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.log
 INPUT C:\Program Files\MiKTeX\tex\latex\hyperref\hyperref.sty
 INPUT C:\Program Files\MiKTeX\tex\latex\url\url.sty
 INPUT C:\Program Files\MiKTeX\tex\latex\base\article.cls
@@ -171,10 +171,10 @@ INPUT C:\Program Files\MiKTeX\tex\latex\lm\t1lmr.fd
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr10.tfm
 INPUT C:\Program Files\MiKTeX\tex\latex\l3backend\l3backend-pdftex.def
 INPUT C:\Program Files\MiKTeX\tex\latex\l3backend\l3backend-pdftex.def
-INPUT .\Relatorio_analise_estatistica.aux
-INPUT .\Relatorio_analise_estatistica.aux
-INPUT Relatorio_analise_estatistica.aux
-OUTPUT Relatorio_analise_estatistica.aux
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.aux
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.aux
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.aux
+OUTPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.aux
 INPUT C:\Program Files\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
 INPUT C:\Program Files\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
 INPUT C:\Program Files\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
@@ -186,7 +186,7 @@ INPUT C:\Program Files\MiKTeX\tex\latex\00miktex\epstopdf-sys.cfg
 INPUT C:\Program Files\MiKTeX\tex\latex\microtype\mt-cmr.cfg
 INPUT C:\Program Files\MiKTeX\tex\latex\microtype\mt-cmr.cfg
 INPUT C:\Program Files\MiKTeX\tex\latex\microtype\mt-cmr.cfg
-OUTPUT Relatorio_analise_estatistica.pdf
+OUTPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.pdf
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr17.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr12.tfm
 INPUT C:\Program Files\MiKTeX\tex\latex\lm\ot1lmr.fd
@@ -231,11 +231,11 @@ INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr12.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmbx12.tfm
-INPUT .\Relatorio_analise_estatistica.toc
-INPUT .\Relatorio_analise_estatistica.toc
-INPUT Relatorio_analise_estatistica.toc
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.toc
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.toc
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.toc
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmbx10.tfm
-OUTPUT Relatorio_analise_estatistica.toc
+OUTPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.toc
 INPUT C:\Users\Admin\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-ec.enc
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmri10.tfm
@@ -388,7 +388,7 @@ INPUT .\figures\15_block_cross_validation_errors.png
 INPUT .\figures\15_block_cross_validation_errors.png
 INPUT .\figures\15_block_cross_validation_errors.png
 INPUT .\figures\15_block_cross_validation_errors.png
-INPUT Relatorio_analise_estatistica.aux
+INPUT C:\Projects\FEI\MSc\PME406\1.Analysis\build\Relatorio_analise_estatistica.aux
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx12.pfb
