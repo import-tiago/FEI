@@ -215,8 +215,7 @@ Os objetivos específicos são:
   comparar o modelo global com o ajuste que considera a interação entre
   carga e comando de DAC;
 \item
-  quantificar erro de predição, resíduos, autocorrelação temporal e
-  pontos influentes;
+  quantificar erro de predição, resíduos e heterocedasticidade;
 \item
   explicitar limitações de normalidade e independência dos resíduos.
 \end{itemize}
@@ -232,13 +231,14 @@ brutos estão disponíveis no repositório indicado nas Referências.
 O fluxo de análise segue a sequência: aquisição CSV do osciloscópio,
 extração da rampa útil, conversão da tensão no shunt para corrente,
 agregação por bins de DAC, seleção da região de compliance, regressão
-linear, comparação entre modelos e análise dos resíduos.
+linear, comparação entre modelos, análise dos resíduos e validação
+cruzada por blocos.
 
 A partir desse conjunto processado, o relatório seleciona a região comum
 de compliance, ajusta modelos lineares, compara modelos aninhados por
 ANOVA/teste F, calcula métricas de erro, examina resíduos, avalia
-heterocedasticidade e autocorrelação temporal e identifica pontos
-influentes. Todas as tabelas são exportadas para a pasta
+heterocedasticidade e verifica a estabilidade preditiva por validação
+cruzada em blocos. Todas as tabelas são exportadas para a pasta
 \texttt{tables}, e as figuras são exportadas para a pasta
 \texttt{figures}.
 
@@ -1192,10 +1192,48 @@ Modelo da carga de 4,7 kOhm & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0
 }
 \tablecaptionbelow{Métricas de erro de predição dos modelos avaliados}
 
+Os resultados mostram que todos os ajustes apresentam alto poder
+explicativo dentro da região linear, com \(R^2\) superior a 0,999. Ainda
+assim, a comparação entre os erros revela diferenças importantes. O modelo
+global apresenta MAE de 0,3315 mA e RMSE de 0,3890 mA, indicando que, em
+média, suas previsões se afastam da corrente medida por algumas décimas de
+miliampere. O ajuste com interação reduz esses erros para MAE de
+0,2234 mA e RMSE de 0,2889 mA, mostrando que considerar a carga no modelo
+melhora a predição sem abandonar a estrutura linear.
+
+O erro absoluto máximo também diminui de 0,9348 mA no modelo global para
+0,7437 mA no ajuste com interação. Essa redução é coerente com a análise
+do tópico anterior: ao permitir pequenas diferenças de intercepto e
+inclinação entre as cargas, o modelo com interação consegue acompanhar
+melhor os dados experimentais. A Figura 10 reforça essa leitura
+visualmente, pois os pontos se concentram próximos da reta de concordância
+entre corrente medida e corrente predita. Assim, o erro de predição é
+baixo para todos os modelos, mas o ajuste com interação é o mais adequado
+quando o objetivo é descrever com maior fidelidade o comportamento
+experimental das três cargas.
+
 \FloatBarrier
-\clearpage
 
 \section{Diagnóstico dos resíduos}\label{diagnuxf3stico-dos-resuxedduos}
+
+O resíduo de uma observação é a diferença entre a corrente medida e a
+corrente prevista pelo modelo:
+\[
+e_i = I_i - \hat{I}_i.
+\]
+Assim, resíduos próximos de zero indicam que o modelo reproduz bem os
+valores observados. Além da magnitude dos resíduos, também é importante
+avaliar sua estrutura. Em um modelo linear bem ajustado, espera-se que os
+resíduos não apresentem tendência sistemática em função da variável
+explicativa, tenham média próxima de zero e não mostrem padrões evidentes.
+Quando os resíduos apresentam tendência, assimetria ou variância não
+constante, isso não invalida automaticamente o modelo, mas indica que
+algumas inferências estatísticas podem exigir cautela.
+
+Neste tópico, os resíduos do modelo global foram avaliados porque esse é
+o modelo mais simples e de maior interesse operacional. A análise permite
+verificar se a aproximação por uma única reta deixa erros pequenos e
+aleatórios ou se ainda existem padrões associados ao comando de DAC.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1242,9 +1280,28 @@ Modelo global & 0 & 0.389303 & 0.015381 & -0.934792 &
 \tablecaptionbelow{Resumo dos resíduos do modelo global e teste de normalidade}
 
 A média dos resíduos é praticamente nula, como esperado em um ajuste por
-mínimos quadrados. Entretanto, o teste de Shapiro-Wilk apresenta
-p-valor inferior a 0,001, indicando que a hipótese de normalidade dos
-resíduos é questionável.
+mínimos quadrados. Isso indica ausência de viés médio global: considerando
+todo o conjunto de dados, o modelo não tende claramente a superestimar ou
+subestimar a corrente. A mediana dos resíduos, igual a 0,0154 mA, também
+fica muito próxima de zero, reforçando que o centro da distribuição dos
+erros está próximo do valor esperado.
+
+A dispersão dos resíduos, entretanto, mostra a magnitude prática do erro.
+O desvio dos resíduos é 0,3893 mA, o MAE é 0,3315 mA e o RMSE é
+0,3890 mA. Como o RMSE penaliza mais erros maiores, sua proximidade em
+relação ao desvio residual indica que os erros são pequenos, mas ainda há
+alguns desvios mais pronunciados. Isso também aparece nos extremos: o
+maior erro negativo é -0,9348 mA e o maior erro positivo é 0,7389 mA. Em
+termos práticos, esses valores definem a ordem de grandeza do erro
+esperado ao usar o modelo global dentro da região linear.
+
+O teste de Shapiro-Wilk avalia a compatibilidade dos resíduos com uma
+distribuição normal. A hipótese nula desse teste é que os resíduos seguem
+distribuição normal. Como o p-valor é inferior a 0,001, rejeita-se essa
+hipótese ao nível de significância de 5\%. Portanto, a normalidade dos
+resíduos é questionável. Esse resultado não impede o uso do modelo como
+aproximação preditiva, mas sugere cautela ao interpretar testes e
+intervalos que dependem fortemente da suposição de normalidade dos erros.
 
 \begin{figure}
 \centering
@@ -1252,9 +1309,39 @@ resíduos é questionável.
 \caption{Resíduos em função do DAC}
 \end{figure}
 
+Na Figura 11, a análise visual complementa a tabela. Se os resíduos
+fossem puramente aleatórios em torno de zero, seria esperado observar uma
+nuvem de pontos sem tendência clara ao longo do comando de DAC. A presença
+de estrutura visual ou agrupamentos indica que o erro do modelo não é
+completamente aleatório, o que é coerente com os resultados posteriores de
+heterocedasticidade e validação por blocos. Assim, o modelo global descreve bem
+a tendência média entre DAC e corrente, mas os resíduos mostram que ainda
+há informação sistemática não capturada por uma única reta média.
+
 \FloatBarrier
+\clearpage
 
 \section{Homocedasticidade}\label{homocedasticidade}
+
+A homocedasticidade é a condição em que a variância dos resíduos permanece
+aproximadamente constante ao longo da faixa de valores preditos ou da
+variável explicativa. Em regressão linear, essa condição é importante
+porque muitos resultados inferenciais, como erros padrão, intervalos de
+confiança e testes de significância, assumem que os resíduos têm dispersão
+semelhante em toda a faixa analisada.
+
+Quando a variância dos resíduos muda ao longo da escala de DAC ou da
+corrente prevista, ocorre heterocedasticidade. Nesse caso, o modelo ainda
+pode representar bem a tendência média, mas a incerteza das previsões pode
+ser diferente em regiões distintas da curva. Para avaliar essa condição,
+foi aplicado o teste de Breusch-Pagan. A hipótese nula do teste é:
+\[
+H_0: \text{a variância dos resíduos é constante}.
+\]
+A hipótese alternativa é:
+\[
+H_1: \text{a variância dos resíduos não é constante}.
+\]
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1282,100 +1369,18 @@ Evidência de variância residual não constante \\
 }
 \tablecaptionbelow{Teste de homocedasticidade dos resíduos}
 
-Há evidência de heterocedasticidade; portanto, a hipótese de variância
-constante dos resíduos é questionável.
+O teste apresenta estatística de 27,8387 e p-valor inferior a 0,001.
+Como esse p-valor é menor que o nível de significância de 5\%, rejeita-se
+\(H_0\). Portanto, há evidência estatística de heterocedasticidade, isto é,
+a variância dos resíduos não pode ser considerada constante ao longo da
+faixa analisada.
 
-\section{Autocorrelação temporal}\label{autocorrelauxe7uxe3o-temporal}
-
-Como os dados vêm de uma rampa temporal, a independência dos resíduos
-não foi assumida automaticamente.
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2800}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1800}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3400}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Teste}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Estatística}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Valor-p}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Interpretação}
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Durbin-Watson & 0.068879 & \(<0{,}001\) &
-Evidência de autocorrelação temporal dos resíduos \\
-\end{longtable}
-}
-\tablecaptionbelow{Teste de autocorrelação temporal dos resíduos}
-
-Há evidência de autocorrelação temporal; assim, os p-valores clássicos
-da regressão podem estar otimistas.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.74\linewidth,height=0.34\textheight,keepaspectratio]{figures/11_residual_acf.png}
-\caption{Autocorrelação dos resíduos}
-\end{figure}
-
-\FloatBarrier
-
-\section{Outliers e influência}\label{outliers-e-influuxeancia}
-
-Foram calculados resíduos studentizados, leverage e distância de Cook.
-Pontos foram apenas marcados e reportados; a remoção automática
-permanece desativada por padrão.
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Amostras}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Pontos influentes}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Pontos influentes (\%)}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Limite de Cook}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Maior distância de Cook}
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-\textbf{Maior resíduo studentizado abs.}
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-566 & 51 & 9.010601 & 0.007067 & 0.0178 & 2.411942 \\
-\end{longtable}
-}
-\tablecaptionbelow{Resumo de pontos influentes e critérios de influência}
-
-O gráfico de distância de Cook foi mantido por sintetizar visualmente os
-pontos com maior influência no ajuste. Os demais critérios aparecem na
-tabela, pois são mais úteis como valores de referência do que como
-figuras isoladas.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.74\linewidth,height=0.32\textheight,keepaspectratio]{figures/12_cook_distance_by_index.png}
-\caption{Distância de Cook por índice}
-\end{figure}
-
-\FloatBarrier
+Esse resultado deve ser interpretado em conjunto com os demais tópicos. A
+heterocedasticidade não significa que a relação linear entre DAC e
+corrente esteja errada; significa que a dispersão dos erros não é
+uniforme. Assim, o modelo global continua útil como aproximação média, mas
+os intervalos de confiança, os p-valores clássicos e a incerteza associada
+às previsões devem ser lidos com cautela.
 
 \section{Validação cruzada por
 blocos}\label{validauxe7uxe3o-cruzada-por-blocos}
@@ -1383,6 +1388,20 @@ blocos}\label{validauxe7uxe3o-cruzada-por-blocos}
 A validação por blocos usa cinco blocos contíguos ordenados, treinando
 em quatro blocos e testando no bloco remanescente. Isso evita usar
 apenas uma validação aleatória que mistura pontos vizinhos da rampa.
+
+A validação cruzada é usada para avaliar a capacidade de generalização do
+modelo, isto é, seu desempenho em dados que não foram usados diretamente
+no ajuste. Neste estudo, uma divisão aleatória simples poderia produzir
+uma avaliação otimista, porque pontos vizinhos da rampa são muito
+semelhantes entre si. Se amostras quase consecutivas fossem separadas
+aleatoriamente entre treino e teste, o conjunto de teste ficaria muito
+parecido com o conjunto de treino.
+
+Por esse motivo, foi usada validação cruzada por blocos contíguos. Em vez
+de embaralhar os dados, a sequência é dividida em cinco blocos ordenados.
+Em cada rodada, quatro blocos são usados para treinamento e um bloco é
+usado para teste. Essa estratégia é mais conservadora para dados obtidos
+em rampa, pois avalia o modelo em segmentos inteiros da aquisição.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1423,6 +1442,14 @@ apenas uma validação aleatória que mistura pontos vizinhos da rampa.
 }
 \tablecaptionbelow{Erros de validação cruzada por bloco}
 
+Os erros por bloco não são idênticos, o que indica que o desempenho do
+modelo varia ao longo da faixa de aquisição. O bloco 1 apresenta o maior
+erro, com MAE de 1,0950 mA, RMSE de 1,1498 mA e erro absoluto máximo de
+1,6401 mA. Esse comportamento sugere que esse segmento da rampa é mais
+difícil de prever pelo modelo ajustado com os demais blocos. Nos blocos 2
+a 5, os erros são menores, com RMSE variando aproximadamente de 0,3150 mA
+a 0,6727 mA.
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
@@ -1457,36 +1484,74 @@ apenas uma validação aleatória que mistura pontos vizinhos da rampa.
 }
 \tablecaptionbelow{Resumo agregado da validação cruzada por blocos}
 
+No resumo agregado, o RMSE médio é 0,6107 mA e o MAE médio é 0,5605 mA.
+Esses valores são maiores que os erros obtidos quando o modelo é avaliado
+nos próprios dados usados no ajuste, o que é esperado em validação
+cruzada. A validação por blocos fornece uma estimativa mais realista da
+capacidade preditiva fora do conjunto de treino.
+
 \begin{figure}
 \centering
 \includegraphics[width=0.78\linewidth,height=0.34\textheight,keepaspectratio]{figures/15_block_cross_validation_errors.png}
 \caption{Erros da validação cruzada por blocos}
 \end{figure}
 
+A figura de validação cruzada evidencia a diferença de desempenho entre os blocos. O
+primeiro bloco concentra os maiores erros, enquanto os blocos centrais e
+finais apresentam desempenho mais estável. Isso indica que o modelo possui
+boa capacidade preditiva geral dentro da região linear, mas sua precisão
+não é perfeitamente uniforme em todos os segmentos da rampa. Essa
+observação é coerente com os diagnósticos anteriores de resíduos,
+heterocedasticidade e validação por blocos.
+
 \FloatBarrier
 
-\section{Conclusões revisadas}\label{conclusuxf5es-revisadas}
+\clearpage
 
-A caracterização sustenta três conclusões principais. Primeiro, há
-linearidade quantificável entre tensão de DAC e corrente de saída dentro
-da região comum de compliance, com correlações próximas de -1 e erros de
-predição baixos. Segundo, o STIMGRASP possui limites claros de operação
-em tensão: essa limitação não é necessariamente uma falha, mas reduz a
-faixa de corrente útil à medida que a carga aumenta. Terceiro, como a
-arquitetura é open-loop, o firmware não detecta em tempo real quando o
-estágio entra em saturação e a corrente entregue passa a ser menor do
-que a prevista pelo modelo.
+\section{Conclusões}\label{conclusuxf5es}
 
-O modelo global é útil como aproximação operacional, mas sua adequação
-deve ser julgada junto com os erros de predição, intervalos de
-confiança/predição, diagnóstico residual e autocorrelação temporal. A
-principal melhoria arquitetural sugerida pela caracterização é a
-inclusão de realimentação de corrente, monitoramento de compliance ou
-outra forma de operação em malha fechada.
+A caracterização mostrou que a relação entre o comando de DAC e a corrente
+de saída pode ser descrita com alta precisão por modelos lineares dentro
+da região comum de compliance. Nessa faixa, as correlações são muito
+próximas de -1, os coeficientes angulares são estatisticamente
+significativos e os erros de predição permanecem baixos. Portanto, para a
+região linear identificada, o comportamento do estágio de saída é
+previsível e pode ser modelado de forma simples.
 
-Análises como PCA, cluster e testes de média global foram preservadas
-somente como material secundário/didático e não são usadas como
-evidência central de validade metrológica do estágio de saída.
+O modelo global, baseado em uma única reta para todas as cargas, é útil
+como aproximação operacional. Ele resume a tendência média do sistema e
+fornece uma descrição compacta da relação entre tensão de DAC e corrente.
+Entretanto, a comparação por ANOVA/teste F mostrou que o ajuste com
+interação entre carga e comando de DAC reduz significativamente a soma dos
+quadrados residual. Isso indica que pequenas diferenças de intercepto e
+inclinação entre as cargas existem e melhoram a descrição estatística dos
+dados.
+
+As métricas de predição confirmam essa leitura. O modelo global já
+apresenta erro médio baixo, mas o ajuste com interação reduz MAE, RMSE e
+erro absoluto máximo. Assim, quando o objetivo é uma aproximação simples,
+o modelo global é suficiente; quando o objetivo é descrever com maior
+fidelidade o comportamento experimental das três cargas, o modelo com
+interação é mais adequado.
+
+Os diagnósticos também delimitam o alcance das conclusões. A análise dos
+resíduos indica que o modelo global não apresenta viés médio relevante,
+mas a normalidade dos resíduos é questionável. Além disso, o teste de
+Breusch-Pagan indica heterocedasticidade, ou seja, a dispersão dos erros
+não é constante em toda a faixa analisada. Portanto, os modelos são
+adequados como descrição empírica e ferramenta de predição dentro da
+região linear, mas a interpretação inferencial deve ser feita com cautela.
+
+Fora da região linear, a limitação de compliance passa a dominar o
+comportamento. Isso não representa necessariamente uma falha do estágio,
+mas define um limite operacional importante: à medida que a carga aumenta,
+a faixa de corrente útil diminui. Como a arquitetura é open-loop, o
+firmware não detecta automaticamente quando o estágio entra em saturação e
+a corrente entregue deixa de acompanhar a corrente prevista pelo modelo.
+Uma melhoria natural seria incluir realimentação de corrente, monitoramento
+de compliance ou outra forma de operação em malha fechada.
+
+\clearpage
 
 \section*{Referências}\label{referuxeancias}
 \addcontentsline{toc}{section}{Referências}
