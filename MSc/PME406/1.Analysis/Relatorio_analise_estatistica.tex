@@ -518,13 +518,21 @@ Amostras
 }
 
 Os coeficientes de Pearson próximos de -1 indicam uma relação linear
-decrescente muito forte entre a tensão de DAC e a corrente medida. O
-mesmo comportamento aparece em Spearman, que avalia a associação
-monotônica por postos e é menos dependente da escala numérica. Como os
-p-valores são inferiores ao nível de significância adotado, a associação
-é estatisticamente evidente; ainda assim, essa tabela não substitui a
-avaliação de erro e de resíduos, pois correlação alta pode coexistir com
-viés, saturação ou dependência temporal.
+decrescente muito forte entre a tensão de DAC e a corrente medida. Esse
+resultado é confirmado pelos coeficientes de Spearman, também próximos de
+-1. Diferentemente de Pearson, Spearman não utiliza diretamente os
+valores absolutos das variáveis, mas sim seus postos, isto é, a ordem
+relativa das observações. Por isso, ele avalia se a corrente varia de
+forma monotônica em relação ao DAC, mesmo quando a relação não é
+perfeitamente linear ou quando pequenas diferenças de escala numérica
+entre os pontos não são relevantes. A concordância entre Pearson e
+Spearman indica, portanto, que a associação observada é simultaneamente
+linear e monotônica decrescente. Considerando o nível de significância de
+5\% adotado nesta análise (\(\alpha = 0{,}05\)), os p-valores inferiores a
+0,05 indicam rejeição da hipótese nula de correlação igual a zero. Assim,
+a associação é estatisticamente evidente; ainda assim, essa tabela não
+substitui a avaliação de erro e de resíduos, pois correlação alta pode
+coexistir com viés, saturação ou dependência temporal.
 
 \section{Modelos lineares por carga}\label{modelos-lineares-por-carga}
 
