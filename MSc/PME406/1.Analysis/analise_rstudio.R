@@ -960,6 +960,7 @@ global_model <- lm(current_mA ~ dac_bin, data = linear_long)
 interaction_model <- lm(current_mA ~ dac_bin * load, data = linear_long)
 
 global_model_data <- add_prediction_intervals(global_model, linear_long)
+interaction_model_data <- add_prediction_intervals(interaction_model, linear_long)
 
 per_load_model_data <- imap_dfr(per_load_models, \(model, load_name) {
   data <- linear_long |> filter(load == load_name)
@@ -1246,6 +1247,30 @@ prediction_band_plot <- global_model_data |>
   labs(x = "DAC voltage [V]", y = "Current [mA]", color = "Load") +
   theme_minimal()
 
+interaction_model_plot <- interaction_model_data |>
+  arrange(load, dac_bin) |>
+  ggplot(aes(dac_bin, current_mA, color = load)) +
+  geom_point(alpha = 0.45, size = 1.4) +
+  geom_line(
+    data = interaction_model_data |>
+      distinct(load, dac_bin, predicted_mA) |>
+      arrange(load, dac_bin),
+    aes(y = predicted_mA),
+    linewidth = 1
+  ) +
+  geom_line(
+    data = global_model_data |>
+      distinct(dac_bin, predicted_mA) |>
+      arrange(dac_bin),
+    aes(dac_bin, predicted_mA),
+    inherit.aes = FALSE,
+    color = "black",
+    linetype = "dashed",
+    linewidth = 0.8
+  ) +
+  labs(x = "DAC voltage [V]", y = "Current [mA]", color = "Load") +
+  theme_minimal()
+
 residuals_vs_dac_plot <- global_model_data |>
   ggplot(aes(dac_bin, residual_mA, color = load)) +
   geom_point(alpha = 0.7, size = 1.7) +
@@ -1310,6 +1335,7 @@ figure_paths <- list(
   measured_vs_predicted_plot = save_report_plot(measured_vs_predicted_plot, "06_measured_vs_predicted.png"),
   confidence_band_plot = save_report_plot(confidence_band_plot, "07_current_vs_dac_confidence_band.png"),
   prediction_band_plot = save_report_plot(prediction_band_plot, "08_current_vs_dac_prediction_band.png"),
+  interaction_model_plot = save_report_plot(interaction_model_plot, "07_interaction_model_by_load.png"),
   residuals_vs_dac_plot = save_report_plot(residuals_vs_dac_plot, "09_residuals_vs_dac.png"),
   residuals_vs_predicted_plot = save_report_plot(residuals_vs_predicted_plot, "10_residuals_vs_predicted.png"),
   acf_residual_plot = save_report_plot(acf_residual_plot, "11_residual_acf.png"),
