@@ -686,21 +686,21 @@ altera a relação entre DAC e corrente.
   >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Modelo
+\textbf{Modelo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-R2
+\textbf{R2}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-R2 ajustado
+\textbf{R2 ajustado}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Desvio residual (mA)
+\textbf{Desvio residual (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Amostras
+\textbf{Amostras}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-MAE (mA)
+\textbf{MAE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMSE (mA)
+\textbf{RMSE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Erro absoluto máximo (mA)
+\textbf{Erro absoluto máximo (mA)}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -843,10 +843,10 @@ retas confirma que o comportamento geral é muito semelhante, mas a
 separação entre elas mostra por que a inclusão da carga reduz o erro
 residual.
 
-A tabela a seguir quantifica esse desempenho. Ela possui apenas uma linha
-porque resume uma única formulação estatística, embora essa formulação
-contenha termos separados para as cargas de 2 kOhm e 4,7 kOhm em relação
-à referência de 1 kOhm.
+As métricas de desempenho resumem o ajuste completo com interação. Embora
+o modelo contenha termos específicos para as cargas de 2 kOhm e 4,7 kOhm
+em relação à referência de 1 kOhm, ele constitui uma única formulação
+estatística e, por isso, é apresentado como um único ajuste.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -860,21 +860,21 @@ contenha termos separados para as cargas de 2 kOhm e 4,7 kOhm em relação
   >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Modelo
+\textbf{Modelo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-R2
+\textbf{R2}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-R2 ajustado
+\textbf{R2 ajustado}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Desvio residual (mA)
+\textbf{Desvio residual (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Amostras
+\textbf{Amostras}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-MAE (mA)
+\textbf{MAE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMSE (mA)
+\textbf{RMSE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Erro absoluto máximo (mA)
+\textbf{Erro absoluto máximo (mA)}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -908,78 +908,95 @@ significância, para afirmar que o coeficiente seja diferente de zero.
 Isso não prova que o coeficiente seja exatamente zero; apenas indica
 ausência de evidência estatística suficiente contra \(H_0\).
 
+A tabela de coeficientes identifica, na coluna Modelo, a formulação de
+regressão de onde cada estimativa foi obtida. A coluna Termo indica o
+parâmetro avaliado, como intercepto, inclinação associada ao nível de DAC
+ou efeitos adicionais de carga e interação. A Estimativa é o valor
+calculado para o coeficiente, enquanto o Erro padrão representa a
+incerteza dessa estimativa. A Estatística corresponde à razão entre a
+estimativa e seu erro padrão, sendo usada no teste de significância do
+coeficiente. O Valor-p quantifica a evidência contra \(H_0\), e o IC
+95\% apresenta o intervalo de confiança de 95\% para o valor do
+coeficiente.
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1700}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2200}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1200}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2100}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Modelo
+\textbf{Modelo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+\textbf{Termo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Decisão
+\textbf{Estimativa}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Termo
+\textbf{Erro padrão}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Estimativa
+\textbf{Estatística}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Erro padrão
+\textbf{Valor-p}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Estatística
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Valor-p
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-IC inferior
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-IC superior
+\textbf{IC 95\%}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Modelo global & 0.05 & Rejeita \(H_0\) & Intercepto &
-46.348935 & 0.039271 & 1180.239742 & 0 & 46.271801 & 46.426070 \\
-Modelo global & 0.05 & Rejeita \(H_0\) & Nível de DAC &
--28.033152 & 0.021733 & -1289.860154 & 0 & -28.075841 & -27.990464 \\
-Interação carga-DAC & 0.05 & Rejeita \(H_0\) &
-Intercepto & 46.618138 & 0.032754 & 1423.279796 & 0 & 46.553802 &
-46.682473 \\
-Interação carga-DAC & 0.05 & Rejeita \(H_0\) & Nível de DAC
-& -28.117716 & 0.017415 & -1614.538039 & 0 & -28.151923 & -28.083509 \\
-Interação carga-DAC & 0.05 & Rejeita \(H_0\) & Carga de 2 kOhm &
--1.087684 & 0.086165 & -12.623199 & 0 & -1.256931 & -0.918437 \\
-Interação carga-DAC & 0.05 & Rejeita \(H_0\) & Carga de 4,7 kOhm &
--3.699103 & 0.254191 & -14.552452 & 0 & -4.198387 & -3.199818 \\
-Interação carga-DAC & 0.05 & Rejeita \(H_0\) &
-Interação DAC-carga de 2 kOhm & 0.521009 & 0.049385 & 10.549968 & 0 & 0.424007 &
-0.618011 \\
-Interação carga-DAC & 0.05 & Rejeita \(H_0\) &
-Interação DAC-carga de 4,7 kOhm & 1.961584 & 0.152886 & 12.830399 & 0 & 1.661285 &
-2.261883 \\
-Modelo da carga de 1 kOhm & 0.05 & Rejeita \(H_0\) & Intercepto & 46.618138 & 0.039924 &
-1167.658226 & 0 & 46.539590 & 46.696685 \\
-Modelo da carga de 1 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -28.117716 & 0.021228 &
--1324.566419 & 0 & -28.159480 & -28.075952 \\
-Modelo da carga de 2 kOhm & 0.05 & Rejeita \(H_0\) & Intercepto & 45.530454 & 0.053064 &
-858.030359 & 0 & 45.425687 & 45.635221 \\
-Modelo da carga de 2 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -27.596707 & 0.030769 &
--896.900438 & 0 & -27.657456 & -27.535958 \\
-Modelo da carga de 4,7 kOhm & 0.05 & Rejeita \(H_0\) & Intercepto & 42.919035 & 0.097037 &
-442.296331 & 0 & 42.725685 & 43.112385 \\
-Modelo da carga de 4,7 kOhm & 0.05 & Rejeita \(H_0\) & Nível de DAC & -26.156132 & 0.058471 &
--447.332761 & 0 & -26.272639 & -26.039625 \\
+Modelo global & Intercepto & 46,3489 & 0,0393 & 1180,24 &
+\(<0{,}001\) & [46,2718; 46,4261] \\
+\midrule
+Modelo global & Nível de DAC & -28,0332 & 0,0217 & -1289,86 &
+\(<0{,}001\) & [-28,0758; -27,9905] \\
+\midrule
+Interação carga-DAC & Intercepto & 46,6181 & 0,0328 & 1423,28 &
+\(<0{,}001\) & [46,5538; 46,6825] \\
+\midrule
+Interação carga-DAC & Nível de DAC & -28,1177 & 0,0174 & -1614,54 &
+\(<0{,}001\) & [-28,1519; -28,0835] \\
+\midrule
+Interação carga-DAC & Carga de 2 kOhm & -1,0877 & 0,0862 & -12,62 &
+\(<0{,}001\) & [-1,2569; -0,9184] \\
+\midrule
+Interação carga-DAC & Carga de 4,7 kOhm & -3,6991 & 0,2542 & -14,55 &
+\(<0{,}001\) & [-4,1984; -3,1998] \\
+\midrule
+Interação carga-DAC & Interação DAC-carga de 2 kOhm & 0,5210 & 0,0494 & 10,55 &
+\(<0{,}001\) & [0,4240; 0,6180] \\
+\midrule
+Interação carga-DAC & Interação DAC-carga de 4,7 kOhm & 1,9616 & 0,1529 & 12,83 &
+\(<0{,}001\) & [1,6613; 2,2619] \\
+\midrule
+Modelo da carga de 1 kOhm & Intercepto & 46,6181 & 0,0399 & 1167,66 &
+\(<0{,}001\) & [46,5396; 46,6967] \\
+\midrule
+Modelo da carga de 1 kOhm & Nível de DAC & -28,1177 & 0,0212 & -1324,57 &
+\(<0{,}001\) & [-28,1595; -28,0760] \\
+\midrule
+Modelo da carga de 2 kOhm & Intercepto & 45,5305 & 0,0531 & 858,03 &
+\(<0{,}001\) & [45,4257; 45,6352] \\
+\midrule
+Modelo da carga de 2 kOhm & Nível de DAC & -27,5967 & 0,0308 & -896,90 &
+\(<0{,}001\) & [-27,6575; -27,5360] \\
+\midrule
+Modelo da carga de 4,7 kOhm & Intercepto & 42,9190 & 0,0970 & 442,30 &
+\(<0{,}001\) & [42,7257; 43,1124] \\
+\midrule
+Modelo da carga de 4,7 kOhm & Nível de DAC & -26,1561 & 0,0585 & -447,33 &
+\(<0{,}001\) & [-26,2726; -26,0396] \\
 \end{longtable}
 }
 \tablecaptionbelow{Coeficientes estimados e testes de significância dos modelos lineares}
+
+Todos os coeficientes listados apresentam p-valor inferior a 0,001.
+Portanto, para o nível de significância adotado de 5\%, todos levam à
+rejeição de \(H_0\), indicando evidência estatística de contribuição dos
+respectivos termos aos modelos.
 
 \section{Comparação entre modelos}\label{comparauxe7uxe3o-entre-modelos}
 
@@ -987,63 +1004,143 @@ A comparação formal entre o modelo global e o ajuste com interação entre
 carga e comando de DAC foi feita por ANOVA/teste F para modelos
 aninhados.
 
+Nessa comparação, o modelo global é o modelo reduzido, pois usa uma única
+reta média para todas as cargas. O ajuste com interação é o modelo
+completo, pois adiciona termos para representar diferenças de intercepto e
+inclinação entre as cargas. A comparação avalia se a redução do erro
+residual obtida pelo modelo completo é grande o suficiente para justificar
+os parâmetros adicionais.
+
+O teste F é adequado nesse caso porque os modelos são aninhados: o modelo
+global pode ser visto como uma versão simplificada do modelo com interação,
+obtida quando os termos adicionais de carga e interação são considerados
+nulos. Assim, a hipótese nula do teste é:
+\[
+H_0: \text{os termos adicionais de carga e interação não reduzem o erro de forma relevante}.
+\]
+A hipótese alternativa é:
+\[
+H_1: \text{os termos adicionais reduzem o erro residual de forma estatisticamente significativa}.
+\]
+Portanto, o teste não verifica se o modelo completo é ``perfeito'', mas
+se ele melhora o ajuste em relação ao modelo mais simples.
+
+A quantidade central da comparação é a soma dos quadrados residual,
+definida por:
+\[
+SQ_{\mathrm{res}} = \sum_{i=1}^{n} (I_i - \hat{I}_i)^2,
+\]
+em que \(I_i\) é a corrente medida na \(i\)-ésima observação e
+\(\hat{I}_i\) é a corrente prevista pelo modelo para essa mesma
+observação. Portanto, quanto menor \(SQ_{\mathrm{res}}\), menor é a
+variabilidade dos dados que permanece não explicada pelo modelo.
+
+A estatística F compara duas quantidades: no numerador, a redução média do
+erro residual obtida ao adicionar os novos parâmetros; no denominador, o
+erro residual médio que ainda permanece no modelo completo. Para dois
+modelos aninhados, essa razão pode ser escrita como:
+\[
+F =
+\frac{(SQ_{\mathrm{res,red}} - SQ_{\mathrm{res,comp}})/(gl_{\mathrm{red}} - gl_{\mathrm{comp}})}
+{SQ_{\mathrm{res,comp}}/gl_{\mathrm{comp}}},
+\]
+em que \(SQ_{\mathrm{res,red}}\) é a soma dos quadrados residual do modelo
+reduzido, \(SQ_{\mathrm{res,comp}}\) é a soma dos quadrados residual do
+modelo completo, e \(gl\) representa os graus de liberdade residuais. Um
+valor de F próximo de 1 indicaria que a melhoria obtida pelo modelo mais
+complexo é pequena em relação ao erro que ainda sobra. Valores muito
+maiores que 1 indicam que a melhoria é grande quando comparada à
+variabilidade residual remanescente.
+
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Modelos comparados
+\textbf{Modelo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+\textbf{Índice do modelo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Índice do modelo
+\textbf{GL residual}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-GL residual
+\textbf{Soma quad. residual}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Soma quad. residual
+\textbf{GL}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-GL
+\textbf{Soma dos quadrados}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Soma dos quadrados
+\textbf{Estatística F}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Estatística F
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Valor-p (F)
+\textbf{Valor-p (F)}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Modelo global & 0.05 & 1 & 564 & 85.629792 & &
-& & \\
-Interação carga-DAC & 0.05 & 2 & 560 &
-47.253472 & 4 & 38.37632 & 113.699262 & 0 \\
+Modelo global & 1 & 564 & 85.629792 & & & & \\
+\midrule
+Interação carga-DAC & 2 & 560 &
+47.253472 & 4 & 38.37632 & 113.699262 & \(<0{,}001\) \\
 \end{longtable}
 }
 \tablecaptionbelow{Comparação por ANOVA entre o modelo global e o ajuste com interação}
 
-Incluir a interação entre carga e comando de DAC melhora
-significativamente o ajuste em relação ao modelo global. A queda da soma
-dos quadrados residual de 85,63 para 47,25 mA\textsuperscript{2} mostra
-redução relevante da variabilidade não explicada, e o teste F elevado,
-com p-valor abaixo de 0,05, indica que os quatro termos adicionais
-associados à carga e à interação não são apenas complexidade supérflua.
-Assim, para fins de descrição estatística, a formulação com interação é
-superior; para controle simples em malha aberta, o modelo global ainda
-pode ser útil se o erro adicional for aceitável.
+Na tabela, o valor 85,63 mA\textsuperscript{2} corresponde ao
+\(SQ_{\mathrm{res}}\) do modelo global, enquanto 47,25
+mA\textsuperscript{2} corresponde ao \(SQ_{\mathrm{res}}\) do ajuste com
+interação. A diferença entre esses valores é:
+\[
+85{,}63 - 47{,}25 = 38{,}38\ \mathrm{mA}^2,
+\]
+que representa a redução da soma dos quadrados residual ao adicionar os
+termos de carga e interação. O modelo completo usa quatro parâmetros
+adicionais em relação ao modelo global, por isso a coluna GL da segunda
+linha mostra o valor 4. Substituindo os valores na expressão do teste:
+\[
+F =
+\frac{(85{,}629792 - 47{,}253472)/4}
+{47{,}253472/560}
+= 113{,}699262.
+\]
+Esse número significa que a redução média do erro obtida pelos termos
+adicionais é cerca de 113,7 vezes maior que o erro residual médio que
+ainda permanece no modelo completo. Trata-se de uma razão muito alta, o
+que indica que a melhora não é pequena em relação à variabilidade
+remanescente.
+
+O valor-p associado à estatística F é inferior a 0,001. Portanto, para o
+nível de significância de 5\%, rejeita-se \(H_0\). Em termos práticos, há
+evidência estatística de que considerar a carga e sua interação com o
+comando de DAC melhora o ajuste em relação ao modelo global. Assim, para
+fins de descrição estatística dos dados experimentais, a formulação com
+interação é superior; para controle simples em malha aberta, o modelo
+global ainda pode ser útil se o erro adicional for aceitável.
 
 \section{Erro de predição}\label{erro-de-prediuxe7uxe3o}
 
 As métricas de erro foram calculadas dentro da região linear: MAE, RMSE
 e maior erro absoluto.
+
+Além das métricas numéricas, a comparação entre a corrente medida e a
+corrente predita permite avaliar visualmente o desempenho do ajuste. Em
+um modelo com boa capacidade preditiva, os pontos devem se concentrar
+próximos da reta ideal, indicando que os valores estimados acompanham os
+valores observados experimentalmente.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.74\linewidth,height=0.30\textheight,keepaspectratio]{figures/06_measured_vs_predicted.png}
+\caption{Corrente medida versus corrente predita}
+\end{figure}
+
+\FloatBarrier
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1079,41 +1176,24 @@ Erro absoluto máximo (mA)
 \endlastfoot
 Modelo global & 0.999661 & 0.999661 & 0.389648 & 566 &
 0.331486 & 0.388959 & 0.934792 \\
+\midrule
 Interação carga-DAC & 0.999813 & 0.999811 & 0.290484
 & 566 & 0.223411 & 0.288941 & 0.743690 \\
+\midrule
 Modelo da carga de 1 kOhm & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 & 0.352975 &
 0.743690 \\
+\midrule
 Modelo da carga de 2 kOhm & 0.999794 & 0.999792 & 0.193410 & 168 & 0.159041 & 0.192255 &
 0.445245 \\
+\midrule
 Modelo da carga de 4,7 kOhm & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0.110343 &
 0.252044 \\
 \end{longtable}
 }
 \tablecaptionbelow{Métricas de erro de predição dos modelos avaliados}
 
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Corrente medida versus corrente predita}]{figures/06_measured_vs_predicted.png}}
-\caption{Corrente medida versus corrente predita}
-\end{figure}
-
 \FloatBarrier
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Banda de confiança da corrente em função do DAC}]{figures/07_current_vs_dac_confidence_band.png}}
-\caption{Banda de confiança da corrente em função do DAC}
-\end{figure}
-
-\FloatBarrier
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Banda de predição da corrente em função do DAC}]{figures/08_current_vs_dac_prediction_band.png}}
-\caption{Banda de predição da corrente em função do DAC}
-\end{figure}
-
-\FloatBarrier
+\clearpage
 
 \section{Diagnóstico dos resíduos}\label{diagnuxf3stico-dos-resuxedduos}
 
@@ -1131,50 +1211,45 @@ Modelo da carga de 4,7 kOhm & 0.999630 & 0.999625 & 0.111824 & 76 & 0.095924 & 0
   >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1000}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Modelo
+\textbf{Modelo}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Média dos resíduos (mA)
+\textbf{Média dos resíduos (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Desvio dos resíduos (mA)
+\textbf{Desvio dos resíduos (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Mediana dos resíduos (mA)
+\textbf{Mediana dos resíduos (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Resíduo mínimo (mA)
+\textbf{Resíduo mínimo (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Resíduo máximo (mA)
+\textbf{Resíduo máximo (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-MAE (mA)
+\textbf{MAE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMSE (mA)
+\textbf{RMSE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Amostras no Shapiro
+\textbf{Amostras no Shapiro}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Valor-p Shapiro
+\textbf{Valor-p Shapiro}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-global\_current\_mA\_by\_dac & 0 & 0.389303 & 0.015381 & -0.934792 &
-0.738906 & 0.331486 & 0.388959 & 566 & 0 \\
+Modelo global & 0 & 0.389303 & 0.015381 & -0.934792 &
+0.738906 & 0.331486 & 0.388959 & 566 & \(<0{,}001\) \\
 \end{longtable}
 }
 \tablecaptionbelow{Resumo dos resíduos do modelo global e teste de normalidade}
 
-A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk.
+A média dos resíduos é praticamente nula, como esperado em um ajuste por
+mínimos quadrados. Entretanto, o teste de Shapiro-Wilk apresenta
+p-valor inferior a 0,001, indicando que a hipótese de normalidade dos
+resíduos é questionável.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos em função do DAC}]{figures/09_residuals_vs_dac.png}}
+\includegraphics[width=0.76\linewidth,height=0.34\textheight,keepaspectratio]{figures/09_residuals_vs_dac.png}
 \caption{Resíduos em função do DAC}
-\end{figure}
-
-\FloatBarrier
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos em função dos valores preditos}]{figures/10_residuals_vs_predicted.png}}
-\caption{Resíduos em função dos valores preditos}
 \end{figure}
 
 \FloatBarrier
@@ -1183,38 +1258,32 @@ A normalidade dos residuos e questionavel pelo teste de Shapiro-Wilk.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3400}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Teste
+\textbf{Teste}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Estatística
+\textbf{Estatística}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Parâmetro
+\textbf{Valor-p}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Valor-p
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Método
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+\textbf{Interpretação}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-manual\_breusch\_pagan\_residual\_squared\_on\_fitted & 27.838682 & 1 &
-0 & fallback & 0.05 \\
+Breusch-Pagan & 27.838682 & \(<0{,}001\) &
+Evidência de variância residual não constante \\
 \end{longtable}
 }
 \tablecaptionbelow{Teste de homocedasticidade dos resíduos}
 
-Ha evidencia de heterocedasticidade; a hipotese de variancia constante e
-questionavel.
+Há evidência de heterocedasticidade; portanto, a hipótese de variância
+constante dos resíduos é questionável.
 
 \section{Autocorrelação temporal}\label{autocorrelauxe7uxe3o-temporal}
 
@@ -1223,39 +1292,36 @@ não foi assumida automaticamente.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1800}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3400}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Teste
+\textbf{Teste}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Estatística
+\textbf{Estatística}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Valor-p
+\textbf{Valor-p}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Método
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Nível alpha
+\textbf{Interpretação}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-manual\_durbin\_watson\_approximation & 0.068879 & 0 &
-fallback\_normal\_approximation & 0.05 \\
+Durbin-Watson & 0.068879 & \(<0{,}001\) &
+Evidência de autocorrelação temporal dos resíduos \\
 \end{longtable}
 }
 \tablecaptionbelow{Teste de autocorrelação temporal dos resíduos}
 
-Ha evidencia de autocorrelacao temporal; p-valores classicos da
-regressao podem estar otimistas.
+Há evidência de autocorrelação temporal; assim, os p-valores clássicos
+da regressão podem estar otimistas.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Autocorrelação dos resíduos}]{figures/11_residual_acf.png}}
+\includegraphics[width=0.74\linewidth,height=0.34\textheight,keepaspectratio]{figures/11_residual_acf.png}
 \caption{Autocorrelação dos resíduos}
 \end{figure}
 
@@ -1277,17 +1343,17 @@ permanece desativada por padrão.
   >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Amostras
+\textbf{Amostras}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Pontos influentes
+\textbf{Pontos influentes}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Pontos influentes (\%)
+\textbf{Pontos influentes (\%)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Limite de Cook
+\textbf{Limite de Cook}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Maior distância de Cook
+\textbf{Maior distância de Cook}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Maior resíduo studentizado abs.
+\textbf{Maior resíduo studentizado abs.}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -1298,26 +1364,15 @@ Maior resíduo studentizado abs.
 }
 \tablecaptionbelow{Resumo de pontos influentes e critérios de influência}
 
+O gráfico de distância de Cook foi mantido por sintetizar visualmente os
+pontos com maior influência no ajuste. Os demais critérios aparecem na
+tabela, pois são mais úteis como valores de referência do que como
+figuras isoladas.
+
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Distância de Cook por índice}]{figures/12_cook_distance_by_index.png}}
+\includegraphics[width=0.74\linewidth,height=0.32\textheight,keepaspectratio]{figures/12_cook_distance_by_index.png}
 \caption{Distância de Cook por índice}
-\end{figure}
-
-\FloatBarrier
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Resíduos studentizados por índice}]{figures/13_studentized_residuals_by_index.png}}
-\caption{Resíduos studentizados por índice}
-\end{figure}
-
-\FloatBarrier
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Leverage versus resíduos studentizados}]{figures/14_leverage_vs_studentized_residuals.png}}
-\caption{Leverage versus resíduos studentizados}
 \end{figure}
 
 \FloatBarrier
@@ -1339,26 +1394,30 @@ apenas uma validação aleatória que mistura pontos vizinhos da rampa.
   >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Bloco
+\textbf{Bloco}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Amostras de treino
+\textbf{Amostras de treino}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Amostras de teste
+\textbf{Amostras de teste}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-MAE (mA)
+\textbf{MAE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMSE (mA)
+\textbf{RMSE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Erro absoluto máximo (mA)
+\textbf{Erro absoluto máximo (mA)}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
 1 & 452 & 114 & 1.094951 & 1.149833 & 1.640076 \\
+\midrule
 2 & 453 & 113 & 0.336214 & 0.391106 & 0.604763 \\
+\midrule
 3 & 453 & 113 & 0.614323 & 0.672667 & 1.249332 \\
+\midrule
 4 & 453 & 113 & 0.287021 & 0.314989 & 0.575789 \\
+\midrule
 5 & 453 & 113 & 0.469936 & 0.525130 & 0.978239 \\
 \end{longtable}
 }
@@ -1375,19 +1434,19 @@ Erro absoluto máximo (mA)
   >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Blocos
+\textbf{Blocos}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-RMSE médio (mA)
+\textbf{RMSE médio (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Desvio do RMSE (mA)
+\textbf{Desvio do RMSE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-MAE médio (mA)
+\textbf{MAE médio (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Desvio do MAE (mA)
+\textbf{Desvio do MAE (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Erro máx. médio (mA)
+\textbf{Erro máx. médio (mA)}
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Desvio do erro máx. (mA)
+\textbf{Desvio do erro máx. (mA)}
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
@@ -1400,7 +1459,7 @@ Desvio do erro máx. (mA)
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Erros da validação cruzada por blocos}]{figures/15_block_cross_validation_errors.png}}
+\includegraphics[width=0.78\linewidth,height=0.34\textheight,keepaspectratio]{figures/15_block_cross_validation_errors.png}
 \caption{Erros da validação cruzada por blocos}
 \end{figure}
 
