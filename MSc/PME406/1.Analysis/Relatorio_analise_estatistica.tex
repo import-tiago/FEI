@@ -212,8 +212,8 @@ Os objetivos específicos são:
 \item
   avaliar linearidade por correlação e regressão;
 \item
-  comparar o modelo global com o ajuste que considera a interação entre
-  carga e comando de DAC;
+  comparar o modelo global com o ajuste que considera a influência da
+  carga na relação entre comando de DAC e corrente de saída;
 \item
   quantificar erro de predição, resíduos e heterocedasticidade;
 \item
@@ -318,7 +318,7 @@ Tensão DAC (V) & Tensão no shunt (V) & Amostra \\
 \begin{minipage}[t]{0.18\textwidth}
 \vspace{0pt}
 \centering
-\small
+\scriptsize
 \begin{tabular}{@{}ll@{}}
 \toprule
 Carga & Amostras \\
@@ -330,6 +330,7 @@ Carga & Amostras \\
 \end{tabular}
 \end{minipage}%
 }
+\caption{Prévia dos dados crus e quantidade de amostras por carga}
 \end{table}
 \FloatBarrier
 
@@ -353,14 +354,42 @@ Carga & Amostras \\
 
 \section{Conversão shunt-corrente}\label{conversuxe3o-shunt-corrente}
 
-A corrente foi calculada por I = Vshunt / Rshunt, com Rshunt = 10 Ohm. A
-tolerância configurada do shunt é 1\%.
+A corrente foi calculada a partir da tensão medida no resistor shunt,
+conforme a Equação~\ref{eq:current-shunt}, com \(R_{\mathrm{shunt}} =
+10\ \Omega\). A tolerância configurada do shunt é 1\%.
+\begin{equation}
+I = \frac{V_{\mathrm{shunt}}}{R_{\mathrm{shunt}}}
+\label{eq:current-shunt}
+\end{equation}
 
 \begin{center}
 \includegraphics[width=0.78\linewidth,keepaspectratio]{figures/03_current_after_conversion.png}
 \captionof{figure}{Corrente calculada após conversão da tensão no shunt}
 \end{center}
 \FloatBarrier
+
+As oscilações e ruídos observados nos sinais calculados de corrente não
+devem ser interpretados apenas como artefatos numéricos da conversão pelo
+shunt. Eles refletem também características da própria arquitetura de
+hardware do STIMGRASP. O estágio utiliza duas fontes de alimentação de
+alta tensão, uma para gerar aproximadamente \(+48\ \mathrm{V}\) e outra
+para gerar aproximadamente \(-48\ \mathrm{V}\), implementadas com
+componentes de part numbers distintos. Assim, pequenas diferenças de
+comportamento dinâmico, limite de corrente, saturação e resposta a
+transientes entre os dois conversores podem aparecer de forma assimétrica
+nos sinais aquisitados.
+
+Esse efeito torna-se mais evidente quando a resistência da carga é maior
+que 1 kOhm. Nessa condição, para manter a corrente ajustada, o comando do
+DAC leva o estágio de saída a exigir tensões cada vez maiores sobre a
+carga. Como a arquitetura opera em malha aberta e não mede diretamente a
+corrente entregue para realimentar o controle, o DAC continua aumentando
+a tensão de comando mesmo quando os conversores e o estágio de saída se
+aproximam de seus limites operacionais. Ao atingir a região de saturação,
+a corrente deixa de seguir linearmente o comando aplicado, e surgem
+oscilações e ruídos nos sinais medidos. Como a corrente é obtida
+diretamente da tensão no shunt, essas instabilidades ficam ainda mais
+explícitas no sinal de corrente calculado na carga.
 
 \FloatBarrier
 
@@ -369,14 +398,42 @@ tolerância configurada do shunt é 1\%.
 \section{Redução de granularidade por
 binning}\label{reduuxe7uxe3o-de-granularidade-por-binning}
 
-Após a conversão da tensão do shunt em corrente, os pontos ainda estavam
-na granularidade temporal da aquisição do osciloscópio. Como a variável
-de interesse para a regressão é a relação entre tensão de DAC e corrente
-de saída, os dados foram agrupados por \texttt{dac\_bin}: cada valor de
+Após a conversão da tensão do shunt em corrente, os pontos ainda
+preservavam tanto a granularidade temporal da aquisição do osciloscópio
+quanto as oscilações associadas ao comportamento dinâmico do estágio de
+saída, especialmente nas regiões próximas aos limites operacionais. Como
+a variável de interesse para a regressão é a relação média entre tensão
+de DAC e corrente de saída, os dados foram agrupados por
+\texttt{dac\_bin}: cada valor de
 \texttt{dac\_volts} foi arredondado para o centro de um intervalo de
 0.01 V, e as medições com o mesmo \texttt{dac\_bin} e a mesma carga
 foram substituídas pela média de corrente, tensão do shunt, tensão de
 DAC e tensão reconstruída na carga.
+
+Matematicamente, o centro do bin associado à \(i\)-ésima amostra foi
+definido pela Equação~\ref{eq:bin-center}:
+\begin{equation}
+b_i = \Delta \cdot \operatorname{round}
+\left(\frac{V_{\mathrm{DAC},i}}{\Delta}\right),
+\qquad \Delta = 0{,}01\ \mathrm{V}.
+\label{eq:bin-center}
+\end{equation}
+Para cada carga \(R\) e cada bin \(b\), foi então formado o conjunto de
+amostras da Equação~\ref{eq:bin-set}:
+\begin{equation}
+S_{R,b} = \{i:\ R_i = R\ \text{e}\ b_i = b\}.
+\label{eq:bin-set}
+\end{equation}
+A corrente representativa do bin corresponde à média das correntes
+calculadas nesse conjunto, como indicado na Equação~\ref{eq:bin-mean}:
+\begin{equation}
+\bar{I}_{R,b} =
+\frac{1}{|S_{R,b}|}\sum_{i\in S_{R,b}} I_i.
+\label{eq:bin-mean}
+\end{equation}
+O mesmo procedimento de média foi aplicado às demais grandezas usadas na
+análise, como tensão no shunt, tensão de DAC e tensão reconstruída na
+carga.
 
 Esse binning reduz a quantidade de pontos repetidos ou quase repetidos
 ao longo da rampa, diminui ruído local de aquisição e evita que regiões
@@ -392,7 +449,6 @@ de inclinações locais, correlação e regressões lineares.
 
 \begin{center}
 \scriptsize
-\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lllll@{}}
 \toprule
 Carga & Amostras originais & Bins de DAC & Largura do bin (V) & Amostras/bin \\
@@ -402,8 +458,8 @@ Carga & Amostras originais & Bins de DAC & Largura do bin (V) & Amostras/bin \\
 4k7 & 58386 & 325 & 0.01 & 179.649 \\
 \bottomrule
 \end{tabular}
-}%
 \end{center}
+\tablecaptionbelow{Resumo da redução de granularidade por binning}
 
 \begin{center}
 \includegraphics[width=0.78\linewidth,keepaspectratio]{figures/04_binned_current_by_load.png}
@@ -418,6 +474,15 @@ Carga & Amostras originais & Bins de DAC & Largura do bin (V) & Amostras/bin \\
 \section{Identificação da região de
 compliance}\label{identificauxe7uxe3o-da-regiuxe3o-de-compliance}
 
+Em uma fonte de corrente, a região de compliance corresponde à faixa de
+operação em que o circuito ainda possui tensão disponível suficiente
+para impor a corrente comandada sobre a carga. Dentro dessa região, a
+corrente depende predominantemente do comando aplicado ao estágio de
+saída, e não da limitação de tensão dos componentes. Quando a carga exige
+uma tensão maior do que a fonte consegue fornecer, o estágio se aproxima
+da saturação: a corrente deixa de acompanhar linearmente o comando do DAC
+e passam a aparecer desvios, oscilações e perda de previsibilidade.
+
 A região comum de compliance foi definida antes da regressão usando dois
 critérios: limite físico pela tensão reconstruída na carga e inclinação
 local mínima compatível com o trecho linear de cada carga. O limite
@@ -429,18 +494,17 @@ ser interpretado apenas dentro dessa região comum.
 
 \begin{center}
 \scriptsize
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}llllllll@{}}
+\begin{tabular}{@{}llllll@{}}
 \toprule
-Carga & Faixa medida (V) & Faixa comum (V) & Inclinação ref. (mA/V) & Limite de inclinação (mA/V) & Pontos retidos & Pontos removidos & Removidos (\%) \\
+Carga & Faixa medida (V) & Faixa comum (V) & Pontos retidos & Pontos removidos & Removidos (\%) \\
 \midrule
-1k & -43.80 a 46.33 & -46.33 a 46.33 & 28.153 & 14.077 & 322 & 3 & 0.923 \\
-2k & -46.22 a 49.56 & -46.33 a 46.33 & 27.808 & 13.904 & 168 & 157 & 48.308 \\
-4k7 & -47.62 a 47.78 & -46.33 a 46.33 & 26.605 & 13.303 & 76 & 249 & 76.615 \\
+1k & -43.80 a 46.33 & -46.33 a 46.33 & 322 & 3 & 0.923 \\
+2k & -46.22 a 49.56 & -46.33 a 46.33 & 168 & 157 & 48.308 \\
+4k7 & -47.62 a 47.78 & -46.33 a 46.33 & 76 & 249 & 76.615 \\
 \bottomrule
 \end{tabular}
-}%
 \end{center}
+\tablecaptionbelow{Pontos retidos e removidos na identificação da região de compliance}
 
 \begin{center}
 \includegraphics[width=0.72\linewidth,keepaspectratio]{figures/05_compliance_retained_removed.png}
@@ -550,10 +614,11 @@ Amostras
 
 Para cada carga, foi ajustado um modelo linear independente relacionando
 a corrente de saída ao nível de comando do DAC. Em termos estatísticos, o
-modelo pode ser escrito como
-\[
+modelo pode ser escrito como na Equação~\ref{eq:linear-model}:
+\begin{equation}
 I = \beta_0 + \beta_1 V_{\mathrm{DAC}} + \varepsilon,
-\]
+\label{eq:linear-model}
+\end{equation}
 em que \(I\) é a corrente medida, \(V_{\mathrm{DAC}}\) é a tensão de DAC,
 \(\beta_0\) é o coeficiente linear, \(\beta_1\) é o coeficiente angular e
 \(\varepsilon\) representa o erro residual do ajuste.
@@ -603,13 +668,16 @@ Modelo da carga de 4,7 kOhm & 4k7 & 0.999630 & 0.999625 & 0.111824 & 76 & 0.0959
 }
 \tablecaptionbelow{Desempenho dos modelos lineares independentes por carga}
 
-\[
+As equações estimadas para cada carga estão reunidas na
+Equação~\ref{eq:linear-models-by-load}:
+\begin{equation}
 \begin{aligned}
 I_{1\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 46{,}6181 - 28{,}1177\,V_{\mathrm{DAC}}\,[\mathrm{V}],\\
 I_{2\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 45{,}5305 - 27{,}5967\,V_{\mathrm{DAC}}\,[\mathrm{V}],\\
 I_{4{,}7\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 42{,}9190 - 26{,}1561\,V_{\mathrm{DAC}}\,[\mathrm{V}].
 \end{aligned}
-\]
+\label{eq:linear-models-by-load}
+\end{equation}
 Assim, os coeficientes angulares variam de aproximadamente -28,12 mA/V a
 -26,16 mA/V, enquanto os coeficientes lineares variam de 46,62 mA a
 42,92 mA. Essa diferença mostra que as retas por carga são muito
@@ -621,14 +689,17 @@ próximas, mas não exatamente coincidentes.
 
 O modelo global foi ajustado dentro da região comum de compliance,
 relacionando a corrente de saída ao nível de comando do DAC por uma única
-reta:
-\[
+reta, seguindo a mesma forma geral da Equação~\ref{eq:linear-model}:
+\begin{equation}
 I = \beta_0 + \beta_1 V_{\mathrm{DAC}} + \varepsilon.
-\]
-Com os dados deste ensaio, a equação estimada foi:
-\[
+\label{eq:global-model-general}
+\end{equation}
+Com os dados deste ensaio, a equação estimada foi a
+Equação~\ref{eq:global-model-estimated}:
+\begin{equation}
 I\,[\mathrm{mA}] = 46{,}3489 - 28{,}0332\,V_{\mathrm{DAC}}\,[\mathrm{V}].
-\]
+\label{eq:global-model-estimated}
+\end{equation}
 Assim, o coeficiente linear do modelo global é 46,3489 mA, e o
 coeficiente angular é -28,0332 mA/V. O sinal negativo indica que, nesta
 montagem, o aumento da tensão de DAC reduz a corrente calculada no
@@ -655,9 +726,9 @@ operacional única para estimativa em malha aberta. Se as curvas das
 cargas permanecem próximas após a remoção dos pontos limitados por
 compliance, um único modelo global pode representar o comportamento do
 estágio de saída sem exigir coeficientes específicos por carga. A
-comparação posterior com o ajuste que inclui a interação entre carga e
-comando de DAC verifica justamente se adicionar dependência explícita da
-carga melhora de forma relevante essa representação.
+comparação posterior com o ajuste que inclui a influência da carga sobre
+a relação DAC-corrente verifica justamente se adicionar dependência
+explícita da carga melhora de forma relevante essa representação.
 
 \begin{figure}
 \centering
@@ -671,8 +742,8 @@ A figura permite avaliar visualmente o compromisso do modelo global: a
 reta única acompanha bem a tendência média das três cargas, mas pequenos
 desvios sistemáticos entre as cores indicam que as curvas não são
 perfeitamente coincidentes. Essa diferença visual antecipa a análise da
-interação entre carga e comando de DAC, que testa formalmente se a carga
-altera a relação entre DAC e corrente.
+influência da carga sobre a relação DAC-corrente, que testa formalmente
+se a carga altera a relação entre DAC e corrente.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -712,8 +783,8 @@ Modelo global & 0.999661 & 0.999661 & 0.389648 & 566 &
 }
 \tablecaptionbelow{Desempenho do modelo global para a região linear retida}
 
-\section{Interação entre carga e comando de
-DAC}\label{modelo-com-interauxe7uxe3o-carga-x-dac}
+\section{Influência da carga sobre a relação DAC-corrente}
+\label{modelo-com-influencia-carga-dac}
 
 Este tópico usa uma extensão direta da regressão linear múltipla
 apresentada na disciplina. A tensão de DAC é tratada como variável
@@ -726,27 +797,27 @@ diferenciá-las da resistência física da carga. Elas permitem incluir no
 mesmo modelo o fato de a medição pertencer à carga de 1 kOhm, 2 kOhm ou
 4,7 kOhm.
 
-O objetivo deste ajuste não é substituir a análise anterior por uma
-técnica desconectada do conteúdo da disciplina, mas complementar o modelo
-global. No modelo global, uma única reta é usada para representar todas
+No modelo global, uma única reta é usada para representar todas
 as cargas, assumindo o mesmo intercepto e a mesma inclinação. Essa
 hipótese é simples e útil, mas pode esconder pequenas diferenças entre as
-cargas. Ao incluir a interação entre carga e comando de DAC, verifica-se
-se a relação entre tensão de DAC e corrente é a mesma para todas as
-cargas ou se muda levemente conforme a carga conectada.
+cargas. Ao incluir a influência da carga sobre a relação DAC-corrente,
+verifica-se se a relação entre tensão de DAC e corrente é a mesma para
+todas as cargas ou se muda levemente conforme a carga conectada.
 
-Em termos estatísticos, uma interação indica que o efeito de uma variável
-explicativa depende do nível de outra variável. Neste relatório, isso
-significa perguntar se a variação da corrente causada por uma mudança na
-tensão de DAC é igual para todas as cargas. Se não houver interação
-relevante, as retas associadas às cargas tendem a ser paralelas. Se
-houver interação relevante, a inclinação da reta também muda com a carga.
-Assim, a carga pode alterar tanto o deslocamento vertical da reta quanto
-sua inclinação:
-\[
+Em termos estatísticos, essa influência é representada por termos que
+permitem que o efeito de uma variável explicativa dependa da carga
+conectada. Neste relatório, isso significa perguntar se a variação da
+corrente causada por uma mudança na tensão de DAC é igual para todas as
+cargas. Se a influência da carga for pequena, as retas associadas às
+cargas tendem a ser aproximadamente paralelas. Se ela for relevante, a
+inclinação da reta também muda com a carga. Assim, a carga pode alterar
+tanto o deslocamento vertical da reta quanto sua inclinação, conforme a
+Equação~\ref{eq:influence-model-general}:
+\begin{equation}
 I = \beta_0 + \beta_1 V_{\mathrm{DAC}} + \gamma_R +
 \delta_R V_{\mathrm{DAC}} + \varepsilon,
-\]
+\label{eq:influence-model-general}
+\end{equation}
 em que \(I\) é a corrente medida e \(V_{\mathrm{DAC}}\) é a tensão de
 comando do DAC. Essa forma resume a ideia geral do modelo: a carga de
 referência possui uma reta própria, e as demais cargas entram como
@@ -787,12 +858,14 @@ quanto essas cargas se afastam da reta de referência.
 
 Em termos simples, essa formulação testa se mudar a carga apenas desloca
 a curva para cima ou para baixo, ou se também modifica a sensibilidade da
-corrente ao comando de DAC. Se os termos de interação forem relevantes,
-isso indica que as curvas das cargas não são paralelas: além de terem
-interceptos diferentes, também possuem inclinações ligeiramente distintas.
+corrente ao comando de DAC. Se os termos produto entre DAC e carga forem
+relevantes, isso indica que as curvas das cargas não são paralelas: além
+de terem interceptos diferentes, também possuem inclinações ligeiramente
+distintas.
 
-A equação completa estimada para o ajuste com interação é:
-\[
+A equação completa estimada para o ajuste com influência da carga é dada
+pela Equação~\ref{eq:influence-model-estimated}:
+\begin{equation}
 \begin{aligned}
 I\,[\mathrm{mA}] =\;& 46{,}6181
 - 28{,}1177\,V_{\mathrm{DAC}}\,[\mathrm{V}]
@@ -801,7 +874,8 @@ I\,[\mathrm{mA}] =\;& 46{,}6181
 &+ 0{,}5210\,V_{\mathrm{DAC}}\,[\mathrm{V}]\,D_{2k}
 + 1{,}9616\,V_{\mathrm{DAC}}\,[\mathrm{V}]\,D_{4{,}7k},
 \end{aligned}
-\]
+\label{eq:influence-model-estimated}
+\end{equation}
 em que \(D_{2k}\) é uma variável indicadora que vale 1 quando a carga
 resistiva é 2 kOhm e 0 nos demais casos, e \(D_{4{,}7k}\) é uma variável
 indicadora que vale 1 quando a carga resistiva é 4,7 kOhm e 0 nos demais
@@ -810,9 +884,9 @@ pois ela é a referência do modelo. Aqui, \(D_{2k}\) e \(D_{4{,}7k}\) não
 representam valores de resistência em ohms, mas apenas a presença de cada
 carga no ajuste.
 
-A partir dos coeficientes do ajuste com interação, as retas finais por
-carga são:
-\[
+A partir dos coeficientes do ajuste com influência da carga, as retas
+finais por carga são obtidas conforme a Equação~\ref{eq:influence-lines}:
+\begin{equation}
 \begin{aligned}
 I_{1\,\mathrm{kOhm}}\,[\mathrm{mA}] &= 46{,}6181 - 28{,}1177\,V_{\mathrm{DAC}}\,[\mathrm{V}]\\[1.0em]
 I_{2\,\mathrm{kOhm}}\,[\mathrm{mA}] &= (46{,}6181 - 1{,}0877) + (-28{,}1177 + 0{,}5210)\,V_{\mathrm{DAC}}\,[\mathrm{V}]
@@ -820,30 +894,31 @@ I_{2\,\mathrm{kOhm}}\,[\mathrm{mA}] &= (46{,}6181 - 1{,}0877) + (-28{,}1177 + 0{
 I_{4{,}7\,\mathrm{kOhm}}\,[\mathrm{mA}] &= (46{,}6181 - 3{,}6991) + (-28{,}1177 + 1{,}9616)\,V_{\mathrm{DAC}}\,[\mathrm{V}]
 = 42{,}9190 - 26{,}1561\,V_{\mathrm{DAC}}\,[\mathrm{V}].
 \end{aligned}
-\]
+\label{eq:influence-lines}
+\end{equation}
 
-Essas equações deixam explícito que o ajuste com interação não produz
-uma única reta igual à do modelo global. Ele produz uma reta de
+Essas equações deixam explícito que o ajuste com influência da carga não
+produz uma única reta igual à do modelo global. Ele produz uma reta de
 referência para 1 kOhm e aplica correções de intercepto e inclinação para
 2 kOhm e 4,7 kOhm.
 
 \begin{figure}
 \centering
 \includegraphics[width=0.92\linewidth,keepaspectratio]{figures/07_interaction_model_by_load.png}
-\caption{Retas estimadas pelo ajuste com interação entre carga e comando de DAC}
+\caption{Retas estimadas pelo ajuste com influência da carga sobre a relação DAC-corrente}
 \end{figure}
 
 \FloatBarrier
 
 A figura mostra a diferença prática entre o modelo global e o ajuste com
-interação. A linha preta tracejada representa a reta global única,
+influência da carga. A linha preta tracejada representa a reta global única,
 enquanto as linhas coloridas representam as retas estimadas para cada
 carga dentro de uma mesma formulação estatística. A proximidade entre as
 retas confirma que o comportamento geral é muito semelhante, mas a
 separação entre elas mostra por que a inclusão da carga reduz o erro
 residual.
 
-As métricas de desempenho resumem o ajuste completo com interação. Embora
+As métricas de desempenho resumem o ajuste completo com influência da carga. Embora
 o modelo contenha termos específicos para as cargas de 2 kOhm e 4,7 kOhm
 em relação à referência de 1 kOhm, ele constitui uma única formulação
 estatística e, por isso, é apresentado como um único ajuste.
@@ -880,22 +955,22 @@ estatística e, por isso, é apresentado como um único ajuste.
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Interação carga-DAC & 0.999813 & 0.999811 & 0.290484
+Influência carga-DAC & 0.999813 & 0.999811 & 0.290484
 & 566 & 0.223411 & 0.288941 & 0.74369 \\
 \end{longtable}
 }
-\tablecaptionbelow{Desempenho do ajuste com interação entre carga e comando de DAC}
+\tablecaptionbelow{Desempenho do ajuste com influência da carga sobre a relação DAC-corrente}
 
-Ao incluir a interação entre carga e comando de DAC, o ajuste reduz o
+Ao incluir a influência da carga sobre a relação DAC-corrente, o ajuste reduz o
 desvio residual, o MAE, o RMSE e o erro absoluto máximo em relação ao
 modelo global. Em termos práticos, isso indica que as curvas das três
 cargas são muito próximas, mas não perfeitamente coincidentes. A carga
 não afeta apenas um deslocamento fixo da curva: ela também altera
 levemente a inclinação da relação DAC-corrente. Portanto, para descrição
-estatística dos dados, o ajuste com interação representa melhor o
+estatística dos dados, o ajuste com influência da carga representa melhor o
 comportamento observado. Para uma aplicação embarcada simples em malha
 aberta, porém, o modelo global ainda pode ser preferível se o erro
-adicional for aceitável, pois o uso da interação exige conhecer ou
+adicional for aceitável, pois o uso dessa influência exige conhecer ou
 estimar a carga conectada para aplicar os coeficientes corretos.
 
 Nas tabelas de coeficientes, \(H_0\) representa a hipótese nula de que o
@@ -911,7 +986,7 @@ ausência de evidência estatística suficiente contra \(H_0\).
 A tabela de coeficientes identifica, na coluna Modelo, a formulação de
 regressão de onde cada estimativa foi obtida. A coluna Termo indica o
 parâmetro avaliado, como intercepto, inclinação associada ao nível de DAC
-ou efeitos adicionais de carga e interação. A Estimativa é o valor
+ou efeitos adicionais de carga e dos termos produto DAC-carga. A Estimativa é o valor
 calculado para o coeficiente, enquanto o Erro padrão representa a
 incerteza dessa estimativa. A Estatística corresponde à razão entre a
 estimativa e seu erro padrão, sendo usada no teste de significância do
@@ -954,22 +1029,22 @@ Modelo global & Intercepto & 46,3489 & 0,0393 & 1180,24 &
 Modelo global & Nível de DAC & -28,0332 & 0,0217 & -1289,86 &
 \(<0{,}001\) & [-28,0758; -27,9905] \\
 \midrule
-Interação carga-DAC & Intercepto & 46,6181 & 0,0328 & 1423,28 &
+Influência carga-DAC & Intercepto & 46,6181 & 0,0328 & 1423,28 &
 \(<0{,}001\) & [46,5538; 46,6825] \\
 \midrule
-Interação carga-DAC & Nível de DAC & -28,1177 & 0,0174 & -1614,54 &
+Influência carga-DAC & Nível de DAC & -28,1177 & 0,0174 & -1614,54 &
 \(<0{,}001\) & [-28,1519; -28,0835] \\
 \midrule
-Interação carga-DAC & Carga de 2 kOhm & -1,0877 & 0,0862 & -12,62 &
+Influência carga-DAC & Carga de 2 kOhm & -1,0877 & 0,0862 & -12,62 &
 \(<0{,}001\) & [-1,2569; -0,9184] \\
 \midrule
-Interação carga-DAC & Carga de 4,7 kOhm & -3,6991 & 0,2542 & -14,55 &
+Influência carga-DAC & Carga de 4,7 kOhm & -3,6991 & 0,2542 & -14,55 &
 \(<0{,}001\) & [-4,1984; -3,1998] \\
 \midrule
-Interação carga-DAC & Interação DAC-carga de 2 kOhm & 0,5210 & 0,0494 & 10,55 &
+Influência carga-DAC & Produto DAC-carga de 2 kOhm & 0,5210 & 0,0494 & 10,55 &
 \(<0{,}001\) & [0,4240; 0,6180] \\
 \midrule
-Interação carga-DAC & Interação DAC-carga de 4,7 kOhm & 1,9616 & 0,1529 & 12,83 &
+Influência carga-DAC & Produto DAC-carga de 4,7 kOhm & 1,9616 & 0,1529 & 12,83 &
 \(<0{,}001\) & [1,6613; 2,2619] \\
 \midrule
 Modelo da carga de 1 kOhm & Intercepto & 46,6181 & 0,0399 & 1167,66 &
@@ -1000,36 +1075,47 @@ respectivos termos aos modelos.
 
 \section{Comparação entre modelos}\label{comparauxe7uxe3o-entre-modelos}
 
-A comparação formal entre o modelo global e o ajuste com interação entre
-carga e comando de DAC foi feita por ANOVA/teste F para modelos
+A comparação formal entre o modelo global e o ajuste com influência da
+carga sobre a relação DAC-corrente foi feita por ANOVA/teste F para modelos
 aninhados.
 
 Nessa comparação, o modelo global é o modelo reduzido, pois usa uma única
-reta média para todas as cargas. O ajuste com interação é o modelo
+reta média para todas as cargas. O ajuste com influência da carga é o modelo
 completo, pois adiciona termos para representar diferenças de intercepto e
 inclinação entre as cargas. A comparação avalia se a redução do erro
 residual obtida pelo modelo completo é grande o suficiente para justificar
 os parâmetros adicionais.
 
 O teste F é adequado nesse caso porque os modelos são aninhados: o modelo
-global pode ser visto como uma versão simplificada do modelo com interação,
-obtida quando os termos adicionais de carga e interação são considerados
-nulos. Assim, a hipótese nula do teste é:
-\[
-H_0: \text{os termos adicionais de carga e interação não reduzem o erro de forma relevante}.
-\]
-A hipótese alternativa é:
-\[
-H_1: \text{os termos adicionais reduzem o erro residual de forma estatisticamente significativa}.
-\]
+global pode ser visto como uma versão simplificada do modelo com influência
+da carga, obtida quando os termos adicionais de carga e os termos produto
+DAC-carga são considerados
+nulos. Assim, a hipótese nula do teste é apresentada na
+Equação~\ref{eq:anova-h0}:
+\begin{equation}
+\begin{aligned}
+H_0 &: \text{os termos adicionais de carga e produto DAC-carga}\\
+&\quad \text{não reduzem o erro de forma relevante}.
+\end{aligned}
+\label{eq:anova-h0}
+\end{equation}
+A hipótese alternativa é apresentada na Equação~\ref{eq:anova-h1}:
+\begin{equation}
+\begin{aligned}
+H_1 &: \text{os termos adicionais reduzem o erro residual}\\
+&\quad \text{de forma estatisticamente significativa}.
+\end{aligned}
+\label{eq:anova-h1}
+\end{equation}
 Portanto, o teste não verifica se o modelo completo é ``perfeito'', mas
 se ele melhora o ajuste em relação ao modelo mais simples.
 
 A quantidade central da comparação é a soma dos quadrados residual,
-definida por:
-\[
+definida pela Equação~\ref{eq:sq-residual}:
+\begin{equation}
 SQ_{\mathrm{res}} = \sum_{i=1}^{n} (I_i - \hat{I}_i)^2,
-\]
+\label{eq:sq-residual}
+\end{equation}
 em que \(I_i\) é a corrente medida na \(i\)-ésima observação e
 \(\hat{I}_i\) é a corrente prevista pelo modelo para essa mesma
 observação. Portanto, quanto menor \(SQ_{\mathrm{res}}\), menor é a
@@ -1038,12 +1124,14 @@ variabilidade dos dados que permanece não explicada pelo modelo.
 A estatística F compara duas quantidades: no numerador, a redução média do
 erro residual obtida ao adicionar os novos parâmetros; no denominador, o
 erro residual médio que ainda permanece no modelo completo. Para dois
-modelos aninhados, essa razão pode ser escrita como:
-\[
+modelos aninhados, essa razão pode ser escrita conforme a
+Equação~\ref{eq:f-test}:
+\begin{equation}
 F =
 \frac{(SQ_{\mathrm{res,red}} - SQ_{\mathrm{res,comp}})/(gl_{\mathrm{red}} - gl_{\mathrm{comp}})}
 {SQ_{\mathrm{res,comp}}/gl_{\mathrm{comp}}},
-\]
+\label{eq:f-test}
+\end{equation}
 em que \(SQ_{\mathrm{res,red}}\) é a soma dos quadrados residual do modelo
 reduzido, \(SQ_{\mathrm{res,comp}}\) é a soma dos quadrados residual do
 modelo completo, e \(gl\) representa os graus de liberdade residuais. Um
@@ -1086,29 +1174,33 @@ variabilidade residual remanescente.
 \endlastfoot
 Modelo global & 1 & 564 & 85.629792 & & & & \\
 \midrule
-Interação carga-DAC & 2 & 560 &
+Influência carga-DAC & 2 & 560 &
 47.253472 & 4 & 38.37632 & 113.699262 & \(<0{,}001\) \\
 \end{longtable}
 }
-\tablecaptionbelow{Comparação por ANOVA entre o modelo global e o ajuste com interação}
+\tablecaptionbelow{Comparação por ANOVA entre o modelo global e o ajuste com influência da carga}
 
 Na tabela, o valor 85,63 mA\textsuperscript{2} corresponde ao
 \(SQ_{\mathrm{res}}\) do modelo global, enquanto 47,25
 mA\textsuperscript{2} corresponde ao \(SQ_{\mathrm{res}}\) do ajuste com
-interação. A diferença entre esses valores é:
-\[
+influência da carga. A diferença entre esses valores é dada pela
+Equação~\ref{eq:sq-residual-reduction}:
+\begin{equation}
 85{,}63 - 47{,}25 = 38{,}38\ \mathrm{mA}^2,
-\]
+\label{eq:sq-residual-reduction}
+\end{equation}
 que representa a redução da soma dos quadrados residual ao adicionar os
-termos de carga e interação. O modelo completo usa quatro parâmetros
+termos de carga e produto DAC-carga. O modelo completo usa quatro parâmetros
 adicionais em relação ao modelo global, por isso a coluna GL da segunda
-linha mostra o valor 4. Substituindo os valores na expressão do teste:
-\[
+linha mostra o valor 4. Substituindo os valores na expressão do teste da
+Equação~\ref{eq:f-test}, obtém-se:
+\begin{equation}
 F =
 \frac{(85{,}629792 - 47{,}253472)/4}
 {47{,}253472/560}
 = 113{,}699262.
-\]
+\label{eq:f-test-value}
+\end{equation}
 Esse número significa que a redução média do erro obtida pelos termos
 adicionais é cerca de 113,7 vezes maior que o erro residual médio que
 ainda permanece no modelo completo. Trata-se de uma razão muito alta, o
@@ -1117,10 +1209,10 @@ remanescente.
 
 O valor-p associado à estatística F é inferior a 0,001. Portanto, para o
 nível de significância de 5\%, rejeita-se \(H_0\). Em termos práticos, há
-evidência estatística de que considerar a carga e sua interação com o
-comando de DAC melhora o ajuste em relação ao modelo global. Assim, para
+evidência estatística de que considerar a influência da carga sobre a
+relação DAC-corrente melhora o ajuste em relação ao modelo global. Assim, para
 fins de descrição estatística dos dados experimentais, a formulação com
-interação é superior; para controle simples em malha aberta, o modelo
+influência da carga é superior; para controle simples em malha aberta, o modelo
 global ainda pode ser útil se o erro adicional for aceitável.
 
 \section{Erro de predição}\label{erro-de-prediuxe7uxe3o}
@@ -1177,7 +1269,7 @@ Erro absoluto máximo (mA)
 Modelo global & 0.999661 & 0.999661 & 0.389648 & 566 &
 0.331486 & 0.388959 & 0.934792 \\
 \midrule
-Interação carga-DAC & 0.999813 & 0.999811 & 0.290484
+Influência carga-DAC & 0.999813 & 0.999811 & 0.290484
 & 566 & 0.223411 & 0.288941 & 0.743690 \\
 \midrule
 Modelo da carga de 1 kOhm & 0.999818 & 0.999817 & 0.354077 & 322 & 0.287084 & 0.352975 &
@@ -1197,18 +1289,18 @@ explicativo dentro da região linear, com \(R^2\) superior a 0,999. Ainda
 assim, a comparação entre os erros revela diferenças importantes. O modelo
 global apresenta MAE de 0,3315 mA e RMSE de 0,3890 mA, indicando que, em
 média, suas previsões se afastam da corrente medida por algumas décimas de
-miliampere. O ajuste com interação reduz esses erros para MAE de
+miliampere. O ajuste com influência da carga reduz esses erros para MAE de
 0,2234 mA e RMSE de 0,2889 mA, mostrando que considerar a carga no modelo
 melhora a predição sem abandonar a estrutura linear.
 
 O erro absoluto máximo também diminui de 0,9348 mA no modelo global para
-0,7437 mA no ajuste com interação. Essa redução é coerente com a análise
+0,7437 mA no ajuste com influência da carga. Essa redução é coerente com a análise
 do tópico anterior: ao permitir pequenas diferenças de intercepto e
-inclinação entre as cargas, o modelo com interação consegue acompanhar
+inclinação entre as cargas, o modelo com influência da carga consegue acompanhar
 melhor os dados experimentais. A Figura 10 reforça essa leitura
 visualmente, pois os pontos se concentram próximos da reta de concordância
 entre corrente medida e corrente predita. Assim, o erro de predição é
-baixo para todos os modelos, mas o ajuste com interação é o mais adequado
+baixo para todos os modelos, mas o ajuste com influência da carga é o mais adequado
 quando o objetivo é descrever com maior fidelidade o comportamento
 experimental das três cargas.
 
@@ -1217,10 +1309,11 @@ experimental das três cargas.
 \section{Diagnóstico dos resíduos}\label{diagnuxf3stico-dos-resuxedduos}
 
 O resíduo de uma observação é a diferença entre a corrente medida e a
-corrente prevista pelo modelo:
-\[
+corrente prevista pelo modelo, conforme a Equação~\ref{eq:residual}:
+\begin{equation}
 e_i = I_i - \hat{I}_i.
-\]
+\label{eq:residual}
+\end{equation}
 Assim, resíduos próximos de zero indicam que o modelo reproduz bem os
 valores observados. Além da magnitude dos resíduos, também é importante
 avaliar sua estrutura. Em um modelo linear bem ajustado, espera-se que os
@@ -1334,14 +1427,17 @@ Quando a variância dos resíduos muda ao longo da escala de DAC ou da
 corrente prevista, ocorre heterocedasticidade. Nesse caso, o modelo ainda
 pode representar bem a tendência média, mas a incerteza das previsões pode
 ser diferente em regiões distintas da curva. Para avaliar essa condição,
-foi aplicado o teste de Breusch-Pagan. A hipótese nula do teste é:
-\[
+foi aplicado o teste de Breusch-Pagan. A hipótese nula do teste é
+apresentada na Equação~\ref{eq:bp-h0}:
+\begin{equation}
 H_0: \text{a variância dos resíduos é constante}.
-\]
-A hipótese alternativa é:
-\[
+\label{eq:bp-h0}
+\end{equation}
+A hipótese alternativa é apresentada na Equação~\ref{eq:bp-h1}:
+\begin{equation}
 H_1: \text{a variância dos resíduos não é constante}.
-\]
+\label{eq:bp-h1}
+\end{equation}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1522,17 +1618,17 @@ O modelo global, baseado em uma única reta para todas as cargas, é útil
 como aproximação operacional. Ele resume a tendência média do sistema e
 fornece uma descrição compacta da relação entre tensão de DAC e corrente.
 Entretanto, a comparação por ANOVA/teste F mostrou que o ajuste com
-interação entre carga e comando de DAC reduz significativamente a soma dos
+influência da carga sobre a relação DAC-corrente reduz significativamente a soma dos
 quadrados residual. Isso indica que pequenas diferenças de intercepto e
 inclinação entre as cargas existem e melhoram a descrição estatística dos
 dados.
 
 As métricas de predição confirmam essa leitura. O modelo global já
-apresenta erro médio baixo, mas o ajuste com interação reduz MAE, RMSE e
+apresenta erro médio baixo, mas o ajuste com influência da carga reduz MAE, RMSE e
 erro absoluto máximo. Assim, quando o objetivo é uma aproximação simples,
 o modelo global é suficiente; quando o objetivo é descrever com maior
 fidelidade o comportamento experimental das três cargas, o modelo com
-interação é mais adequado.
+influência da carga é mais adequado.
 
 Os diagnósticos também delimitam o alcance das conclusões. A análise dos
 resíduos indica que o modelo global não apresenta viés médio relevante,
