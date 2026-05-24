@@ -107,7 +107,7 @@
 \title{Relatório de Caracterização Experimental e Estatística do Estágio
 de Saída de um Estimulador Elétrico Funcional}
 \author{Tiago de Paula Silva}
-\date{22 de maio de 2026}
+\date{24 de maio de 2026}
 
 \begin{document}
 \maketitle
@@ -222,11 +222,17 @@ Os objetivos específicos são:
 
 \section{Estrutura da análise}\label{estrutura-da-anuxe1lise}
 
-O script em R lê os CSVs exportados do osciloscópio, remove trechos
+A análise que deu origem às tabelas e figuras deste relatório foi
+implementada no script \texttt{analise\_rstudio.R}, disponível
+publicamente no GitHub {[}2{]}:
+\url{https://github.com/import-tiago/FEI/blob/main/MSc/PME406/1.Analysis/analise_rstudio.R}.
+Esse script em R lê os CSVs exportados do osciloscópio, remove trechos
 estacionários antes e depois da rampa útil, calcula corrente a partir da
 tensão no resistor shunt, reconstrói a tensão na carga por resistência
-nominal e agrega os dados por bins de DAC de 10 mV. O script e os dados
-brutos estão disponíveis no repositório indicado nas Referências.
+nominal e agrega os dados por bins de DAC de 10 mV. Os dados brutos
+utilizados como entrada da análise correspondem aos arquivos
+\texttt{1k.csv}, \texttt{2k.csv} e \texttt{4k7.csv}, também disponíveis
+no GitHub {[}3{]}.
 
 O fluxo de análise segue a sequência: aquisição CSV do osciloscópio,
 extração da rampa útil, conversão da tensão no shunt para corrente,
@@ -289,8 +295,9 @@ representa a tensão de controle aplicada ao estágio de saída, e
 \texttt{shunt\_volts}, que representa a tensão medida no resistor shunt
 e é usada para calcular a corrente.
 
-Os dados brutos utilizados nesta etapa estão disponíveis no repositório
-indicado nas Referências.
+Os dados brutos utilizados nesta etapa são os arquivos CSV
+\texttt{1k.csv}, \texttt{2k.csv} e \texttt{4k7.csv}, disponíveis no
+repositório indicado na Referência {[}3{]}.
 
 Antes de qualquer tratamento, apenas como um exemplo, a carga de 1 kOhm
 possui a seguinte prévia dos dados crus:
@@ -1657,8 +1664,13 @@ Output Stage of a Functional Electrical Stimulator Based on a Howland
 Current Source,'' artigo produzido no contexto da disciplina PEL309,
 Centro Universitário FEI, 2026.
 
-{[}2{]} Tiago de Paula Silva, ``FEI - PME406: dados brutos e script R da
-análise estatística,'' repositório GitHub. Disponível em:
-\url{https://github.com/import-tiago/FEI/tree/main/MSc/PME406}.
+{[}2{]} Tiago de Paula Silva, ``FEI - PME406: script R da análise
+estatística,'' repositório GitHub. Disponível em:
+\url{https://github.com/import-tiago/FEI/blob/main/MSc/PME406/1.Analysis/analise_rstudio.R}.
+
+{[}3{]} Tiago de Paula Silva, ``FEI - PME406: dados brutos em CSV
+exportados do osciloscópio,'' repositório GitHub. Arquivos
+\texttt{1k.csv}, \texttt{2k.csv} e \texttt{4k7.csv}. Disponível em:
+\url{https://github.com/import-tiago/FEI/tree/main/MSc/PME406/0.Data}.
 
 \end{document}
